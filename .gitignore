@@ -1,0 +1,10 @@
+build/
+Source/pdex.*
+
+CMakeFiles/
+CMakeCache.txt
+cmake-build-debug/
+
+prismatic-game.pdx/
+prismatic-game.pdx.zip
+
