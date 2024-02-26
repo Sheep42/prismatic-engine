@@ -1,9 +1,9 @@
 #!/bin/bash
 rm -rf build/
 rm -rf prismatic-game.pdx/ prismatic-game.pdx.zip
-mkdir build/
+mkdir build
 cd build
 cmake ..
 make
-cd ..
+mv ../prismatic-game.pdx ./ 
 pdsim ./prismatic-game.pdx

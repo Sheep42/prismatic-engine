@@ -1,0 +1,2 @@
+struct State {};
+struct StateMachine {};
