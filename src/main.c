@@ -1,14 +1,13 @@
 // main.c is used to hook into the playdate, override the update callback, and 
 // bootstrap the engine. If you are looking to add game logic, you are probably 
 // looking for src/core/game.c
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#include "pd_api.h"
 #include "prismatic/prismatic.h"
 
 static int update(void* userdata);
+static int clock;
 
 #ifdef _WINDLL
 __declspec(dllexport)
@@ -21,6 +20,9 @@ int eventHandler( PlaydateAPI* p, PDSystemEvent event, uint32_t arg ) {
 
 	if ( event == kEventInit ) {
 
+		// Initialize clock
+		clock = p->system->getCurrentTimeMilliseconds();
+
 		// bootstrap Prismatic Engine
 		initEngine( p );
 
@@ -29,12 +31,18 @@ int eventHandler( PlaydateAPI* p, PDSystemEvent event, uint32_t arg ) {
 		p->system->setUpdateCallback( update, p );
 
 	}
-	
+
 	return 0;
 }
 
 // Main game loop
 static int update( void* userdata ) {
+
+	int update = sys->getCurrentTimeMilliseconds();
+	float delta = (float)(update - clock) / 1000.0f;
+	clock = update;
+
+	runEngine( delta );
 
 	return 1;
 

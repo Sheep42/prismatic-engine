@@ -9,6 +9,7 @@ const struct playdate_graphics *graphics;
 const struct playdate_sound *sound;
 const struct playdate_sprite *sprite;
 const struct playdate_sys *sys;
+const Game* g;
 
 void initEngine( PlaydateAPI* p ) {
 
@@ -18,4 +19,18 @@ void initEngine( PlaydateAPI* p ) {
 	sprite = pd->sprite;
 	sys = pd->system;
 
+	g = initGame();
+
+}
+
+void runEngine( float delta ) {
+
+	if( g != NULL ) {
+		g->update( delta );
+	}
+
+}
+
+void shutdownEngine() {
+	free( (void*)g ); // Might not be able to do this.
 }
