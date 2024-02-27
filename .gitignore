@@ -4,6 +4,7 @@ Source/pdex.*
 CMakeFiles/
 CMakeCache.txt
 cmake-build-debug/
+.cache/
 
 prismatic-game.pdx/
 prismatic-game.pdx.zip
