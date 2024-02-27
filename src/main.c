@@ -42,7 +42,7 @@ static int update( void* userdata ) {
 	float delta = (float)(update - clock) / 1000.0f;
 	clock = update;
 
-	runEngine( delta );
+	updateEngine( delta );
 
 	return 1;
 

@@ -23,7 +23,7 @@ void initEngine( PlaydateAPI* p ) {
 
 }
 
-void runEngine( float delta ) {
+void updateEngine( float delta ) {
 
 	if( g != NULL ) {
 		g->update( delta );

@@ -3,8 +3,8 @@
 #include "state/state.h"
 
 void initEngine( PlaydateAPI* );
-void runEngine( float );
-void shutdownEngine();
+void updateEngine( float );
+void shutdownEngine( void );
 
 extern const PlaydateAPI *pd;
 extern const struct playdate_graphics *graphics;
