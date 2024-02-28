@@ -1,6 +1,12 @@
 #include "pd_api.h"
 #include "../core/game.h"
 #include "state/state.h"
+#include "logger/logger.h"
+
+typedef char* string;
+
+string strNew( string );
+void strDelete( string );
 
 void initEngine( PlaydateAPI* );
 void updateEngine( float );

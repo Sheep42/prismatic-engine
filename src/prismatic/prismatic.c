@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "prismatic.h"
 #include "pd_api.h"
@@ -33,4 +34,12 @@ void updateEngine( float delta ) {
 
 void shutdownEngine() {
 	free( (void*)g ); // Might not be able to do this.
+}
+
+string strNew( string str ) {
+	return strdup( str );
+}
+
+void strDelete( string str ) {
+	free( str );
 }

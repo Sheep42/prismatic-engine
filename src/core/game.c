@@ -8,7 +8,10 @@ static void update( float delta );
 // update is your game's entry point to the engine
 static void update( float delta ) {
 	
-	puts( "Hello Playdate" );
+    // string three = strNew( "three" );
+    prismaticLogger->info( "Hello Logger" );
+    prismaticLogger->infof( "1: %d 2: %s", 1, "two" );
+    // strDelete( three );
 
 }
 

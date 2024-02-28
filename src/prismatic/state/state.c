@@ -25,7 +25,21 @@ static State* changeStateByName( StateMachine* stateMachine, char* name ) {
 }
 
 static State* changeState( StateMachine* stateMachine, State* state ) {
-	return NULL;
+
+	if( state == NULL ) {
+		return stateMachine->currentState != NULL 
+			? stateMachine->currentState 
+			: stateMachine->defaultState;
+	}
+
+	if( stateMachine->currentState != NULL ) {
+		stateMachine->currentState->exit();
+		stateMachine->previousState = stateMachine->currentState;
+	}
+
+	stateMachine->currentState = state;
+	stateMachine->currentState->enter();
+
 }
 
 static State* changeToPrevious( StateMachine* stateMachine ) {
@@ -48,4 +62,4 @@ const StateMachineFn* prismaticStateMachine = &(StateMachineFn){
 	.changeToPrevious = changeToPrevious,
 	.changeToDefault = changeToDefault,
 	.addState = addState,
-};
+}; 
