@@ -39,8 +39,37 @@ static void infof( const char* fmt, ... ) {
 
 }
 
+static void debugf( const char* fmt, ... ) {
+
+    va_list args, finalArgs;
+    va_start( args, fmt );
+    va_copy( finalArgs, args );
+
+    const char* debug = "DEBUG:";
+
+    char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( debug ) * sizeof(char)) + 2 );
+    sprintf( fmtBuf, "%s %s", debug, fmt );
+
+    int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
+    char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
+
+    vsprintf( msg, fmtBuf, finalArgs );
+    log( msg );
+
+    va_end( args );
+    va_end( finalArgs );
+
+    free( fmtBuf );
+    free( msg );
+
+}
+
 static void info( const char* msg ) {
 	infof( "%s", msg );
+}
+
+static void debug( const char* msg ) {
+	debugf( "%s", msg );
 }
 
 static char* getCurrentTimestamp() {
@@ -62,4 +91,6 @@ static char* getCurrentTimestamp() {
 const Logger* prismaticLogger = &(Logger){
 	.info = info,
 	.infof = infof,
+	.debug = debug,
+	.debugf = debugf,
 };

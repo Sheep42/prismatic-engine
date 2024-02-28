@@ -10,6 +10,7 @@ static void update( float delta ) {
 	
     // string three = strNew( "three" );
     prismaticLogger->info( "Hello Logger" );
+    prismaticLogger->debug( "Hello Logger" );
     prismaticLogger->infof( "1: %d 2: %s", 1, "two" );
     // strDelete( three );
 
