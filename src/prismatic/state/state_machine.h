@@ -4,7 +4,7 @@ typedef struct State {
 	char* name;
 	void (*enter)( void );
 	void (*exit)( void );
-	void (*tick)( void );
+	void (*tick)( float );
 } State;
 
 // State Machines

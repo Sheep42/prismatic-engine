@@ -24,7 +24,7 @@ static StateMachine* new( State* defaultState ) {
 	}
 
 	if( defaultState != NULL ) {
-		stateMachine->defaultState = defaultState;
+		stateMachine->defaultState = stateMachine->currentState = defaultState;
 	}
 
 	return stateMachine;
@@ -52,7 +52,7 @@ static void update( StateMachine* stateMachine, float delta ) {
 		return;
 	}
 
-	stateMachine->currentState->tick();
+	stateMachine->currentState->tick( delta );
 
 }
 
