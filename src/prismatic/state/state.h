@@ -17,6 +17,9 @@ typedef struct StateMachine {
 } StateMachine;
 
 typedef struct StateMachineFn {
+	StateMachine* (*new)(State*);
+	void (*delete)(StateMachine*);
+	void (*update)(StateMachine*, float);
 	State* (*changeStateByName)( StateMachine*, char* );
 	State* (*changeState)( StateMachine*, State* );
 	State* (*changeToPrevious)( StateMachine* );

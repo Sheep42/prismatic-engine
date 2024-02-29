@@ -3,13 +3,16 @@
 
 #include "../prismatic.h"
 
+static StateMachine* new( State* );
+static void delete( StateMachine* );
+static void update( StateMachine*, float );
 static State* changeStateByName( StateMachine* stateMachine, char* name );
 static State* changeState( StateMachine* stateMachine, State* state );
 static State* changeToPrevious( StateMachine* stateMachine );
 static State* changeToDefault( StateMachine* stateMachine );
 static void addState( StateMachine* stateMachine, State* state );
 
-StateMachine* newStateMachine( State* defaultState ) {
+static StateMachine* new( State* defaultState ) {
 	
 	StateMachine* stateMachine = calloc( 1, sizeof(StateMachine) );
 	if( stateMachine == NULL ) {
@@ -25,13 +28,23 @@ StateMachine* newStateMachine( State* defaultState ) {
 
 }
 
-void deleteStateMachine( StateMachine* stateMachine ) {
+static void delete( StateMachine* stateMachine ) {
 	
 	if( stateMachine == NULL )
 		return;
 
 	free( stateMachine->states );
 	free( stateMachine );
+
+}
+
+static void update( StateMachine* stateMachine, float delta ) {
+
+	if( stateMachine->currentState == NULL ) {
+		return;
+	}
+
+	stateMachine->currentState->tick();
 
 }
 
@@ -108,6 +121,9 @@ static void addState( StateMachine* stateMachine, State* state ) {
 }
 
 const StateMachineFn* prismaticStateMachine = &(StateMachineFn){
+	.new = new,
+	.delete = delete,
+	.update = update,
 	.changeStateByName = changeStateByName,
 	.changeState = changeState,
 	.changeToPrevious = changeToPrevious,
