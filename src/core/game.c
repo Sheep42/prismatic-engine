@@ -3,20 +3,26 @@
 
 #include "../prismatic/prismatic.h"
 
-static void update( float delta );
+static void update( float );
+static void test( float );
 
 // update is your game's entry point to the engine
 static void update( float delta ) {
-	
-    string three = newString( "three" );
-    prismaticLogger->info( "Hello Logger" );
-    prismaticLogger->debug( "Hello Logger" );
-    prismaticLogger->error( "Hello Logger" );
-    prismaticLogger->infof( "1: %d 2: %s 3: %s", 1, "two", three );
-    deleteString( three );
+
+    State* s = prismaticState->new( "test" );
+    s->tick = test;
+
+    StateMachine* sm = prismaticStateMachine->new( s );
+    prismaticStateMachine->update( sm, delta );
 
 }
 
+static void test( float delta ) {
+
+    puts( "hello" );
+    prismaticLogger->infof( "%f", delta );
+
+}
 
 // Internal engine setup - Here be dragons
 Game* initGame() {
