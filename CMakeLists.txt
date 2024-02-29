@@ -40,7 +40,7 @@ set(SOURCE_FILES
     src/prismatic/logger/logger.c
     src/prismatic/scene/scene.c
     src/prismatic/sprite/sprite.c
-    src/prismatic/state/state.c
+    src/prismatic/state/state_machine.c
     src/prismatic/text/text.c
     src/prismatic/transition/transition.c
 )
@@ -53,7 +53,7 @@ set(HEADER_FILES
     src/prismatic/logger/logger.h
     src/prismatic/scene/scene.h
     src/prismatic/sprite/sprite.h
-    src/prismatic/state/state.h
+    src/prismatic/state/state_machine.h
     src/prismatic/text/text.h
     src/prismatic/transition/transition.h
 )
