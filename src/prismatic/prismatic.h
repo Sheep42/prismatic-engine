@@ -5,8 +5,8 @@
 
 typedef char* string;
 
-string strNew( string );
-void strDelete( string );
+string newString( string );
+void deleteString( string );
 
 void initEngine( PlaydateAPI* );
 void updateEngine( float );

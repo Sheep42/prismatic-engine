@@ -36,10 +36,10 @@ void shutdownEngine() {
 	free( (void*)g ); // Might not be able to do this.
 }
 
-string strNew( string str ) {
+string newString( string str ) {
 	return strdup( str );
 }
 
-void strDelete( string str ) {
+void deleteString( string str ) {
 	free( str );
 }

@@ -8,12 +8,12 @@ static void update( float delta );
 // update is your game's entry point to the engine
 static void update( float delta ) {
 	
-    // string three = strNew( "three" );
+    string three = newString( "three" );
     prismaticLogger->info( "Hello Logger" );
     prismaticLogger->debug( "Hello Logger" );
     prismaticLogger->error( "Hello Logger" );
-    prismaticLogger->infof( "1: %d 2: %s", 1, "two" );
-    // strDelete( three );
+    prismaticLogger->infof( "1: %d 2: %s 3: %s", 1, "two", three );
+    deleteString( three );
 
 }
 
