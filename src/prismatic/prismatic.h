@@ -1,6 +1,6 @@
 #include "pd_api.h"
 #include "../core/game.h"
-#include "state/state.h"
+#include "state/state_machine.h"
 #include "logger/logger.h"
 
 typedef char* string;
