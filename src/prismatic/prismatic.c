@@ -20,7 +20,8 @@ void initEngine( PlaydateAPI* p ) {
 	sprite = pd->sprite;
 	sys = pd->system;
 
-	g = initGame();
+	g = newGame();
+	g->init();
 
 }
 
@@ -28,11 +29,13 @@ void updateEngine( float delta ) {
 
 	if( g != NULL ) {
 		g->update( delta );
+		g->draw( delta );
 	}
 
 }
 
 void shutdownEngine() {
+	g->destroy();
 	free( (void*)g ); // Might not be able to do this.
 }
 

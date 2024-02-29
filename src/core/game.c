@@ -3,29 +3,36 @@
 
 #include "../prismatic/prismatic.h"
 
+static void init( void );
 static void update( float );
-static void test( float );
+static void draw( float );
+static void destroy( void );
+
+// Use init to hook into the Engine's initialization function. This runs 
+// before the first call to update but after the engine has initialized itself
+static void init() {
+
+}
 
 // update is your game's entry point to the engine
 static void update( float delta ) {
 
-    State* s = prismaticState->new( "test" );
-    s->tick = test;
+}
 
-    StateMachine* sm = prismaticStateMachine->new( s );
-    prismaticStateMachine->update( sm, delta );
+// draw should be used to handle screen drawing operations. It is called after 
+// update
+static void draw( float delta ) {
 
 }
 
-static void test( float delta ) {
-
-    puts( "hello" );
-    prismaticLogger->infof( "%f", delta );
+// destroy is called when the game is shut down, before the game itself is
+// freed from memory
+static void destroy() {
 
 }
 
-// Internal engine setup - Here be dragons
-Game* initGame() {
+// Called by the Engine to bind the game to the Engine
+Game* newGame() {
 
     Game* g = malloc( sizeof( Game ) );
 
@@ -34,7 +41,10 @@ Game* initGame() {
     }
 
     g->update = update;
+    g->init = init;
+    g->draw = draw;
+    g->destroy = destroy;
 
-	return g;
+    return g;
 
 }
