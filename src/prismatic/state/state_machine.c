@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../prismatic.h"
+
+// State Machine
 
 static StateMachine* new( State* );
 static void delete( StateMachine* );
@@ -44,6 +47,11 @@ static void update( StateMachine* stateMachine, float delta ) {
 		return;
 	}
 
+	if( stateMachine->currentState->tick == NULL ) {
+		prismaticLogger->errorf( "State '%s' has NULL tick function", stateMachine->currentState->name );
+		return;
+	}
+
 	stateMachine->currentState->tick();
 
 }
@@ -76,12 +84,20 @@ static State* changeState( StateMachine* stateMachine, State* state ) {
 	}
 
 	if( stateMachine->currentState != NULL ) {
-		stateMachine->currentState->exit();
+		
+		if( stateMachine->currentState->exit != NULL ) {
+			stateMachine->currentState->exit();
+		}
+
 		stateMachine->previousState = stateMachine->currentState;
+
 	}
 
 	stateMachine->currentState = state;
-	stateMachine->currentState->enter();
+
+	if( stateMachine->currentState->enter != NULL ) {
+		stateMachine->currentState->enter();
+	}
 
 	return stateMachine->currentState;
 
@@ -130,3 +146,36 @@ const StateMachineFn* prismaticStateMachine = &(StateMachineFn){
 	.changeToDefault = changeToDefault,
 	.addState = addState,
 }; 
+
+// State
+
+static State* newState( const char* name ) {
+
+	if( name == NULL ) {
+		prismaticLogger->error( "Cannot create new state with NULL name" );
+		return NULL;
+	}
+
+	State* state = calloc( 1, sizeof(State) );
+	if( state == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for new state" );
+		return NULL;
+	}
+
+	state->name = strdup( name );
+
+	return state;
+
+}
+
+static void deleteState( State* state ) {
+
+	free( state->name );
+	free( state );
+
+}
+
+const StateFn* prismaticState = &(StateFn) {
+	.new = newState,
+	.delete = deleteState,
+};

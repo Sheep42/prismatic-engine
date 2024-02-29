@@ -2,9 +2,9 @@
 #include <stddef.h>
 typedef struct State {
 	char* name;
-	void (*enter)(void);
-	void (*exit)(void);
-	void (*tick)(void);
+	void (*enter)( void );
+	void (*exit)( void );
+	void (*tick)( void );
 } State;
 
 // State Machines
@@ -17,9 +17,9 @@ typedef struct StateMachine {
 } StateMachine;
 
 typedef struct StateMachineFn {
-	StateMachine* (*new)(State*);
-	void (*delete)(StateMachine*);
-	void (*update)(StateMachine*, float);
+	StateMachine* (*new)( State* );
+	void (*delete)( StateMachine* );
+	void (*update)( StateMachine*, float );
 	State* (*changeStateByName)( StateMachine*, char* );
 	State* (*changeState)( StateMachine*, State* );
 	State* (*changeToPrevious)( StateMachine* );
@@ -27,4 +27,10 @@ typedef struct StateMachineFn {
 	void (*addState)( StateMachine*, State* );
 } StateMachineFn;
 
+typedef struct StateFn {
+	State* (*new)( const char* );
+	void (*delete)( State* );
+} StateFn;
+
 extern const StateMachineFn* prismaticStateMachine;
+extern const StateFn* prismaticState;
