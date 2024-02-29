@@ -23,10 +23,20 @@ static void infof( const char* fmt, ... ) {
     const char* info = "INFO:";
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( info ) * sizeof(char)) + 2 );
+    if( fmtBuf == NULL ) {
+        puts( "ERROR: Could not allocate space for fmtBuf" );
+        return;
+    }
+
     sprintf( fmtBuf, "%s %s", info, fmt );
 
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
+    if( msg == NULL ) {
+        puts( "ERROR: Could not allocate space for msg" );
+        free( fmtBuf );
+        return;
+    }
 
     vsprintf( msg, fmtBuf, finalArgs );
     log( msg );
@@ -48,10 +58,20 @@ static void debugf( const char* fmt, ... ) {
     const char* debug = "DEBUG:";
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( debug ) * sizeof(char)) + 2 );
+    if( fmtBuf == NULL ) {
+        puts( "ERROR: Could not allocate space for fmtBuf" );
+        return;
+    }
+
     sprintf( fmtBuf, "%s %s", debug, fmt );
 
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
+    if( msg == NULL ) {
+        puts( "ERROR: Could not allocate space for msg" );
+        free( fmtBuf );
+        return;
+    }
 
     vsprintf( msg, fmtBuf, finalArgs );
     log( msg );
@@ -73,10 +93,19 @@ static void errorf( const char* fmt, ... ) {
     const char* error = "ERROR:";
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( error ) * sizeof(char)) + 2 );
+    if( fmtBuf == NULL ) {
+        puts( "ERROR: Could not allocate space for fmtBuf" );
+        return;
+    }
     sprintf( fmtBuf, "%s %s", error, fmt );
 
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
+    if( msg == NULL ) {
+        puts( "ERROR: Could not allocate space for fmtBuf" );
+        free( fmtBuf );
+        return;
+    }
 
     vsprintf( msg, fmtBuf, finalArgs );
     log( msg );
