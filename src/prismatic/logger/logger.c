@@ -4,11 +4,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "logger.h"
+#include "../prismatic.h"
 
 static char* getCurrentTimestamp(void);
 
-static void log( const char* str ) {
+static void prismLog( const char* str ) {
     char* timestamp = getCurrentTimestamp();
     printf( "%s %s\n", timestamp, str );
     free( timestamp );
@@ -39,7 +39,7 @@ static void infof( const char* fmt, ... ) {
     }
 
     vsprintf( msg, fmtBuf, finalArgs );
-    log( msg );
+    prismLog( msg );
 
     va_end( args );
     va_end( finalArgs );
@@ -74,7 +74,7 @@ static void debugf( const char* fmt, ... ) {
     }
 
     vsprintf( msg, fmtBuf, finalArgs );
-    log( msg );
+    prismLog( msg );
 
     va_end( args );
     va_end( finalArgs );
@@ -108,7 +108,7 @@ static void errorf( const char* fmt, ... ) {
     }
 
     vsprintf( msg, fmtBuf, finalArgs );
-    log( msg );
+    sys->error( msg );
 
     va_end( args );
     va_end( finalArgs );
