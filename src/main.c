@@ -30,7 +30,7 @@ int eventHandler( PlaydateAPI* p, PDSystemEvent event, uint32_t arg ) {
 		// assumes the game is pure C and doesn't run any Lua code in the game
 		p->system->setUpdateCallback( update, p );
 
-	} else {
+	} else if( event == kEventTerminate ) {
 		shutdownEngine();
 	}
 
