@@ -15,6 +15,7 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene );
 static Scene* changeToPrevious( SceneManager* sceneManager );
 static Scene* changeToDefault( SceneManager* sceneManager );
 static void addScene( SceneManager* sceneManager, Scene* scene );
+static void deleteScene( Scene* scene );
 
 static SceneManager* new( Scene* defaultScene ) {
 	
@@ -41,7 +42,7 @@ static void delete( SceneManager* sceneManager ) {
 
 	for( size_t i = 0; i < sceneManager->totalScenes; i++ ) {
 		Scene* s = sceneManager->scenes[i];
-		s->destroy();
+		deleteScene( s );
 	}
 
 	free( sceneManager->scenes );
