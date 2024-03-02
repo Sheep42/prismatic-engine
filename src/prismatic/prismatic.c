@@ -39,10 +39,17 @@ void shutdownEngine() {
 	free( (void*)g ); // Might not be able to do this.
 }
 
-string newString( string str ) {
+// String Helpers
+
+static string newString( string str ) {
 	return strdup( str );
 }
 
-void deleteString( string str ) {
+static void deleteString( string str ) {
 	free( str );
 }
+
+const StringUtils* prismaticString = &(StringUtils) {
+	.new = newString,
+	.delete = deleteString,
+};

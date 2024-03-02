@@ -4,11 +4,6 @@
 #include "state/state_machine.h"
 #include "logger/logger.h"
 
-typedef char* string;
-
-string newString( string );
-void deleteString( string );
-
 void initEngine( PlaydateAPI* );
 void updateEngine( float );
 void shutdownEngine( void );
@@ -19,3 +14,11 @@ extern const struct playdate_sound *sound;
 extern const struct playdate_sprite *sprite;
 extern const struct playdate_sys *sys;
 extern const Game* g;
+
+typedef char* string;
+typedef struct StringUtils {
+	string ( *new )( string );
+	void ( *delete )( string );
+} StringUtils;
+
+extern const StringUtils* prismaticString;
