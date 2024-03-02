@@ -1,5 +1,12 @@
 // States
-#include <stddef.h>
+#ifndef STATE_MACHINE_H
+#define STATE_MACHINE_H
+
+#ifndef STDDEF_INCLUDED
+	#include <stddef.h>
+	#define STDDEF_INCLUDED
+#endif
+
 typedef struct State {
 	char* name;
 	void (*enter)( void );
@@ -34,3 +41,5 @@ typedef struct StateFn {
 
 extern const StateMachineFn* prismaticStateMachine;
 extern const StateFn* prismaticState;
+
+#endif  // STATE_MACHINE_H

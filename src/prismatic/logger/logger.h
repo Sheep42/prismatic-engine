@@ -1,3 +1,6 @@
+#ifndef LOGGER_H
+#define LOGGER_H
+
 typedef struct Logger {
 	void ( *info )( const char* );
 	void ( *debug )( const char* );
@@ -8,3 +11,5 @@ typedef struct Logger {
 } Logger;
 
 extern const Logger* prismaticLogger;
+
+#endif // LOGGER_H

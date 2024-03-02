@@ -36,20 +36,5 @@ void updateEngine( float delta ) {
 
 void shutdownEngine() {
 	g->destroy();
-	free( (void*)g ); // Might not be able to do this.
+	free( (void*)g );
 }
-
-// String Helpers
-
-static string newString( string str ) {
-	return strdup( str );
-}
-
-static void deleteString( string str ) {
-	free( str );
-}
-
-const StringUtils* prismaticString = &(StringUtils) {
-	.new = newString,
-	.delete = deleteString,
-};

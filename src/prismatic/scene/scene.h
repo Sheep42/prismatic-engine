@@ -1,3 +1,6 @@
+#ifndef SCENE_H
+#define SCENE_H
+
 typedef struct Scene {
 	const char* name;
 	void ( *enter )( struct Scene* );
@@ -34,3 +37,5 @@ typedef struct SceneManagerFn {
 
 extern const SceneFn* prismaticScene;
 extern const SceneManagerFn* prismaticSceneManager;
+
+#endif // SCENE_H

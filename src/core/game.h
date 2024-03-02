@@ -1,3 +1,7 @@
+#ifndef GAME_H
+
+#define GAME_H
+
 typedef struct Game {
 	void ( *update )( float );
 	void ( *init )( void );
@@ -6,3 +10,5 @@ typedef struct Game {
 } Game;
 
 Game* newGame( void );
+
+#endif // GAME_H
