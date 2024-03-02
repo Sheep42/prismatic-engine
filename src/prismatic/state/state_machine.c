@@ -24,7 +24,9 @@ static StateMachine* new( State* defaultState ) {
 	}
 
 	if( defaultState != NULL ) {
-		stateMachine->defaultState = stateMachine->currentState = defaultState;
+		stateMachine->defaultState = defaultState;
+		addState( stateMachine, defaultState );
+		changeState( stateMachine, defaultState );
 	}
 
 	return stateMachine;
@@ -61,7 +63,7 @@ static State* changeStateByName( StateMachine* stateMachine, char* name ) {
 	State* state = NULL;
 
 	for( int i = 0; i < stateMachine->totalStates; i++ ) {
-		State* s = &stateMachine->states[i];
+		State* s = stateMachine->states[i];
 		if( strcmp( s->name, name ) == 0 ) {
 			state = changeState( stateMachine, s );
 		}
@@ -125,14 +127,14 @@ static void addState( StateMachine* stateMachine, State* state ) {
 	}
 
 	stateMachine->totalStates += 1;
-	stateMachine->states = realloc( stateMachine->states, stateMachine->totalStates * sizeof(State) );
+	stateMachine->states = sys->realloc( stateMachine->states, stateMachine->totalStates * sizeof(State) );
 
 	if (stateMachine->states == NULL) {
         prismaticLogger->error( "Memory allocation failed for adding state.\n" );
         return;
     }
     
-    stateMachine->states[stateMachine->totalStates - 1] = *state;
+    stateMachine->states[stateMachine->totalStates - 1] = state;
 
 }
 

@@ -1,5 +1,6 @@
 #include "pd_api.h"
 #include "../core/game.h"
+#include "scene/scene.h"
 #include "state/state_machine.h"
 #include "logger/logger.h"
 
