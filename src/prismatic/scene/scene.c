@@ -60,7 +60,7 @@ static void update( SceneManager* sceneManager, float delta ) {
 		return;
 	}
 
-	sceneManager->currentScene->update( delta );
+	sceneManager->currentScene->update( sceneManager->currentScene, delta );
 
 }
 
@@ -75,7 +75,7 @@ static void draw( SceneManager* sceneManager, float delta ) {
 		return;
 	}
 
-	sceneManager->currentScene->draw( delta );
+	sceneManager->currentScene->draw( sceneManager->currentScene, delta );
 
 }
 
@@ -109,7 +109,7 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene ) {
 	if( sceneManager->currentScene != NULL ) {
 		
 		if( sceneManager->currentScene->exit != NULL ) {
-			sceneManager->currentScene->exit();
+			sceneManager->currentScene->exit( sceneManager->currentScene );
 		}
 
 		sceneManager->previousScene = sceneManager->currentScene;
@@ -119,7 +119,7 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene ) {
 	sceneManager->currentScene = scene;
 
 	if( sceneManager->currentScene->enter != NULL ) {
-		sceneManager->currentScene->enter();
+		sceneManager->currentScene->enter( sceneManager->currentScene );
 	}
 
 	return sceneManager->currentScene;

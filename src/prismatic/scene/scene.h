@@ -1,9 +1,9 @@
 typedef struct Scene {
 	const char* name;
-	void ( *enter )( void );
-	void ( *update )( float );
-	void ( *draw )( float );
-	void ( *exit )( void );
+	void ( *enter )( struct Scene* );
+	void ( *update )( struct Scene*, float );
+	void ( *draw )( struct Scene*, float );
+	void ( *exit )( struct Scene* );
 	void ( *destroy )( void );
 } Scene;
 
