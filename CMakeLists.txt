@@ -60,8 +60,14 @@ set(HEADER_FILES
 
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_executable(${PLAYDATE_GAME_DEVICE} ${SOURCE_FILES} ${HEADER_FILES})
+	target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-specs=nosys.specs")
+    target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-Wl,--gc-sections")
+    target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mthumb")
+    target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mcpu=cortex-m7")
+    target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mfloat-abi=hard")
+    target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mfpu=fpv5-sp-d16")
 else()
-	add_library(${PLAYDATE_GAME_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} )
+	add_library(${PLAYDATE_GAME_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
