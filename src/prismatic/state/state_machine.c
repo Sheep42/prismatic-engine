@@ -127,7 +127,7 @@ static void addState( StateMachine* stateMachine, State* state ) {
 	}
 
 	stateMachine->totalStates += 1;
-	stateMachine->states = sys->realloc( stateMachine->states, stateMachine->totalStates * sizeof(State) );
+	stateMachine->states = sys->realloc( stateMachine->states, stateMachine->totalStates * sizeof(State) + 1 );
 
 	if (stateMachine->states == NULL) {
         prismaticLogger->error( "Memory allocation failed for adding state.\n" );
@@ -135,6 +135,7 @@ static void addState( StateMachine* stateMachine, State* state ) {
     }
     
     stateMachine->states[stateMachine->totalStates - 1] = state;
+    stateMachine->states[stateMachine->totalStates] = NULL;
 
 }
 
@@ -164,17 +165,14 @@ static State* newState( const char* name ) {
 		return NULL;
 	}
 
-	state->name = strdup( name );
+	state->name = name;
 
 	return state;
 
 }
 
 static void deleteState( State* state ) {
-
-	free( state->name );
 	free( state );
-
 }
 
 const StateFn* prismaticState = &(StateFn) {

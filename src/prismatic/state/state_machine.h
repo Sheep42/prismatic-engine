@@ -8,7 +8,7 @@
 #endif
 
 typedef struct State {
-	char* name;
+	const char* name;
 	void (*enter)( void );
 	void (*exit)( void );
 	void (*tick)( float );

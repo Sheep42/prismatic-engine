@@ -149,7 +149,7 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 	}
 
 	sceneManager->totalScenes += 1;
-	sceneManager->scenes = sys->realloc( sceneManager->scenes, sceneManager->totalScenes * sizeof(Scene) );
+	sceneManager->scenes = sys->realloc( sceneManager->scenes, sceneManager->totalScenes * sizeof(Scene) + 1 );
 
 	if (sceneManager->scenes == NULL) {
         prismaticLogger->error( "Memory allocation failed for adding scene.\n" );
@@ -157,6 +157,7 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
     }
     
     sceneManager->scenes[sceneManager->totalScenes - 1] = scene;
+    sceneManager->scenes[sceneManager->totalScenes] = NULL;
 
 }
 
