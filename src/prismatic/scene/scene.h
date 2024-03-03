@@ -1,8 +1,17 @@
 #ifndef SCENE_H
+	
 #define SCENE_H
+
+#include <stddef.h>
+#ifndef SPRITE_INCLUDED
+	#define SPRITE_INCLUDED
+	#include "../sprite/sprite.h"
+#endif
 
 typedef struct Scene {
 	const char* name;
+	PrismSprite** sprites;
+	size_t totalSprites;
 	void ( *enter )( struct Scene* );
 	void ( *update )( struct Scene*, float );
 	void ( *draw )( struct Scene*, float );
@@ -21,6 +30,7 @@ typedef struct SceneManager {
 typedef struct SceneFn {
 	Scene* ( *new )( const char* );
 	void ( *delete )( Scene* );
+	void ( *add )( struct Scene*, PrismSprite* );
 } SceneFn;
 
 typedef struct SceneManagerFn {

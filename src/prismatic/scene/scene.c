@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../prismatic.h"
+#include "scene.h"
 
 // Scene Machine
 
@@ -16,6 +17,7 @@ static Scene* changeToPrevious( SceneManager* sceneManager );
 static Scene* changeToDefault( SceneManager* sceneManager );
 static void addScene( SceneManager* sceneManager, Scene* scene );
 static void deleteScene( Scene* scene );
+static void addSprite( Scene* scene, PrismSprite* sp );
 
 static SceneManager* new( Scene* defaultScene ) {
 	
@@ -61,7 +63,21 @@ static void update( SceneManager* sceneManager, float delta ) {
 		return;
 	}
 
+	// Run the Scene's update method
 	sceneManager->currentScene->update( sceneManager->currentScene, delta );
+
+	// Run the update method for each of the Scene's sprites
+	for( size_t i = 0; i < sceneManager->currentScene->totalSprites; i++ ) {
+		
+		PrismSprite* sp = sceneManager->currentScene->sprites[i];
+
+		if( sp->update == NULL ) {
+			continue;
+		}
+
+		sp->update( delta );
+
+	}
 
 }
 
@@ -188,7 +204,7 @@ static Scene* newScene( const char* name ) {
 		return NULL;
 	}
 
-	scene->name = strdup( name );
+	scene->name = name;
 
 	return scene;
 
@@ -204,7 +220,28 @@ static void deleteScene( Scene* scene ) {
 
 }
 
+static void addSprite( Scene* scene, PrismSprite* sp ) {
+
+	if( scene == NULL ) {
+		prismaticLogger->info( "Cannot add Sprite to NULL Scene" );
+		return;
+	}
+
+	scene->totalSprites += 1;
+	scene->sprites = sys->realloc( scene->sprites, scene->totalSprites * sizeof(PrismSprite*) + 1 );
+
+	if( scene->sprites == NULL ) {
+        prismaticLogger->error( "Memory allocation failed for adding sprite." );
+        return;
+    }
+    
+    scene->sprites[scene->totalSprites - 1] = sp;
+    scene->sprites[scene->totalSprites] = NULL;
+
+}
+
 const SceneFn* prismaticScene = &(SceneFn) {
 	.new = newScene,
 	.delete = deleteScene,
+	.add = addSprite,
 };

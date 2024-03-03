@@ -21,13 +21,15 @@ static void init() {
 
     // PrismSprite* s = prismaticSprite->newFromPath( paths[0] );
     s = prismaticSprite->newFromImages( images, 0, 0 );
-    sprite->addSprite( s->sprite );
-    sprite->moveTo( s->sprite, 100, 100 );
+    // sprite->addSprite( s->sprite );
+    // sprite->moveTo( s->sprite, 10, 10 );
+
 }
 
 // update is your game's entry point to the engine
 static void update( float delta ) {
     sprite->updateAndDrawSprites();
+    // sprite->moveBy( s->sprite, 1, 1 );
 }
 
 // draw should be used to handle screen drawing operations. It is called after 
