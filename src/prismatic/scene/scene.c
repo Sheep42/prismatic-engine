@@ -11,13 +11,13 @@
 static SceneManager* new( Scene* );
 static void delete( SceneManager* );
 static void update( SceneManager*, float );
-static Scene* changeSceneByName( SceneManager* sceneManager, char* name );
+static Scene* changeSceneByName( SceneManager* sceneManager, string name );
 static Scene* changeScene( SceneManager* sceneManager, Scene* scene );
 static Scene* changeToPrevious( SceneManager* sceneManager );
 static Scene* changeToDefault( SceneManager* sceneManager );
 static void addScene( SceneManager* sceneManager, Scene* scene );
 static void deleteScene( Scene* scene );
-static void addSprite( Scene* scene, PrismSprite* sp );
+static void addSprite( Scene* scene, string id, PrismSprite* sp );
 
 static SceneManager* new( Scene* defaultScene ) {
 	
@@ -96,7 +96,7 @@ static void draw( SceneManager* sceneManager, float delta ) {
 
 }
 
-static Scene* changeSceneByName( SceneManager* sceneManager, char* name ) {
+static Scene* changeSceneByName( SceneManager* sceneManager, string name ) {
 
 	Scene* scene = NULL;
 
@@ -191,7 +191,7 @@ const SceneManagerFn* prismaticSceneManager = &(SceneManagerFn){
 
 // Scene
 
-static Scene* newScene( const char* name ) {
+static Scene* newScene( string name ) {
 
 	if( name == NULL ) {
 		prismaticLogger->error( "Cannot create new scene with NULL name" );
@@ -220,10 +220,15 @@ static void deleteScene( Scene* scene ) {
 
 }
 
-static void addSprite( Scene* scene, PrismSprite* sp ) {
+static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
 
 	if( scene == NULL ) {
 		prismaticLogger->info( "Cannot add Sprite to NULL Scene" );
+		return;
+	}
+
+	if( spriteId == NULL ) {
+		prismaticLogger->info( "Cannot add sprite without id" );
 		return;
 	}
 
@@ -235,6 +240,7 @@ static void addSprite( Scene* scene, PrismSprite* sp ) {
         return;
     }
     
+    sp->id = spriteId;
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
 

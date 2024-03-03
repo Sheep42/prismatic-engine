@@ -2,14 +2,23 @@
 	
 #define SCENE_H
 
-#include <stddef.h>
+#ifndef STDDEF_INCLUDED
+	#define STDDEF_INCLUDED
+	#include <stddef.h>
+#endif
+
 #ifndef SPRITE_INCLUDED
 	#define SPRITE_INCLUDED
 	#include "../sprite/sprite.h"
 #endif
 
+#ifndef TEXT_INCLUDED
+	#define TEXT_INCLUDED
+	#include "../sprite/sprite.h"
+#endif
+
 typedef struct Scene {
-	const char* name;
+	string name;
 	PrismSprite** sprites;
 	size_t totalSprites;
 	void ( *enter )( struct Scene* );
@@ -28,9 +37,10 @@ typedef struct SceneManager {
 } SceneManager; 
 
 typedef struct SceneFn {
-	Scene* ( *new )( const char* );
+	Scene* ( *new )( string );
 	void ( *delete )( Scene* );
-	void ( *add )( struct Scene*, PrismSprite* );
+	void ( *add )( struct Scene*, string, PrismSprite* );
+	void ( *remove )( struct Scene*, string );
 } SceneFn;
 
 typedef struct SceneManagerFn {

@@ -18,6 +18,7 @@ typedef struct PrismAnimation PrismAnimation;
 typedef struct SpriteFn SpriteFn;
 
 typedef struct PrismSprite {
+	string id;
 	LCDSprite* sprite;
 	PrismAnimation* animation;
 	void ( *setAnimation )( LCDBitmap** frames, size_t startFrame, int frameRate );
