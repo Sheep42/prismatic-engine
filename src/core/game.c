@@ -28,7 +28,6 @@ static void init() {
 // update is your game's entry point to the engine
 static void update( float delta ) {
     sprite->updateAndDrawSprites();
-    prismaticLogger->info( "test" );
 }
 
 // draw should be used to handle screen drawing operations. It is called after 
@@ -42,6 +41,7 @@ static void draw( float delta ) {
 static void destroy() {
     prismaticLogger->info( "destroy" );
     prismaticSprite->delete( s );
+    prismaticSprite->freeImages( images );
 }
 
 // Called by the Engine to bind the game to itself - if you are going to modify

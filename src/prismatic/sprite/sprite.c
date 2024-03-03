@@ -37,7 +37,7 @@ static PrismSprite* newFromPath( string path ) {
 	LCDBitmap* image = loadImage( path );
 	s->sprite = newLCDSprite( image );
 
-	free( image );
+	graphics->freeBitmap( image );
 
 	return s;
 
@@ -70,22 +70,27 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, int fr
 
 static void deleteSprite( PrismSprite* s ) {
 
+	sprite->setImage( s->sprite, NULL, 0 );
 	sprite->removeSprite( s->sprite );
 	sprite->freeSprite( s->sprite );
 
 	// TODO: Destroy Animation
+	sys->realloc( s, 0 );
 
-	// free( s );
 
 }
 
 static void freeImages( LCDBitmap** images ) {
 
-	for( size_t i = 0; images[i] != NULL; i++ ) {
-		free( images[i] );
+	if( images == NULL ) {
+		return;
 	}
 
-	free( images );
+	for( size_t i = 0; images[i] != NULL; i++ ) {
+		graphics->freeBitmap( images[i] );
+	}
+
+	images = sys->realloc( images, 0 );
 
 }
 
@@ -133,7 +138,7 @@ static LCDBitmap* loadImage( string path ) {
     }
 
     LCDBitmap* img = images[0];
-    free( images );
+    freeImages( images );
 
     return img;
 
