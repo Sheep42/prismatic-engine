@@ -39,15 +39,21 @@ typedef struct SceneManager {
 typedef struct SceneFn {
 	// Creates a new Scene with the given name
 	// 
+	// ----
+	// 
 	// string name - A unique identifier for the Scene in the SceneManager
 	Scene* ( *new )( string );
 
 	// Deletes the Scene
 	// 
+	// ----
+	// 
 	// Scene* scene
 	void ( *delete )( Scene* );
 
 	// Add the Sprite to the Scene. 
+	// 
+	// ----
 	// 
 	// Scene* scene
 	// 
@@ -58,6 +64,8 @@ typedef struct SceneFn {
 
 	// Remove the Sprite from the Scene
 	// 
+	// ----
+	// 
 	// Scene* scene 
 	// 
 	// PrismSprite* sprite
@@ -65,14 +73,82 @@ typedef struct SceneFn {
 } SceneFn;
 
 typedef struct SceneManagerFn {
+	// Creates a new SceneManager
+	// 
+	// ----
+	// 
+	// Scene defaultScene - The Default Scene for the SceneManager
 	SceneManager* (*new)( Scene* );
+
+	// Deletes a SceneManager. 
+	// 
+	// Calls prismaticScene->delete() for each Scene in the SceneManager. 
+	// Then frees sceneManager->scenes. Finally, frees the SceneManager
+	// itself.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
 	void ( *delete )( SceneManager* );
+
+	// Updates the SceneManager. 
+	// 
+	// First, calls scene->update() for the SceneManager's current Scene. 
+	// Then, calls sprite->update() for each Sprite in the Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// float delta
 	void ( *update )( SceneManager*, float );
+
+	// Draws the SceneManager. 
+	// 
+	// Calls scene->draw() for the SceneManager's current Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// float delta
 	void ( *draw )( SceneManager*, float );
-	Scene* ( *changeSceneByName )( SceneManager*, char* );
+
+	// Change the current Scene to the named Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// string sceneName - The name of the Scene to change to
+	Scene* ( *changeSceneByName )( SceneManager*, string );
+
+	// Change the current Scene to the given Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// Scene* newScene
 	Scene* ( *changeScene )( SceneManager*, Scene* );
+
+	// Change the current Scene to the previous Scene.
+	// 
+	// SceneManager* sceneManager
 	Scene* ( *changeToPrevious )( SceneManager* );
+
+	// Change the current Scene to the default Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
 	Scene* ( *changeToDefault )( SceneManager* );
+
+	// Add a Scene to the SceneManager
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// Scene* scene
 	void ( *addScene )( SceneManager*, Scene* );
 } SceneManagerFn;
 

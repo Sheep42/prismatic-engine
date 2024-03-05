@@ -60,11 +60,9 @@ static void update( SceneManager* sceneManager, float delta ) {
 
 	if( sceneManager->currentScene->update == NULL ) {
 		prismaticLogger->errorf( "Scene '%s' has NULL update function", sceneManager->currentScene->name );
-		return;
+	} else {
+		sceneManager->currentScene->update( sceneManager->currentScene, delta );
 	}
-
-	// Run the Scene's update method
-	sceneManager->currentScene->update( sceneManager->currentScene, delta );
 
 	// Run the update method for each of the Scene's sprites
 	for( size_t i = 0; i < sceneManager->currentScene->totalSprites; i++ ) {
@@ -89,10 +87,9 @@ static void draw( SceneManager* sceneManager, float delta ) {
 
 	if( sceneManager->currentScene->draw == NULL ) {
 		prismaticLogger->errorf( "Scene '%s' has NULL draw function", sceneManager->currentScene->name );
-		return;
+	} else {
+		sceneManager->currentScene->draw( sceneManager->currentScene, delta );
 	}
-
-	sceneManager->currentScene->draw( sceneManager->currentScene, delta );
 
 }
 
@@ -169,7 +166,7 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 	sceneManager->scenes = sys->realloc( sceneManager->scenes, sceneManager->totalScenes * sizeof(Scene) + 1 );
 
 	if (sceneManager->scenes == NULL) {
-        prismaticLogger->error( "Memory allocation failed for adding scene.\n" );
+        prismaticLogger->errorf( "Memory allocation failed for adding scene: %s", scene->name );
         return;
     }
     
