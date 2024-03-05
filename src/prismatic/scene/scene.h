@@ -25,7 +25,7 @@ typedef struct Scene {
 	void ( *update )( struct Scene*, float );
 	void ( *draw )( struct Scene*, float );
 	void ( *exit )( struct Scene* );
-	void ( *destroy )( void );
+	void ( *destroy )( struct Scene* );
 } Scene;
 
 typedef struct SceneManager {
@@ -37,10 +37,31 @@ typedef struct SceneManager {
 } SceneManager; 
 
 typedef struct SceneFn {
+	// Creates a new Scene with the given name
+	// 
+	// string name - A unique identifier for the Scene in the SceneManager
 	Scene* ( *new )( string );
+
+	// Deletes the Scene
+	// 
+	// Scene* scene
 	void ( *delete )( Scene* );
+
+	// Add the Sprite to the Scene. 
+	// 
+	// Scene* scene
+	// 
+	// string spriteId - A unique identifier for sprite
+	// 
+	// PrismSprite* sprite
 	void ( *add )( struct Scene*, string, PrismSprite* );
-	void ( *remove )( struct Scene*, string );
+
+	// Remove the Sprite from the Scene
+	// 
+	// Scene* scene 
+	// 
+	// PrismSprite* sprite
+	void ( *remove )( struct Scene*, PrismSprite* );
 } SceneFn;
 
 typedef struct SceneManagerFn {
@@ -55,7 +76,10 @@ typedef struct SceneManagerFn {
 	void ( *addScene )( SceneManager*, Scene* );
 } SceneManagerFn;
 
+// The Prismatic Engine Scene Global
 extern const SceneFn* prismaticScene;
+
+// The Prismatic Engine SceneManager Global
 extern const SceneManagerFn* prismaticSceneManager;
 
 #endif // SCENE_H

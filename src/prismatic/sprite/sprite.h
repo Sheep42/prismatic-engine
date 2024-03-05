@@ -2,7 +2,11 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include <stddef.h>
+#ifndef STDDEF_INCLUDED
+	#include <stddef.h>
+	#define STDDEF_INCLUDED
+#endif
+
 #ifndef PD_API_INCLUDED 
 	#include "pd_api.h"  
 	#define PD_API_INCLUDED  
@@ -21,9 +25,9 @@ typedef struct PrismSprite {
 	string id;
 	LCDSprite* sprite;
 	PrismAnimation* animation;
-	void ( *setAnimation )( LCDBitmap** frames, size_t startFrame, int frameRate );
-	void ( *update )( float delta );
-	void ( *destroy )( void );
+	void ( *setAnimation )( PrismSprite*, LCDBitmap**, size_t, int );
+	void ( *update )( PrismSprite*, float );
+	void ( *destroy )( PrismSprite* );
 } PrismSprite;
 
 typedef struct PrismAnimation {
@@ -34,12 +38,12 @@ typedef struct PrismAnimation {
 } PrismAnimation;
 
 typedef struct SpriteFn {
-	PrismSprite* ( *newFromPath )( string path );
-	PrismSprite* ( *newFromImages )( LCDBitmap** frames, size_t startFrame, int frameRate );
-	void ( *delete )( PrismSprite* sprite );
-	void ( *freeImages )( LCDBitmap** images );
-	LCDBitmap** ( *loadImages )( string* path, size_t imageCount );
-	LCDBitmap* ( *loadImage )( string path );
+	PrismSprite* ( *newFromPath )( string );
+	PrismSprite* ( *newFromImages )( LCDBitmap**, size_t, int );
+	void ( *delete )( PrismSprite* );
+	void ( *freeImages )( LCDBitmap** );
+	LCDBitmap** ( *loadImages )( string*, size_t );
+	LCDBitmap* ( *loadImage )( string );
 } SpriteFn;
 
 

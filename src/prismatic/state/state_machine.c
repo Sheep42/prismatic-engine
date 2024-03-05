@@ -66,6 +66,7 @@ static State* changeStateByName( StateMachine* stateMachine, char* name ) {
 		State* s = stateMachine->states[i];
 		if( strcmp( s->name, name ) == 0 ) {
 			state = changeState( stateMachine, s );
+			break;
 		}
 	}
 
