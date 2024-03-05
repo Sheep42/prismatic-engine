@@ -8,7 +8,7 @@
 const struct PlaydateAPI *pd;
 const struct playdate_graphics *graphics;
 const struct playdate_sound *sound;
-const struct playdate_sprite *sprite;
+const struct playdate_sprite *sprites;
 const struct playdate_sys *sys;
 const Game* g;
 
@@ -17,7 +17,7 @@ void initEngine( PlaydateAPI* p ) {
 	pd = p;
 	graphics = pd->graphics;
 	sound = pd->sound;
-	sprite = pd->sprite;
+	sprites = pd->sprite;
 	sys = pd->system;
 
 	g = newGame();

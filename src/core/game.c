@@ -14,13 +14,13 @@ Scene* sc;
 SceneManager* sm;
 
 static void spr_upd( PrismSprite* self, float delta ) {
-    sprite->moveBy( self->sprite, 1, 1 );
+    sprites->moveBy( self->sprite, 1, 1 );
 }
 
 static void sc_enter( Scene* self ) {
 
     prismaticScene->add( self, "spr1", s );
-    sprite->moveTo( self->sprites[0]->sprite, 10, 10 );
+    sprites->moveTo( self->sprites[0]->sprite, 10, 10 );
     
 }
 
@@ -54,7 +54,8 @@ static void init() {
 
 // update is your game's entry point to the engine
 static void update( float delta ) {
-    sprite->updateAndDrawSprites();
+    sprites->updateAndDrawSprites();
+    sys->drawFPS( 0, 0 );
     prismaticSceneManager->update( sm, delta );
 }
 

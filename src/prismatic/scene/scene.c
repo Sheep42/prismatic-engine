@@ -260,7 +260,7 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
 
-    sprite->addSprite( sp->sprite );
+    sprites->addSprite( sp->sprite );
 
 }
 
@@ -283,7 +283,7 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 	for( i = 0; scene->sprites[i] != NULL; i++ ) {
 		
 		if( sp->id != scene->sprites[i]->id ) {
-			sprite->removeSprite( scene->sprites[i]->sprite );
+			sprites->removeSprite( scene->sprites[i]->sprite );
 			continue;
 		}
 

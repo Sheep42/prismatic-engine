@@ -23,15 +23,15 @@ static void playAnimationInOrder( PrismAnimation* animation, size_t frameOrder[]
 
 static LCDSprite* newLCDSprite( LCDBitmap* image ) {
 
-	LCDSprite* sp = sprite->newSprite();
-    sprite->setImage( sp, image, 0 );
+	LCDSprite* sp = sprites->newSprite();
+    sprites->setImage( sp, image, 0 );
 
     int width, height;
     graphics->getBitmapData( image, &width, &height, NULL, NULL, NULL );
 
     PDRect spBounds = PDRectMake( 0, 0, width, height );
-    sprite->setBounds( sp, spBounds );
-    sprite->setZIndex( sp, 0 );
+    sprites->setBounds( sp, spBounds );
+    sprites->setZIndex( sp, 0 );
 
     return sp;
 
@@ -85,9 +85,9 @@ static void deleteSprite( PrismSprite* s ) {
 		s->destroy( s );
 	}
 
-	sprite->setImage( s->sprite, NULL, 0 );
-	sprite->removeSprite( s->sprite );
-	sprite->freeSprite( s->sprite );
+	sprites->setImage( s->sprite, NULL, 0 );
+	sprites->removeSprite( s->sprite );
+	sprites->freeSprite( s->sprite );
 
 	// TODO: Destroy Animation
 	sys->realloc( s, 0 );
