@@ -10,7 +10,7 @@ static char* getCurrentTimestamp(void);
 
 static void prismLog( const char* str ) {
     char* timestamp = getCurrentTimestamp();
-    printf( "%s %s\n", timestamp, str );
+    sys->logToConsole( "%s %s", timestamp, str );
     free( timestamp );
 }
 
@@ -24,7 +24,7 @@ static void infof( const char* fmt, ... ) {
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( info ) * sizeof(char)) + 2 );
     if( fmtBuf == NULL ) {
-        puts( "ERROR: Could not allocate space for fmtBuf" );
+        sys->error( "ERROR: Could not allocate space for fmtBuf" );
         return;
     }
 
@@ -33,7 +33,7 @@ static void infof( const char* fmt, ... ) {
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
     if( msg == NULL ) {
-        puts( "ERROR: Could not allocate space for msg" );
+        sys->error( "ERROR: Could not allocate space for msg" );
         free( fmtBuf );
         return;
     }
@@ -59,7 +59,7 @@ static void debugf( const char* fmt, ... ) {
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( debug ) * sizeof(char)) + 2 );
     if( fmtBuf == NULL ) {
-        puts( "ERROR: Could not allocate space for fmtBuf" );
+        sys->error( "ERROR: Could not allocate space for fmtBuf" );
         return;
     }
 
@@ -68,7 +68,7 @@ static void debugf( const char* fmt, ... ) {
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
     if( msg == NULL ) {
-        puts( "ERROR: Could not allocate space for msg" );
+        sys->error( "ERROR: Could not allocate space for msg" );
         free( fmtBuf );
         return;
     }
@@ -94,7 +94,7 @@ static void errorf( const char* fmt, ... ) {
 
     char* fmtBuf = malloc( (strlen( fmt ) * sizeof(char)) + (strlen( error ) * sizeof(char)) + 2 );
     if( fmtBuf == NULL ) {
-        puts( "ERROR: Could not allocate space for fmtBuf" );
+        sys->error( "ERROR: Could not allocate space for fmtBuf" );
         return;
     }
     sprintf( fmtBuf, "%s %s", error, fmt );
@@ -102,7 +102,7 @@ static void errorf( const char* fmt, ... ) {
     int parsedLen = vsnprintf( NULL, 0, fmtBuf, args );
     char* msg = malloc( (parsedLen * sizeof(char)) + 1 );
     if( msg == NULL ) {
-        puts( "ERROR: Could not allocate space for fmtBuf" );
+        sys->error( "ERROR: Could not allocate space for fmtBuf" );
         free( fmtBuf );
         return;
     }
