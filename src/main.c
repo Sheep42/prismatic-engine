@@ -41,10 +41,11 @@ int eventHandler( PlaydateAPI* p, PDSystemEvent event, uint32_t arg ) {
 static int update( void* userdata ) {
 
 	int update = sys->getCurrentTimeMilliseconds();
-	float delta = (float)(update - clock) / 1000.0f;
-	clock = update;
+	float elapsed = (float)( update - clock );
+	float delta = elapsed / 1000.0f;
 
 	updateEngine( delta );
+	clock = update;
 
 	return 1;
 
