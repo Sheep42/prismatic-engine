@@ -5,6 +5,20 @@
 #include "../prismatic.h"
 #include "sprite.h"
 
+static LCDSprite* newLCDSprite( LCDBitmap* image );
+static PrismSprite* newFromPath( string path );
+static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint frameRate );
+static void deleteSprite( PrismSprite* sp );
+static void freeImages( LCDBitmap** images );
+static LCDBitmap** loadImages( string* paths, size_t pathCount );
+static LCDBitmap* loadImage( string path );
+static void setSpriteAnimation( PrismSprite* sp, PrismAnimation* animation );
+
+static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint frameRate );
+static void deleteAnimation( PrismAnimation* animation );
+static void playAnimation( PrismAnimation* animation );
+static void playAnimationInOrder( PrismAnimation* animation, size_t frameOrder[] );
+
 // Sprites
 
 static LCDSprite* newLCDSprite( LCDBitmap* image ) {
@@ -23,13 +37,6 @@ static LCDSprite* newLCDSprite( LCDBitmap* image ) {
 
 }
 
-static PrismSprite* newFromPath( string path );
-static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, int frameRate );
-static void deleteSprite( PrismSprite* sprite );
-static void freeImages( LCDBitmap** images );
-static LCDBitmap** loadImages( string* paths, size_t pathCount );
-static LCDBitmap* loadImage( string path );
-
 static PrismSprite* newFromPath( string path ) {
 
 	PrismSprite* s = sys->realloc( NULL, sizeof(PrismSprite));
@@ -43,7 +50,7 @@ static PrismSprite* newFromPath( string path ) {
 
 }
 
-static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, int frameRate ) {
+static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint frameRate ) {
 	
 	PrismSprite* s = sys->realloc( NULL, sizeof(PrismSprite));
 
@@ -58,7 +65,7 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, int fr
 	}
 
 	if( (frameCount - 1) < startFrame ) {
-		prismaticLogger->errorf( "startFrame %d is out of bounds. frames size: %d", startFrame, sizeof(frames) );
+		prismaticLogger->errorf( "startFrame %d is out of bounds. frames size: %d", startFrame, frameCount );
 		return NULL;
 	}
 
@@ -67,7 +74,6 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, int fr
 	
 	s->update = NULL;
 	s->destroy = NULL;
-	s->setAnimation = NULL;
 
 	return s;
 
@@ -152,6 +158,22 @@ static LCDBitmap* loadImage( string path ) {
 
 }
 
+static void setSpriteAnimation( PrismSprite* sp, PrismAnimation* animation ) {
+
+	if( sp == NULL ) {
+		prismaticLogger->error( "Cannot set Animation for NULL Sprite!" );
+		return;
+	}
+
+	if( animation == NULL ) {
+		prismaticLogger->error( "Cannot set NULL Animation for Sprite!" );
+		return;
+	}
+
+	sp->animation = animation;
+
+}
+
 const SpriteFn* prismaticSprite = &(SpriteFn) {
 	.freeImages = freeImages,
 	.loadImages = loadImages,
@@ -159,6 +181,56 @@ const SpriteFn* prismaticSprite = &(SpriteFn) {
 	.newFromPath = newFromPath,
 	.newFromImages = newFromImages,
 	.delete = deleteSprite,
+	.setAnimation = setSpriteAnimation,
+};
+
+// Animations
+
+static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint frameRate ) {
+
+	PrismAnimation* animation = calloc( 1, sizeof( PrismAnimation ) );
+
+	size_t frameCount = 0;
+	while( frames[frameCount] != NULL ) {
+		frameCount++;
+	}
+
+	if( frameCount < 1 ) {
+		prismaticLogger->error( "Cannot create Animation with no frames" );
+		return NULL;
+	}
+
+	if( (frameCount - 1) < startFrame ) {
+		prismaticLogger->errorf( "startFrame %d is out of bounds. frames size: %d", startFrame, frameCount );
+		return NULL;
+	}
+
+	animation->frames = frames;
+	animation->frameCount = frameCount;
+	animation->currentFrame = startFrame;
+	animation->frameRate = frameRate;
+
+	return animation;
+
+}
+
+static void deleteAnimation( PrismAnimation* animation ) {
+
+}
+
+static void playAnimation( PrismAnimation* animation ) {
+
+}
+
+static void playAnimationInOrder( PrismAnimation* animation, size_t frameOrder[] ) {
+
+}
+
+const AnimationFn* prismaticAnimation = &(AnimationFn) {
+	.new = newAnimation,
+	.delete = deleteAnimation,
+	.play = playAnimation,
+	.playInOrder = playAnimationInOrder,
 };
 
 // Animations
