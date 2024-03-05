@@ -47,7 +47,7 @@ static void delete( SceneManager* sceneManager ) {
 		deleteScene( s );
 	}
 
-	free( sceneManager->scenes );
+	sceneManager->scenes = sys->realloc( sceneManager->scenes, 0 );
 	free( sceneManager );
 
 }
