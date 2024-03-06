@@ -127,11 +127,22 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene ) {
 			sceneManager->currentScene->exit( sceneManager->currentScene );
 		}
 
+		// Remove any active sprites from the screen
+		sprites->removeAllSprites();
+
 		sceneManager->previousScene = sceneManager->currentScene;
 
 	}
 
 	sceneManager->currentScene = scene;
+
+	// Add Sprites from current Scene
+	if( sceneManager->currentScene->sprites != NULL ) {
+		size_t i = 0;
+		for( i = 0; sceneManager->currentScene->sprites[i] != NULL; i++ ) {
+			sprites->addSprite( sceneManager->currentScene->sprites[i]->sprite );
+		}
+	}
 
 	if( sceneManager->currentScene->enter != NULL ) {
 		sceneManager->currentScene->enter( sceneManager->currentScene );
@@ -219,12 +230,17 @@ static void deleteScene( Scene* scene ) {
 		scene->destroy( scene );
 	}
 
-	for( size_t i = 0; scene->sprites[i] != NULL; i++ ) {
-		prismaticSprite->delete( scene->sprites[i] );
-		prismaticScene->remove( scene, scene->sprites[i] );
+	if( scene->sprites != NULL ) {
+
+		for( size_t i = 0; scene->sprites[i] != NULL; i++ ) {
+			prismaticScene->remove( scene, scene->sprites[i] );
+			prismaticSprite->delete( scene->sprites[i] );
+		}
+
+		scene->sprites = sys->realloc( scene->sprites, 0 );
+	
 	}
 
-	scene->sprites = sys->realloc( scene->sprites, 0 );
 	free( scene );
 
 }

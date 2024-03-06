@@ -13,6 +13,7 @@ LCDBitmap** images;
 PrismSprite* s;
 PrismSprite* s2;
 Scene* sc;
+Scene* sc2;
 SceneManager* sm;
 
 static void spr_upd( PrismSprite* self, float delta ) {
@@ -35,6 +36,8 @@ static void sc_enter( Scene* self ) {
     // sprites->moveTo( self->sprites[1]->sprite, 0, 0 );
     
 }
+
+static void sc2_enter( Scene* self ) {}
 
 static void sc_upd( Scene* self, float delta ) {
 
@@ -65,19 +68,37 @@ static void init() {
     s2->update = spr2_upd;
 
     sc = prismaticScene->new( "Scene 1" );
+    sc2 = prismaticScene->new( "Scene 2" );
 
     sc->enter = sc_enter;
     sc->update = sc_upd;
     sc->draw = sc_draw;
 
+    sc2->enter = sc2_enter;
+    sc2->update = sc_draw;
+    sc2->draw = sc_draw;
+
     sm = prismaticSceneManager->new( sc );
+    prismaticSceneManager->addScene( sm, sc2 );
 }
 
+float e;
 // update is your game's entry point to the engine
 static void update( float delta ) {
     sprites->updateAndDrawSprites();
     sys->drawFPS( 0, 0 );
     prismaticSceneManager->update( sm, delta );
+
+    e += delta;
+
+    if( e >= 5.0f ) {
+        prismaticSceneManager->changeScene( sm, sc2 );
+    }
+
+    if( e >= 10.0f ) {
+        prismaticSceneManager->changeScene( sm, sc );
+        e = 0;
+    }
 }
 
 // draw should be used to handle screen drawing operations. It is called after 
