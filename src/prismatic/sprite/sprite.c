@@ -39,12 +39,24 @@ static LCDSprite* newLCDSprite( LCDBitmap* image ) {
 
 static PrismSprite* newFromPath( string path ) {
 
-	PrismSprite* s = sys->realloc( NULL, sizeof(PrismSprite));
+	size_t start = 0;
+	float speed = 0;
 
-	LCDBitmap* image = loadImage( path );
-	s->sprite = newLCDSprite( image );
+	LCDBitmap* img = loadImage( path );
+	if( img == NULL ) {
+		prismaticLogger->errorf( "Could not create Sprite from path '%s'", path );
+		return NULL;
+	}
 
-	graphics->freeBitmap( image );
+	LCDBitmap* frames[1] = { img };
+	PrismSprite* s = newFromImages( frames, start, speed );
+	
+	if( s == NULL ) {
+		prismaticLogger->errorf( "Could not create Sprite from path '%s'", path );
+		return NULL;
+	}
+
+	s->img = img;
 
 	return s;
 
@@ -72,6 +84,10 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float 
 	LCDBitmap* image = frames[startFrame];
 	s->sprite = newLCDSprite( image );
 
+	s->id = NULL;
+	s->animation = NULL;
+	s->img = NULL;
+
 	if( frameCount > 1 ) {
 		s->animation = newAnimation( frames, startFrame, playSpeed );
 		s->animation->sprite = s;
@@ -96,6 +112,10 @@ static void deleteSprite( PrismSprite* s ) {
 
 	if( s->animation != NULL ) {
 		deleteAnimation( s->animation );
+	}
+
+	if( s->img != NULL ) {
+		graphics->freeBitmap( s->img );
 	}
 
 	sys->realloc( s, 0 );
@@ -160,7 +180,7 @@ static LCDBitmap* loadImage( string path ) {
     }
 
     LCDBitmap* img = images[0];
-    freeImages( images );
+    free( images );
 
     return img;
 

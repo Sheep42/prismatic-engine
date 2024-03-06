@@ -29,6 +29,7 @@ typedef struct SpriteFn SpriteFn;
 typedef struct PrismSprite {
 	string id;
 	LCDSprite* sprite;
+	LCDBitmap* img;
 	PrismAnimation* animation;
 	void ( *update )( PrismSprite*, float );
 	void ( *destroy )( PrismSprite* );
