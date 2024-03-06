@@ -2,6 +2,11 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
+#ifndef STDBOOL_INCLUDED
+	#include <stdbool.h>
+	#define STDBOOL_INCLUDED
+#endif
+
 #ifndef STDDEF_INCLUDED
 	#include <stddef.h>
 	#define STDDEF_INCLUDED
@@ -34,6 +39,10 @@ typedef struct PrismAnimation {
 	size_t frameCount;
 	size_t currentFrame;
 	uint frameRate;
+	PrismSprite* sprite;
+	bool looping;
+	bool finished;
+	void ( *complete )( PrismAnimation* );
 } PrismAnimation;
 
 typedef struct SpriteFn {
@@ -54,5 +63,6 @@ typedef struct AnimationFn {
 } AnimationFn;
 
 extern const SpriteFn* prismaticSprite;
+extern const AnimationFn* prismaticAnimation;
 
 #endif  // SPRITE_H

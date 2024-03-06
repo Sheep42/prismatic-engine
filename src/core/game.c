@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -14,13 +15,15 @@ Scene* sc;
 SceneManager* sm;
 
 static void spr_upd( PrismSprite* self, float delta ) {
-    sprites->moveBy( self->sprite, 1, 1 );
+    // self->animation->looping = false;
+    prismaticAnimation->play( self->animation );
+    // sprites->moveBy( self->sprite, 1, 1 );
 }
 
 static void sc_enter( Scene* self ) {
 
     prismaticScene->add( self, "spr1", s );
-    sprites->moveTo( self->sprites[0]->sprite, 10, 10 );
+    sprites->moveTo( self->sprites[0]->sprite, 50, 50 );
     
 }
 
@@ -37,10 +40,17 @@ static void sc_draw( Scene* self, float delta ) {
 static void init() {
     prismaticLogger->info( "init" );
     
-    string paths[1] = { "assets/images/entities/player/player" };
-    images = prismaticSprite->loadImages( paths, 1 );
+    // string paths[1] = { "assets/images/entities/player/player" };
+    string paths[4] = { 
+        "assets/images/entities/test/anim-1",
+        "assets/images/entities/test/anim-2",
+        "assets/images/entities/test/anim-3",
+        "assets/images/entities/test/anim-4",
+    };
 
-    s = prismaticSprite->newFromImages( images, 0, 0 );
+    images = prismaticSprite->loadImages( paths, 4 );
+
+    s = prismaticSprite->newFromImages( images, 0, 1 );
     s->update = spr_upd;
 
     sc = prismaticScene->new( "Scene 1" );

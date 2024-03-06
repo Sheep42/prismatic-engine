@@ -71,6 +71,11 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint f
 
 	LCDBitmap* image = frames[startFrame];
 	s->sprite = newLCDSprite( image );
+
+	if( frameCount > 1 ) {
+		s->animation = newAnimation( frames, startFrame, frameRate );
+		s->animation->sprite = s;
+	}
 	
 	s->update = NULL;
 	s->destroy = NULL;
@@ -89,7 +94,10 @@ static void deleteSprite( PrismSprite* s ) {
 	sprites->removeSprite( s->sprite );
 	sprites->freeSprite( s->sprite );
 
-	// TODO: Destroy Animation
+	if( s->animation != NULL ) {
+		deleteAnimation( s->animation );
+	}
+
 	sys->realloc( s, 0 );
 
 }
@@ -171,6 +179,7 @@ static void setSpriteAnimation( PrismSprite* sp, PrismAnimation* animation ) {
 	}
 
 	sp->animation = animation;
+	animation->sprite = sp;
 
 }
 
@@ -209,6 +218,7 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint
 	animation->frameCount = frameCount;
 	animation->currentFrame = startFrame;
 	animation->frameRate = frameRate;
+	animation->looping = true; 
 
 	return animation;
 
@@ -216,9 +226,48 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint
 
 static void deleteAnimation( PrismAnimation* animation ) {
 
+	free( animation );
+
 }
 
 static void playAnimation( PrismAnimation* animation ) {
+
+	if( animation->finished ) {
+		return;
+	}
+
+	animation->currentFrame++;
+
+	if( animation->currentFrame >= animation->frameCount ) {
+
+		if( animation->complete != NULL ) {
+			animation->complete( animation );
+		}
+
+		if( animation->looping ) {
+			animation->currentFrame = 0;
+			return;
+		}
+		
+		animation->finished = true;
+
+	} else {
+
+		LCDBitmap* nextFrame = animation->frames[animation->currentFrame];
+
+		if ( nextFrame == NULL ) {
+			prismaticLogger->errorf( "NULL frame in Animation at [%d]", animation->currentFrame );
+			return;
+		}
+
+		if( animation->sprite == NULL ) {
+			prismaticLogger->errorf( "NULL Sprite in Animation" );
+			return;
+		}
+
+		sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+
+	}
 
 }
 
