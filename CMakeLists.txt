@@ -36,7 +36,6 @@ set(SOURCE_FILES
     src/main.c
     src/core/game.c
     src/prismatic/prismatic.c
-    src/prismatic/input/input.c
     src/prismatic/logger/logger.c
     src/prismatic/scene/scene.c
     src/prismatic/sprite/sprite.c
@@ -49,7 +48,6 @@ set(SOURCE_FILES
 set(HEADER_FILES
     src/core/game.h
     src/prismatic/prismatic.h
-    src/prismatic/input/input.h
     src/prismatic/logger/logger.h
     src/prismatic/scene/scene.h
     src/prismatic/sprite/sprite.h
