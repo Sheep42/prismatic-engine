@@ -44,24 +44,137 @@ typedef struct PrismAnimation {
 	PrismSprite* sprite;
 	bool looping;
 	bool finished;
+	bool paused;
 	float timer;
 	void ( *complete )( PrismAnimation* );
 } PrismAnimation;
 
 typedef struct SpriteFn {
+	// Create a new Sprite from the given path.
+	// 
+	// This creates a static Sprite with no Animation, simply setting 
+	// the underlying LCDSprite* image
+	// 
+	// ----
+	// 
+	// string path
 	PrismSprite* ( *newFromPath )( string );
+
+	// Create a new Sprite from an array of LCDBitmap*s
+	// 
+	// The list of images will be converted into frames for the Sprite's 
+	// underlying PrismAnimation*, accessible via sprite->animation.
+	// 
+	// Caller is responsible for freeing frames with prismaticSprite->freeImages
+	// when Sprite is destroyed.
+	// 
+	// ----
+	// 
+	// LCDBitmap** frames
+	// 
+	// size_t startFrame - The frame to start the Animation from
+	// 
+	// float playSpeed - The number of seconds elapsed between frame changes
 	PrismSprite* ( *newFromImages )( LCDBitmap**, size_t, float );
+
+	// Delete a Sprite
+	// 
+	// First, calls sprite->destroy(), if it exists.
+	// 
+	// Then, removes the image from the underlying
+	// LCDSprite*. Then, removes the LCDSprite from the screen and calls sprites->freeSprite.
+	// 
+	// Then, calls prismaticAnimation->delete() on the Sprite's PrismAnimation, if one exists.
+	// 
+	// Then, frees the initialization image, if one exists.
+	// 
+	// Finally, calls sys->realloc on the Sprite itself.
+	// 
+	// ----
+	// 
+	// PrismSprite* sprite
 	void ( *delete )( PrismSprite* );
+
+	// Free an array of LCDBitmap*s used to create a Sprite.
+	// 
+	// Generally, this should be called during Sprite or Scene destroy actions.
+	// If you choose to implement a game without Scenes, this should be called 
+	// when the game is destroyed.
+	// 
+	// ----
+	// 
+	// LCDBitmap** images The array of images to free
 	void ( *freeImages )( LCDBitmap** );
+
+	// Load images into an array of LCDBitmap*s
+	// 
+	// Caller is responsible for freeing the resulting images
+	// 
+	// ----
+	// 
+	// string* paths - Paths to images on the file system. Do not include extension.
+	// 
+	// size_t pathCount - The legnth of the paths array
 	LCDBitmap** ( *loadImages )( string*, size_t );
+
+	// Load a single LCDBitmap* from the given path
+	// 
+	// Caller is responsible for freeing the resulting image.
+	// 
+	// ----
+	// 
+	// string path - Path the image on the file system. Do not include extension.
 	LCDBitmap* ( *loadImage )( string );
+
+	// Set the PrismAnimation* for a PrismSprite* manually
+	// 
+	// ----
+	// 
+	// PrismSprite* sprite
+	// 
+	// PrismAnimation* animation
 	void ( *setAnimation )( PrismSprite*, PrismAnimation* );
 } SpriteFn;
 
 typedef struct AnimationFn {
+	// Create a new PrismAnimation*
+	// 
+	// ----
+	// 
+	// LCDBitmap** frames
+	// 
+	// size_t startFrame - The frame to start the Animation from
+	// 
+	// float playSpeed - The number of seconds elapsed between frame changes
 	PrismAnimation* ( *new )( LCDBitmap**, size_t, float );
+
+	// Delete a PrismAnimation*
+	// 
+	// Frees only the animation, frame images should be freed separately.
+	// 
+	// ----
+	// 
+	// PrismAnimation* animation
 	void ( *delete )( PrismAnimation* );
+
+	// Play an Animation
+	// 
+	// ----
+	// 
+	// PrismAnimation* animation
+	// 
+	// float delta
 	void ( *play )( PrismAnimation*, float );
+
+	// Play an Animation in a specific order
+	// 
+	// ----
+	// 
+	// PrismAnimation* animation
+	// 
+	// size_t* frameOrder - An array of frame indexes, in the order they should be played. e.g.: { 0, 3, 1 }
+	// 
+	// size_t frameCount - The length of the frameOrder array
 	void ( *playInOrder )( PrismAnimation*, float, size_t*, size_t );
 } AnimationFn;
 
