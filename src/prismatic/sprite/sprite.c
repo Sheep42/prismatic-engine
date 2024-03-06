@@ -7,17 +7,17 @@
 
 static LCDSprite* newLCDSprite( LCDBitmap* image );
 static PrismSprite* newFromPath( string path );
-static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint frameRate );
+static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float playSpeed );
 static void deleteSprite( PrismSprite* sp );
 static void freeImages( LCDBitmap** images );
 static LCDBitmap** loadImages( string* paths, size_t pathCount );
 static LCDBitmap* loadImage( string path );
 static void setSpriteAnimation( PrismSprite* sp, PrismAnimation* animation );
 
-static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint frameRate );
+static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, float playSpeed );
 static void deleteAnimation( PrismAnimation* animation );
-static void playAnimation( PrismAnimation* animation );
-static void playAnimationInOrder( PrismAnimation* animation, size_t frameOrder[] );
+static void playAnimation( PrismAnimation* animation, float delta );
+static void playAnimationInOrder( PrismAnimation* animation, float delta, size_t* frameOrder, size_t frameCount );
 
 // Sprites
 
@@ -50,7 +50,7 @@ static PrismSprite* newFromPath( string path ) {
 
 }
 
-static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint frameRate ) {
+static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float playSpeed ) {
 	
 	PrismSprite* s = sys->realloc( NULL, sizeof(PrismSprite));
 
@@ -73,7 +73,7 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, uint f
 	s->sprite = newLCDSprite( image );
 
 	if( frameCount > 1 ) {
-		s->animation = newAnimation( frames, startFrame, frameRate );
+		s->animation = newAnimation( frames, startFrame, playSpeed );
 		s->animation->sprite = s;
 	}
 	
@@ -195,7 +195,7 @@ const SpriteFn* prismaticSprite = &(SpriteFn) {
 
 // Animations
 
-static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint frameRate ) {
+static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, float playSpeed ) {
 
 	PrismAnimation* animation = calloc( 1, sizeof( PrismAnimation ) );
 
@@ -217,7 +217,7 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, uint
 	animation->frames = frames;
 	animation->frameCount = frameCount;
 	animation->currentFrame = startFrame;
-	animation->frameRate = frameRate;
+	animation->playSpeed = playSpeed;
 	animation->looping = true; 
 
 	return animation;
@@ -230,13 +230,17 @@ static void deleteAnimation( PrismAnimation* animation ) {
 
 }
 
-static void playAnimation( PrismAnimation* animation ) {
+static void playAnimation( PrismAnimation* animation, float delta ) {
 
 	if( animation->finished ) {
 		return;
 	}
 
-	animation->currentFrame++;
+	animation->timer += delta;
+
+	if( animation->timer < animation->playSpeed ) {
+		return;
+	}
 
 	if( animation->currentFrame >= animation->frameCount ) {
 
@@ -266,12 +270,61 @@ static void playAnimation( PrismAnimation* animation ) {
 		}
 
 		sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+		
+		animation->timer = 0;
+		animation->currentFrame++;
 
 	}
 
 }
 
-static void playAnimationInOrder( PrismAnimation* animation, size_t frameOrder[] ) {
+static void playAnimationInOrder( PrismAnimation* animation, float delta, size_t* frameOrder, size_t frameCount ) {
+
+	if( animation->finished ) {
+		return;
+	}
+
+	animation->timer += delta;
+
+	if( animation->timer < animation->playSpeed ) {
+		return;
+	}
+
+	if( animation->currentFrame >= animation->frameCount || animation->customOrderPtr >= frameCount ) {
+
+		if( animation->complete != NULL ) {
+			animation->complete( animation );
+		}
+
+		if( animation->looping ) {
+			animation->currentFrame = frameOrder[0];
+			animation->customOrderPtr = 0;
+			return;
+		}
+		
+		animation->finished = true;
+
+	} else {
+
+		LCDBitmap* nextFrame = animation->frames[animation->currentFrame];
+
+		if ( nextFrame == NULL ) {
+			prismaticLogger->errorf( "NULL frame in Animation at [%d]", animation->currentFrame );
+			return;
+		}
+
+		if( animation->sprite == NULL ) {
+			prismaticLogger->errorf( "NULL Sprite in Animation" );
+			return;
+		}
+
+		sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+		
+		animation->timer = 0;
+		animation->customOrderPtr++;
+		animation->currentFrame = frameOrder[animation->customOrderPtr];
+
+	}
 
 }
 

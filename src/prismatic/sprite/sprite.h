@@ -38,16 +38,18 @@ typedef struct PrismAnimation {
 	LCDBitmap** frames;
 	size_t frameCount;
 	size_t currentFrame;
-	uint frameRate;
+	size_t customOrderPtr;
+	float playSpeed;
 	PrismSprite* sprite;
 	bool looping;
 	bool finished;
+	float timer;
 	void ( *complete )( PrismAnimation* );
 } PrismAnimation;
 
 typedef struct SpriteFn {
 	PrismSprite* ( *newFromPath )( string );
-	PrismSprite* ( *newFromImages )( LCDBitmap**, size_t, uint );
+	PrismSprite* ( *newFromImages )( LCDBitmap**, size_t, float );
 	void ( *delete )( PrismSprite* );
 	void ( *freeImages )( LCDBitmap** );
 	LCDBitmap** ( *loadImages )( string*, size_t );
@@ -56,10 +58,10 @@ typedef struct SpriteFn {
 } SpriteFn;
 
 typedef struct AnimationFn {
-	PrismAnimation* ( *new )( LCDBitmap**, size_t, uint );
+	PrismAnimation* ( *new )( LCDBitmap**, size_t, float );
 	void ( *delete )( PrismAnimation* );
-	void ( *play )( PrismAnimation* );
-	void ( *playInOrder )( PrismAnimation*, size_t[] );
+	void ( *play )( PrismAnimation*, float );
+	void ( *playInOrder )( PrismAnimation*, float, size_t*, size_t );
 } AnimationFn;
 
 extern const SpriteFn* prismaticSprite;

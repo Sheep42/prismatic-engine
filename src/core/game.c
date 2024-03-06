@@ -16,7 +16,9 @@ SceneManager* sm;
 
 static void spr_upd( PrismSprite* self, float delta ) {
     // self->animation->looping = false;
-    prismaticAnimation->play( self->animation );
+    prismaticAnimation->play( self->animation, delta );
+    // size_t frames[3] = { 0, 3, 1 };
+    // prismaticAnimation->playInOrder( self->animation, delta, frames, 3 );
     // sprites->moveBy( self->sprite, 1, 1 );
 }
 
@@ -50,7 +52,7 @@ static void init() {
 
     images = prismaticSprite->loadImages( paths, 4 );
 
-    s = prismaticSprite->newFromImages( images, 0, 1 );
+    s = prismaticSprite->newFromImages( images, 0, 0.5f );
     s->update = spr_upd;
 
     sc = prismaticScene->new( "Scene 1" );
