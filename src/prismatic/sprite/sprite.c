@@ -239,6 +239,7 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, floa
 	animation->currentFrame = startFrame;
 	animation->playSpeed = playSpeed;
 	animation->looping = true; 
+	animation->paused = false;
 
 	return animation;
 
@@ -252,7 +253,7 @@ static void deleteAnimation( PrismAnimation* animation ) {
 
 static void playAnimation( PrismAnimation* animation, float delta ) {
 
-	if( animation->finished ) {
+	if( animation->finished || animation->paused ) {
 		return;
 	}
 
