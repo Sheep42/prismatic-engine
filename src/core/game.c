@@ -11,6 +11,7 @@ static void destroy( void );
 
 LCDBitmap** images;
 PrismSprite* s;
+PrismSprite* s2;
 Scene* sc;
 SceneManager* sm;
 
@@ -22,10 +23,16 @@ static void spr_upd( PrismSprite* self, float delta ) {
     // sprites->moveBy( self->sprite, 1, 1 );
 }
 
+static void spr2_upd( PrismSprite* self, float delta ) {
+    sprites->moveBy( self->sprite, 1, 1 );
+}
+
 static void sc_enter( Scene* self ) {
 
     prismaticScene->add( self, "spr1", s );
+    prismaticScene->add( self, "spr2", s2 );
     sprites->moveTo( self->sprites[0]->sprite, 50, 50 );
+    // sprites->moveTo( self->sprites[1]->sprite, 0, 0 );
     
 }
 
@@ -41,8 +48,7 @@ static void sc_draw( Scene* self, float delta ) {
 // before the first call to update but after the engine has initialized itself
 static void init() {
     prismaticLogger->info( "init" );
-    
-    // string paths[1] = { "assets/images/entities/player/player" };
+
     string paths[4] = { 
         "assets/images/entities/test/anim-1",
         "assets/images/entities/test/anim-2",
@@ -54,6 +60,9 @@ static void init() {
 
     s = prismaticSprite->newFromImages( images, 0, 0.5f );
     s->update = spr_upd;
+
+    s2 = prismaticSprite->newFromPath( "assets/images/entities/player/player" );
+    s2->update = spr2_upd;
 
     sc = prismaticScene->new( "Scene 1" );
 
@@ -81,7 +90,10 @@ static void draw( float delta ) {
 // freed from memory
 static void destroy() {
     prismaticLogger->info( "destroy" );
+    
     // prismaticSprite->delete( s );
+    // prismaticSprite->delete( s2 );
+
     prismaticSprite->freeImages( images );
     prismaticSceneManager->delete( sm );
 }
