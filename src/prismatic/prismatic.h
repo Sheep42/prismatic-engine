@@ -48,6 +48,5 @@ extern const struct playdate_graphics *graphics;
 extern const struct playdate_sound *sound;
 extern const struct playdate_sprite *sprites;
 extern const struct playdate_sys *sys;
-extern const Game* g;
 
 #endif // PRISMATIC_H

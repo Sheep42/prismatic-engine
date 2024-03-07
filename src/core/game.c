@@ -115,8 +115,8 @@ static void destroy() {
     // prismaticSprite->delete( s );
     // prismaticSprite->delete( s2 );
 
-    prismaticSprite->freeImages( images );
     prismaticSceneManager->delete( sm );
+    prismaticSprite->freeImages( images );
 }
 
 // Called by the Engine to bind the game to itself - if you are going to modify
