@@ -264,6 +264,20 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
 		return;
 	}
 
+	if( scene->sprites != NULL ) {
+		size_t i = 0;
+		for( i = 0; scene->sprites[i] != NULL; i++ ) {
+			
+			if( sp->id != scene->sprites[i]->id ) {
+				continue;
+			}
+
+			prismaticLogger->info( "hit" );
+			return;
+
+		}
+	}
+
 	scene->totalSprites += 1;
 	scene->sprites = sys->realloc( scene->sprites, scene->totalSprites * sizeof(PrismSprite*) + 1 );
 
@@ -271,7 +285,7 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
         prismaticLogger->error( "Memory allocation failed for adding sprite." );
         return;
     }
-    
+
     sp->id = spriteId;
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
@@ -295,29 +309,31 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 		return;
 	}
 
-	size_t i = 0;
-	for( i = 0; scene->sprites[i] != NULL; i++ ) {
-		
-		if( sp->id != scene->sprites[i]->id ) {
+	if( scene->sprites != NULL ) {		
+		size_t i = 0;
+		for( i = 0; scene->sprites[i] != NULL; i++ ) {
+			
+			if( sp->id != scene->sprites[i]->id ) {
+				continue;
+			}
+
 			sprites->removeSprite( scene->sprites[i]->sprite );
-			continue;
+			break;
+
 		}
 
-		break;
+	    if( scene->sprites[i] == NULL ) {
+	        prismaticLogger->errorf( "Did not find Sprite %d in Scene!", sp->id );
+	        return;
+	    }
 
+	    // Shift sprites to remove Sprite at i 
+	    for( size_t j = i; scene->sprites[j] != NULL; j++ ) {
+	        scene->sprites[j] = scene->sprites[j + 1];
+	    }
+
+	    scene->totalSprites--;
 	}
-
-    if( scene->sprites[i] == NULL ) {
-        prismaticLogger->errorf( "Did not find Sprite %d in Scene!", sp->id );
-        return;
-    }
-
-    // Shift sprites to remove Sprite at i 
-    for( size_t j = i; scene->sprites[j] != NULL; j++ ) {
-        scene->sprites[j] = scene->sprites[j + 1];
-    }
-
-    scene->totalSprites--;
 
 }
 
