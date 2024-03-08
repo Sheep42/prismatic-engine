@@ -21,6 +21,8 @@ typedef struct Scene {
 	string name;
 	PrismSprite** sprites;
 	size_t totalSprites;
+	bool isActive;
+	struct SceneManager* sceneManager;
 	void ( *enter )( struct Scene* );
 	void ( *update )( struct Scene*, float );
 	void ( *draw )( struct Scene*, float );
@@ -71,6 +73,15 @@ typedef struct SceneFn {
 	// 
 	// PrismSprite* sprite
 	void ( *remove )( struct Scene*, PrismSprite* );
+
+	// Get a Sprite from the Scene by its string ID
+	// 
+	// ----
+	// 
+	// Scene* scene
+	// 
+	// string spriteId
+	PrismSprite* ( *get )( struct Scene*, string );
 } SceneFn;
 
 typedef struct SceneManagerFn {

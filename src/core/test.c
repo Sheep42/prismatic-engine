@@ -16,7 +16,8 @@ static void spr2_upd( PrismSprite* self, float delta ) {
 }
 
 static void sc_enter( Scene* self ) {
-    sprites->moveTo( self->sprites[0]->sprite, 50, 50 );
+    PrismSprite* s = prismaticScene->get( self, "spr1" );
+    sprites->moveTo( s->sprite, 50, 50 );
     // sprites->moveTo( self->sprites[1]->sprite, 0, 0 );
 }
 

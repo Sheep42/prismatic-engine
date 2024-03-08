@@ -8,9 +8,10 @@
 
 // Scene Manager
 
-static SceneManager* new( Scene* );
-static void delete( SceneManager* );
-static void update( SceneManager*, float );
+static SceneManager* newSceneManager( Scene* );
+static void deleteSceneManager( SceneManager* );
+static void updateSceneManager( SceneManager*, float );
+static void drawSceneManager( SceneManager*, float );
 static Scene* changeSceneByName( SceneManager* sceneManager, string name );
 static Scene* changeScene( SceneManager* sceneManager, Scene* scene );
 static Scene* changeToPrevious( SceneManager* sceneManager );
@@ -19,7 +20,7 @@ static void addScene( SceneManager* sceneManager, Scene* scene );
 static void deleteScene( Scene* scene );
 static void addSprite( Scene* scene, string id, PrismSprite* sp );
 
-static SceneManager* new( Scene* defaultScene ) {
+static SceneManager* newSceneManager( Scene* defaultScene ) {
 	
 	SceneManager* sceneManager = calloc( 1, sizeof(SceneManager) );
 	if( sceneManager == NULL ) {
@@ -37,7 +38,7 @@ static SceneManager* new( Scene* defaultScene ) {
 
 }
 
-static void delete( SceneManager* sceneManager ) {
+static void deleteSceneManager( SceneManager* sceneManager ) {
 	
 	if( sceneManager == NULL )
 		return;
@@ -56,7 +57,7 @@ static void delete( SceneManager* sceneManager ) {
 
 }
 
-static void update( SceneManager* sceneManager, float delta ) {
+static void updateSceneManager( SceneManager* sceneManager, float delta ) {
 
 	if( sceneManager->currentScene == NULL ) {
 		return;
@@ -83,7 +84,7 @@ static void update( SceneManager* sceneManager, float delta ) {
 
 }
 
-static void draw( SceneManager* sceneManager, float delta ) {
+static void drawSceneManager( SceneManager* sceneManager, float delta ) {
 
 	if( sceneManager->currentScene == NULL ) {
 		return;
@@ -131,6 +132,8 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene ) {
 			sceneManager->currentScene->exit( sceneManager->currentScene );
 		}
 
+		sceneManager->currentScene->isActive = false;
+
 		// Remove any active sprites from the screen
 		sprites->removeAllSprites();
 
@@ -147,6 +150,8 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene ) {
 			sprites->addSprite( sceneManager->currentScene->sprites[i]->sprite );
 		}
 	}
+
+	sceneManager->currentScene->isActive = true;
 
 	if( sceneManager->currentScene->enter != NULL ) {
 		sceneManager->currentScene->enter( sceneManager->currentScene );
@@ -184,6 +189,8 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
         prismaticLogger->errorf( "Memory allocation failed for adding scene: %s", scene->name );
         return;
     }
+
+    scene->sceneManager = sceneManager;
     
     sceneManager->scenes[sceneManager->totalScenes - 1] = scene;
     sceneManager->scenes[sceneManager->totalScenes] = NULL;
@@ -191,10 +198,10 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 }
 
 const SceneManagerFn* prismaticSceneManager = &(SceneManagerFn){
-	.new = new,
-	.delete = delete,
-	.update = update,
-	.draw = draw,
+	.new = newSceneManager,
+	.delete = deleteSceneManager,
+	.update = updateSceneManager,
+	.draw = drawSceneManager,
 	.changeSceneByName = changeSceneByName,
 	.changeScene = changeScene,
 	.changeToPrevious = changeToPrevious,
@@ -237,7 +244,6 @@ static void deleteScene( Scene* scene ) {
 	if( scene->sprites != NULL ) {
 
 		for( size_t i = 0; scene->sprites[i] != NULL; i++ ) {
-			prismaticScene->remove( scene, scene->sprites[i] );
 			prismaticSprite->delete( scene->sprites[i] );
 		}
 
@@ -294,7 +300,9 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
 
-    sprites->addSprite( sp->sprite );
+    if( scene->isActive ) {
+		sprites->addSprite( sp->sprite );
+    }
 
 }
 
@@ -341,9 +349,34 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 
 }
 
+
+PrismSprite* getSprite( Scene* scene, string spriteId ) {
+
+	if( scene->sprites == NULL ) {
+		prismaticLogger->infof( "Scene sprites NULL when removing sprite '%s'", spriteId );
+		return NULL;
+	}
+
+	size_t i = 0;
+	for( i = 0; scene->sprites[i] != NULL; i++ ) {
+		
+		if( spriteId != scene->sprites[i]->id ) {
+			continue;
+		}
+
+		return scene->sprites[i];
+
+	}
+
+	prismaticLogger->infof( "Sprite id '%s' not found in Scene", spriteId );
+	return NULL;
+
+}
+
 const SceneFn* prismaticScene = &(SceneFn) {
 	.new = newScene,
 	.delete = deleteScene,
 	.add = addSprite,
 	.remove = removeSprite,
+	.get = getSprite,
 };

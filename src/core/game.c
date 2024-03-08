@@ -48,10 +48,6 @@ static void draw( float delta ) {
 // freed from memory
 static void destroy() {
     prismaticLogger->info( "destroy" );
-    
-    // prismaticSprite->delete( s );
-    // prismaticSprite->delete( s2 );
-
     prismaticSceneManager->delete( sm );
 }
 
