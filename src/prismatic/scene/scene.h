@@ -34,6 +34,7 @@ typedef struct SceneManager {
 	Scene* defaultScene;
 	Scene* currentScene;
 	Scene* previousScene;
+	void (*destroy)( struct SceneManager* );
 } SceneManager; 
 
 typedef struct SceneFn {

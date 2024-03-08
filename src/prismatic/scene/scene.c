@@ -42,6 +42,10 @@ static void delete( SceneManager* sceneManager ) {
 	if( sceneManager == NULL )
 		return;
 
+	if( sceneManager->destroy != NULL ) {
+		sceneManager->destroy( sceneManager );
+	}
+
 	for( size_t i = 0; i < sceneManager->totalScenes; i++ ) {
 		Scene* s = sceneManager->scenes[i];
 		deleteScene( s );
