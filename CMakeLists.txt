@@ -34,7 +34,6 @@ project(${PLAYDATE_GAME_NAME} C ASM)
 # Set source files
 set(SOURCE_FILES
     src/main.c
-    src/core/game.c
     src/prismatic/prismatic.c
     src/prismatic/logger/logger.c
     src/prismatic/scene/scene.c
@@ -46,7 +45,6 @@ set(SOURCE_FILES
 
 # Set header files
 set(HEADER_FILES
-    src/core/game.h
     src/prismatic/prismatic.h
     src/prismatic/logger/logger.h
     src/prismatic/scene/scene.h
@@ -56,8 +54,11 @@ set(HEADER_FILES
     src/prismatic/transition/transition.h
 )
 
+# Glob all files in core game dir
+file(GLOB CORE "src/core/*.c" "src/core/*.h")
+
 if (TOOLCHAIN STREQUAL "armgcc")
-	add_executable(${PLAYDATE_GAME_DEVICE} ${SOURCE_FILES} ${HEADER_FILES})
+	add_executable(${PLAYDATE_GAME_DEVICE} ${SOURCE_FILES} ${HEADER_FILES} ${CORE})
 	target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-specs=nosys.specs")
     target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-Wl,--gc-sections")
     target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mthumb")
@@ -65,7 +66,7 @@ if (TOOLCHAIN STREQUAL "armgcc")
     target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mfloat-abi=hard")
     target_link_libraries(${PLAYDATE_GAME_DEVICE} PUBLIC "-mfpu=fpv5-sp-d16")
 else()
-	add_library(${PLAYDATE_GAME_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
+	add_library(${PLAYDATE_GAME_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} ${CORE})
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
