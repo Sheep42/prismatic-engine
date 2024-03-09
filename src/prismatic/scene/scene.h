@@ -161,7 +161,16 @@ typedef struct SceneManagerFn {
 	// SceneManager* sceneManager
 	// 
 	// Scene* scene
-	void ( *addScene )( SceneManager*, Scene* );
+	void ( *add )( SceneManager*, Scene* );
+
+	// Get a Scene by its name from the SceneManager
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// string sceneName - The Scene's name
+	Scene* ( *get )( SceneManager*, string );
 } SceneManagerFn;
 
 // The Prismatic Engine Scene Global

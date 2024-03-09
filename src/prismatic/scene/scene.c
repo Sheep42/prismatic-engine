@@ -197,6 +197,29 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 
 }
 
+static Scene* getScene( SceneManager* sceneManager, string sceneName ) {
+
+	if( sceneManager->scenes == NULL ) {
+		prismaticLogger->infof( "Scenes NULL when getting Scene '%s'", sceneName );
+		return NULL;
+	}
+
+	size_t i = 0;
+	for( i = 0; sceneManager->scenes[i] != NULL; i++ ) {
+
+		if( strcmp( sceneManager->scenes[i]->name, sceneName ) != 0 ) {
+			continue;
+		}
+
+		return sceneManager->scenes[i];
+
+	}
+
+	prismaticLogger->infof( "Scene id '%s' not found in SceneManager", sceneName );
+	return NULL;
+
+}
+
 const SceneManagerFn* prismaticSceneManager = &(SceneManagerFn){
 	.new = newSceneManager,
 	.delete = deleteSceneManager,
@@ -206,7 +229,8 @@ const SceneManagerFn* prismaticSceneManager = &(SceneManagerFn){
 	.changeScene = changeScene,
 	.changeToPrevious = changeToPrevious,
 	.changeToDefault = changeToDefault,
-	.addScene = addScene,
+	.add = addScene,
+	.get = getScene,
 }; 
 
 // Scene
@@ -278,11 +302,10 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
 		size_t i = 0;
 		for( i = 0; scene->sprites[i] != NULL; i++ ) {
 			
-			if( sp->id != scene->sprites[i]->id ) {
+			if( strcmp( sp->id, scene->sprites[i]->id ) != 0 ) {
 				continue;
 			}
 
-			prismaticLogger->info( "hit" );
 			return;
 
 		}
@@ -325,7 +348,7 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 		size_t i = 0;
 		for( i = 0; scene->sprites[i] != NULL; i++ ) {
 			
-			if( sp->id != scene->sprites[i]->id ) {
+			if( strcmp( sp->id, scene->sprites[i]->id ) != 0 ) {
 				continue;
 			}
 
@@ -353,14 +376,14 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 PrismSprite* getSprite( Scene* scene, string spriteId ) {
 
 	if( scene->sprites == NULL ) {
-		prismaticLogger->infof( "Scene sprites NULL when removing sprite '%s'", spriteId );
+		prismaticLogger->infof( "Scene sprites NULL when getting sprite '%s'", spriteId );
 		return NULL;
 	}
 
 	size_t i = 0;
 	for( i = 0; scene->sprites[i] != NULL; i++ ) {
 		
-		if( spriteId != scene->sprites[i]->id ) {
+		if( strcmp( spriteId, scene->sprites[i]->id ) != 0 ) {
 			continue;
 		}
 
