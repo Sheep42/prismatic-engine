@@ -29,7 +29,7 @@ typedef struct SpriteFn SpriteFn;
 typedef struct PrismSprite {
 	string id;
 	LCDSprite* sprite;
-	LCDBitmap* img;
+	LCDBitmap** imgs;
 	PrismAnimation* animation;
 	void ( *update )( PrismSprite*, float );
 	void ( *destroy )( PrismSprite* );
@@ -50,15 +50,14 @@ typedef struct PrismAnimation {
 } PrismAnimation;
 
 typedef struct SpriteFn {
-	// Create a new Sprite from the given path.
-	// 
-	// This creates a static Sprite with no Animation, simply setting 
-	// the underlying LCDSprite* image
+	// Create a new Sprite from the given paths
 	// 
 	// ----
 	// 
-	// string path
-	PrismSprite* ( *newFromPath )( string );
+	// string* paths
+	// 
+	// size_t pathCount - The length of paths
+	PrismSprite* ( *newFromPath )( string*, size_t );
 
 	// Create a new Sprite from an array of LCDBitmap*s
 	// 
@@ -116,15 +115,6 @@ typedef struct SpriteFn {
 	// 
 	// size_t pathCount - The legnth of the paths array
 	LCDBitmap** ( *loadImages )( string*, size_t );
-
-	// Load a single LCDBitmap* from the given path
-	// 
-	// Caller is responsible for freeing the resulting image.
-	// 
-	// ----
-	// 
-	// string path - Path the image on the file system. Do not include extension.
-	LCDBitmap* ( *loadImage )( string );
 
 	// Set the PrismAnimation* for a PrismSprite* manually
 	// 

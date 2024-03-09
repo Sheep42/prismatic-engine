@@ -55,7 +55,8 @@ SceneManager* initScenes() {
     s = prismaticSprite->newFromImages( images, 0, 0.5f );
     s->update = spr_upd;
 
-    s2 = prismaticSprite->newFromPath( "assets/images/entities/player/player" );
+    string paths2[1] = { "assets/images/entities/player/player" };
+    s2 = prismaticSprite->newFromPath( paths2, 1 );
     s2->update = spr2_upd;
 
     sc = prismaticScene->new( "Scene 1" );
