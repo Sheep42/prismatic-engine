@@ -35,6 +35,7 @@ project(${PLAYDATE_GAME_NAME} C ASM)
 set(SOURCE_FILES
     src/main.c
     src/prismatic/prismatic.c
+    src/prismatic/utils/utils.c
     src/prismatic/logger/logger.c
     src/prismatic/scene/scene.c
     src/prismatic/sprite/sprite.c
@@ -46,6 +47,7 @@ set(SOURCE_FILES
 # Set header files
 set(HEADER_FILES
     src/prismatic/prismatic.h
+    src/prismatic/utils/utils.h
     src/prismatic/logger/logger.h
     src/prismatic/scene/scene.h
     src/prismatic/sprite/sprite.h
