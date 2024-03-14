@@ -25,10 +25,6 @@ typedef enum {
 	PrismTransitionType_RTLIn,
 	// Right-to-left draw out effect
 	PrismTransitionType_RTLOut,
-	// Grow in from edges
-	PrismTransitionType_GrowFromEdge,
-	// Shrink out to edges
-	PrismTransitionType_ShrinkToEdge,
 	// Grow out from center
 	PrismTransitionType_GrowFromCenter,
 	// Shrink in to center

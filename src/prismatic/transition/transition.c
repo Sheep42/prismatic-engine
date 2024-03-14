@@ -17,8 +17,6 @@ static void LTRIn_update( PrismTransition* self, float delta );
 static void LTROut_update( PrismTransition* self, float delta );
 static void RTLIn_update( PrismTransition* self, float delta );
 static void RTLOut_update( PrismTransition* self, float delta );
-static void GrowFromEdge_update( PrismTransition* self, float delta );
-static void ShrinkToEdge_update( PrismTransition* self, float delta );
 static void GrowFromCenter_update( PrismTransition* self, float delta );
 static void ShrinkToCenter_update( PrismTransition* self, float delta );
 
@@ -57,19 +55,6 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
             transition->_exp1 = 0;
             initializeHide( transition );
             transition->update = RTLIn_update;
-            break;
-
-        case PrismTransitionType_ShrinkToEdge:
-            transition->_exp1 = 0;
-            transition->_exp2 = 7;
-            initializeShow( transition );
-            transition->update = ShrinkToEdge_update;
-            break;
-        case PrismTransitionType_GrowFromEdge:
-            transition->_exp1 = 0;
-            transition->_exp2 = 7;
-            initializeHide( transition );
-            transition->update = GrowFromEdge_update;
             break;
 
         case PrismTransitionType_ShrinkToCenter:
@@ -286,60 +271,6 @@ static void RTLOut_update( PrismTransition* self, float delta ) {
     if( self->_exp1 < 8 ) {
         self->_exp1++;
     }
-
-    if( done ) {
-        completeTransition( self );
-    }
-
-}
-
-static void GrowFromEdge_update( PrismTransition* self, float delta ) {
-
-    bool done = true;
-
-    for( uint8_t i = 0; i < 8; i++ ) {
-
-        if( self->pattern[i] < PRISM_TRANSITION_MAX ) { 
-            self->pattern[i] = self->pattern[i] + ( prismaticUtils->uint8_pow( 2, self->_exp1 ) + prismaticUtils->uint8_pow( 2, self->_exp2 ) );
-
-            if( self->pattern[i] < PRISM_TRANSITION_MAX ) { 
-                done = false;
-            }
-        } else {
-            self->pattern[i] = PRISM_TRANSITION_MAX;
-        }
-
-    }
-
-    if( self->_exp1 < 3 ) self->_exp1++;
-    if( self->_exp2 > 4 ) self->_exp2--;
-
-    if( done ) {
-        completeTransition( self );
-    }
-
-}
-
-static void ShrinkToEdge_update( PrismTransition* self, float delta ) {
-
-    bool done = true;
-
-    for( uint8_t i = 0; i < 8; i++ ) {
-
-        if( self->pattern[i] > PRISM_TRANSITION_MIN ) { 
-            self->pattern[i] = self->pattern[i] - ( prismaticUtils->uint8_pow( 2, self->_exp1 ) + prismaticUtils->uint8_pow( 2, self->_exp2 ) ); 
-
-            if( self->pattern[i] > PRISM_TRANSITION_MIN ) { 
-                done = false;
-            }
-        } else {
-            self->pattern[i] = PRISM_TRANSITION_MIN;
-        }
-
-    }
-
-    if( self->_exp1 < 3 ) self->_exp1++;
-    if( self->_exp2 > 4 ) self->_exp2--;
 
     if( done ) {
         completeTransition( self );
