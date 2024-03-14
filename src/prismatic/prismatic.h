@@ -8,6 +8,11 @@
 	#include "pd_api.h"
 #endif
 
+#ifndef UTILS_INCLUDED
+    #define UTILS_INCLUDED
+    #include "utils/utils.h"
+#endif
+
 #ifndef GAME_INCLUDED
 	#define GAME_INCLUDED
 	#include "../core/game.h"
@@ -33,11 +38,15 @@
 	#include "state/state_machine.h"
 #endif
 
+#ifndef TRANSITION_INCLUDED
+	#define TRANSITION_INCLUDED
+	#include "transition/transition.h"
+#endif
+
 #ifndef LOGGER_INCLUDED
 	#define LOGGER_INCLUDED
 	#include "logger/logger.h"
 #endif
-
 
 void initEngine( PlaydateAPI* );
 void updateEngine( float );

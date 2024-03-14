@@ -76,7 +76,7 @@ SceneManager* initScenes() {
     sm = prismaticSceneManager->new( sc );
     sm->destroy = sm_destroy;
 
-    prismaticSceneManager->addScene( sm, sc2 );
+    prismaticSceneManager->add( sm, sc2 );
 
     return sm;
 
