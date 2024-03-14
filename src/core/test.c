@@ -2,28 +2,70 @@
 #include "../prismatic/prismatic.h"
 
 static LCDBitmap** images;
+static float e = 0.0f;
+static LCDBitmap* bg;
+static bool bgGot = false;
+static SceneManager* sm;
+static PrismTransition* transition;
 
+static void spr_upd( PrismSprite* self, float delta );
+static void spr2_upd( PrismSprite* self, float delta );
+static void tr_complete( PrismTransition* self );
+static void sc_enter( Scene* self );
+static void sc2_enter( Scene* self );
+static void sc_upd( Scene* self, float delta );
+static void sc_draw( Scene* self, float delta );
+static void sm_destroy( SceneManager* sceneManager );
+
+//////////////
+// Sprite 1 //
+//////////////
 static void spr_upd( PrismSprite* self, float delta ) {
-    // self->animation->looping = false;
-    prismaticAnimation->play( self->animation, delta );
-    // size_t frames[3] = { 0, 3, 1 };
-    // prismaticAnimation->playInOrder( self->animation, delta, frames, 3 );
-    // sprites->moveBy( self->sprite, 1, 1 );
+    prismaticAnimation->play( self->animation, delta ); // Play Sprite 1's animation every time we run sprite->update()
 }
 
+//////////////
+// Sprite 2 //
+//////////////
 static void spr2_upd( PrismSprite* self, float delta ) {
-    sprites->moveBy( self->sprite, 1, 1 );
+    sprites->moveBy( self->sprite, 1, 1 ); // Move Sprite 2 by 1px every time we run sprite->update()
 }
 
+////////////////
+// Transition //
+////////////////
+static void tr_complete( PrismTransition* self ) {
+    prismaticSceneManager->changeSceneByName( sm, "Scene 2" ); // Change the current Scene to Scene 2
+}
+
+
+/////////////
+// Scene 1 //
+/////////////
 static void sc_enter( Scene* self ) {
-    PrismSprite* s = prismaticScene->get( self, "spr1" );
-    sprites->moveTo( s->sprite, 50, 50 );
-    // sprites->moveTo( self->sprites[1]->sprite, 0, 0 );
-}
+    PrismSprite* s = prismaticScene->get( self, "spr1" ); // Get Sprite 1 from the Scene
+    sprites->moveTo( s->sprite, 50, 50 ); // Set Sprite 1's position to 50, 50
 
-static void sc2_enter( Scene* self ) {}
+    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_ShrinkToCenter ); // Initialize a new ShrinkToCenter Transition that animates in intervals of 0.05 seconds
+    transition->complete = tr_complete; // Set the Transition's complete method to tr_complete
+}
 
 static void sc_upd( Scene* self, float delta ) {
+
+    e += delta; // Keep track of total seconds elapsed with each frame
+    if( e >= 5.0f && !bgGot ) {  // When we hit 5 seconds for the first time
+        bg = graphics->copyBitmap( graphics->getDisplayBufferBitmap() ); // Take a snapshot of the current frame and copy it into bg
+
+        PrismSprite* sp1 = prismaticScene->get( self, "spr1" ); // Get Sprite 1 from the Scene
+        prismaticScene->remove( self, sp1 ); // Remove Sprite 1 from the Scene
+        transition->image = bg; // Set the Transition's image to our snapshot
+
+        bgGot = true; // Flag that we've been here already
+    }
+
+    if( bgGot ) {
+        prismaticTransition->play( transition, delta ); // Play the transition
+    }
 
 }
 
@@ -31,18 +73,35 @@ static void sc_draw( Scene* self, float delta ) {
 
 }
 
+
+/////////////
+// Scene 2 //
+/////////////
+static void sc2_enter( Scene* self ) {}
+
+///////////////////
+// Scene Manager //
+///////////////////
 static void sm_destroy( SceneManager* sceneManager ) {
-    prismaticSprite->freeImages( images );
+    prismaticTransition->delete( transition ); // Destroy the Transition and free its internals
+    graphics->freeBitmap( bg ); // Explicitly free the bg snapshot that we took in Scene 1
+    prismaticSprite->freeImages( images ); // Explicitly free the images array that we used to create Sprite 1
 }
 
+//////////////////////////////////////////
+// Set up the Scenes - Called from game //
+//////////////////////////////////////////
 SceneManager* initScenes() {
 
     PrismSprite* s;
     PrismSprite* s2;
+
     Scene* sc;
     Scene* sc2;
-    SceneManager* sm;
 
+    /////////////////////////////////
+    // Load Bitmaps from path list //
+    /////////////////////////////////
     string paths[4] = { 
         "assets/images/entities/test/anim-1",
         "assets/images/entities/test/anim-2",
@@ -52,30 +111,70 @@ SceneManager* initScenes() {
 
     images = prismaticSprite->loadImages( paths, 4 );
 
-    s = prismaticSprite->newFromImages( images, 0, 0.5f );
-    s->update = spr_upd;
 
+    ///////////////////////////////////////////
+    // Create Sprite 1 from loaded images // //
+    ///////////////////////////////////////////
+    s = prismaticSprite->newFromImages( images, 0, 0.10f );
+    s->update = spr_upd; // Set Sprite 1's update method
+
+
+    ////////////////////////////////////////
+    // Create Sprite 2 directly from path //
+    ////////////////////////////////////////
     string paths2[1] = { "assets/images/entities/player/player" };
     s2 = prismaticSprite->newFromPath( paths2, 1 );
-    s2->update = spr2_upd;
+    s2->update = spr2_upd; // Set Sprite 2's update method
 
+
+    ////////////////////
+    // Create Scene 1 //
+    ////////////////////
     sc = prismaticScene->new( "Scene 1" );
-    sc2 = prismaticScene->new( "Scene 2" );
 
+    ///////////////////////////
+    // Set Scene 1's methods //
+    ///////////////////////////
     sc->enter = sc_enter;
     sc->update = sc_upd;
     sc->draw = sc_draw;
 
+
+    ////////////////////
+    // Create Scene 2 //
+    ////////////////////
+    sc2 = prismaticScene->new( "Scene 2" );
+
+    ///////////////////////////
+    // Set Scene 2's methods //
+    ///////////////////////////
     sc2->enter = sc2_enter;
     sc2->update = sc_draw;
     sc2->draw = sc_draw;
 
+
+    /////////////////////////////
+    // Add Sprite 1 to Scene 1 //
+    /////////////////////////////
     prismaticScene->add( sc, "spr1", s );
+
+
+    /////////////////////////////
+    // Add Sprite 2 to Scene 2 //
+    /////////////////////////////
     prismaticScene->add( sc2, "spr2", s2 );
 
-    sm = prismaticSceneManager->new( sc );
-    sm->destroy = sm_destroy;
 
+    ///////////////////////////////////////////////////////
+    // Create the Scene Manager, with Scene 1 as default //
+    ///////////////////////////////////////////////////////
+    sm = prismaticSceneManager->new( sc );
+    sm->destroy = sm_destroy; // Set the Scene Manager's destroy method
+
+
+    ///////////////////////////////////////
+    // Add Scene 2 to the Scene Manager  //
+    ///////////////////////////////////////
     prismaticSceneManager->add( sm, sc2 );
 
     return sm;
