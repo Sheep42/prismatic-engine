@@ -40,10 +40,12 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
         case PrismTransitionType_LTROut:
             initializeShow( transition );
             transition->update = LTROut_update;
+            transition->_exp1 = 7;
             break;
         case PrismTransitionType_LTRIn:
             initializeHide( transition );
             transition->update = LTRIn_update;
+            transition->_exp1 = 7;
             break;
 
         case PrismTransitionType_RTLOut:
@@ -169,7 +171,6 @@ static void completeTransition( PrismTransition* transition ) {
 }
 
 // built-in type update functions
-
 static void LTRIn_update( PrismTransition* self, float delta ) {
 
     bool done = true;

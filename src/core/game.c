@@ -24,7 +24,7 @@ static void init() {
 
     prismaticLogger->info( "init" );
     sm = initScenes();
-    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_RTLOut );
+    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_GrowFromCenter );
 
 }
 
