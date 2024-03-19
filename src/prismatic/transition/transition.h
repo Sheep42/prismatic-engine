@@ -98,7 +98,7 @@ typedef struct TransitionFn {
 	void ( *play )( PrismTransition*, float );
 	// Complete a PrismTransition
 	// 
-	// You will ned to implement your own completion state, and call this when
+	// You will need to implement your own completion state, and call this when
 	// you implement a custom transition update function
 	// 
 	// PrismTransition* transition
