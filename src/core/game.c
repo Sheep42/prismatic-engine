@@ -1,11 +1,7 @@
-#include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "time.h"
-#include "test.h"
+#include "customscenes.h"
 #include "../prismatic/prismatic.h"
 
 static void init( void );
