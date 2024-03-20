@@ -62,10 +62,10 @@ EQUALS = =
 CMAKE_PROJECT_NAME = prismatic-game
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dan/Projects/Playdate/prismatic-game
+CMAKE_SOURCE_DIR = ~/Projects/Playdate/prismatic-game
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dan/Projects/Playdate/prismatic-game
+CMAKE_BINARY_DIR = ~/Projects/Playdate/prismatic-game
 
 #=============================================================================
 # Targets provided globally by CMake.

@@ -27,7 +27,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 # Game Name Customization
 set(PLAYDATE_GAME_NAME prismatic-game)
 set(PLAYDATE_GAME_DEVICE prismatic-game_DEVICE)
-set(PROJECT_DIR "/home/dan/Projects/Playdate/prismatic-game/")
+set(PROJECT_DIR "~/Projects/Playdate/prismatic-game/")
 
 project(${PLAYDATE_GAME_NAME} C ASM)
 
