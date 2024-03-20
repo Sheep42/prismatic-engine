@@ -935,7 +935,14 @@ SceneManager* initScenes() {
 
 Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`.
 
+Optionally rename the `prismatic-game` directory
+
 Find all instances of `~/Projects/Playdate/prismatic-game/` that appear in the project directory, and replace them with the path to your project.
+
+```bash
+cd /path/to/project/
+find ./ -type f -exec sed -i 's#~/Projects/Playdate/prismatic-game/#/path/to/project/#g' {} +
+`
 
 ### Running on the Simulator
 
