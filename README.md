@@ -931,7 +931,7 @@ SceneManager* initScenes() {
 
 ## Building / Running a Game
 
-**Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. Make sure to update accordingly if running elsewhere.
+**Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. You'll need to update accordingly if building on Windows or Mac.
 
 Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`.
 
@@ -964,4 +964,164 @@ You'll see a `build` directory should be created. In that directory you will see
 
 ## Type Documentation
 
-TODO
+### States & StateMachines
+
+`State`s are members of a `StateMachine`, in charge of handling specific game logic. 
+
+#### State
+
+**Type Name**: `State`
+
+- `const char* name`: A unique identifier for the State
+
+- `void (*enter)( void )`: The function that is fired when entering the State
+
+- `void (*exit)( void )`: The function that is fired when exiting the State
+
+- `void (*tick)( float )`: The function that is fired continuously while the State is active
+
+	- **Param**: `float delta` - The time, in seconds, since the last tick
+
+#### StateMachine
+
+**Type Name**: `StateMachine`
+
+- `State** states`: The array of `State`s added to the `StateMachine`
+
+- `size_t totalStates`: The length of `stateMachine->states`
+
+- `State* defaultState`: The default `State` for the `StateMachine`
+
+- `State* previousState`: The previously active `State`
+
+- `State* currentState`: The currently active `State`
+
+
+**Example**:
+
+```C
+// game.c
+// Define our custom functions
+static void enter( void );
+static void exit( void );
+static void tick( float );
+
+// Define static vars
+static StateMachine* sm;
+static State* s;
+
+static void init() {
+	
+	// Create a State named "State 1"
+	s = prismaticState->new( "State 1" );
+	if( s == NULL ) {
+		prismaticLogger->error( "Could not create State" );
+		return;
+	}
+
+	// Assign the State's methods to our custom logic
+	s->enter = enter;
+	s->exit = exit;
+	s->update = tick;
+
+	// Create a StateMachine and assign the State as default
+	sm = prismaticStateMachine->new( s );
+	if( s == NULL ) {
+		prismaticLogger->error( "Could not create StateMachine" );
+		return;
+	}
+
+}
+
+static void update( float delta ) {
+	// Update the StateMachine
+	// This runs s->tick and passes along delta
+	prismaticStateMachine->update( sm, delta );
+}
+
+static void destroy() {
+	// Free the StateMachine
+	// This will also free its States and their interal allocated memory
+	prismaticStateMachine->delete( sm );
+}
+
+static void enter() {
+	prismaticLogger->info( "Enter" );
+}
+
+static void exit() {
+	prismaticLogger->info( "Exit" );
+}
+
+static void tick( float delta ) {
+	prismaticLogger->infof( "%f", delta );
+}
+
+```
+
+### Scenes & SceneManagers
+
+#### Scene
+
+**Type Name**: `Scene`
+
+- `string name`: A unique identifier for the `Scene`
+
+- `PrismSprite** sprites`: The array of `PrismSprite`s currently added to the `Scene`
+
+- `size_t totalSprites`: The length of `scene->sprites`
+
+- `bool isActive`: A flag for whether the `Scene` is active or not
+
+- `struct SceneManager* sceneManager`: The `SceneManager` that the `Scene` belongs to
+
+- `void ( *enter )( struct Scene* )`:  The function that runs when the `Scene` is entered
+
+	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the enter function
+
+- `void ( *update )( struct Scene*, float )`: The `Scene`'s update function
+
+	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the update function
+	- **Param**: `float delta` - The time, in seconds, since the last update
+
+- `void ( *draw )( struct Scene*, float )`: The `Scene`'s draw function
+
+	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the draw function
+	- **Param**: `float delta` - The time, in seconds, since the last draw
+
+- `void ( *exit )( struct Scene* )`: The function that runs when the `Scene` is exited
+
+	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the exit function
+
+- `void ( *destroy )( struct Scene* )`: The function that runs just before the `Scene` is destroyed
+
+	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the destroy function
+
+#### SceneManager
+
+**Type Name**: `SceneManager`
+
+- `Scene** scenes`: The array of `Scene`'s currently added to the `SceneManager`
+
+- `int totalScenes`: The length of `sceneManager->scenes`
+
+- `Scene* defaultScene`: The default `Scene` for the `SceneManager`
+
+- `Scene* currentScene`: The currently active `Scene`
+
+- `Scene* previousScene`: The previously active `Scene`
+
+- `void (*destroy)( struct SceneManager* )`: The function that runs just before the `SceneManager` is destroyed
+
+	- **Param**: `SceneManager* self` - A reference to the `SceneManager` for use inside the destroy function
+
+**Example**: See [demo](#creating-a-game)
+
+### Sprites
+
+
+### Transitions
+
+
+
+### Strings
