@@ -195,7 +195,9 @@ Provides an interface for creating, managing, and deleting Sprites
 // string* paths
 // 
 // size_t pathCount - The length of paths
-PrismSprite* ( *newFromPath )( string*, size_t );
+// 
+// float playSpeed - The number of seconds elapsed between frame changes
+PrismSprite* ( *newFromPath )( string*, size_t, float );
 
 // Create a new Sprite from an array of LCDBitmap*s
 // 
@@ -268,7 +270,7 @@ void ( *setAnimation )( PrismSprite*, PrismAnimation* );
 
 ```C
 string* paths[1] = { "assets/images/my_sprite" };
-PrismSprite* sprite = prismaticSprite->newFromPath( paths, 1 );
+PrismSprite* sprite = prismaticSprite->newFromPath( paths, 1, 0 );
 ```
 
 #### prismaticAnimation
@@ -868,7 +870,7 @@ SceneManager* initScenes() {
 	// Create Sprite 2 directly from path //
 	////////////////////////////////////////
 	string paths2[1] = { "assets/images/entities/player/player" };
-	s2 = prismaticSprite->newFromPath( paths2, 1 );
+	s2 = prismaticSprite->newFromPath( paths2, 1, 0 );
 	s2->update = spr2_update; // Set Sprite 2's update method
 
 
@@ -1026,7 +1028,7 @@ static void init() {
 
 	// Create a StateMachine and assign the State as default
 	sm = prismaticStateMachine->new( s );
-	if( s == NULL ) {
+	if( sm == NULL ) {
 		prismaticLogger->error( "Could not create StateMachine" );
 		return;
 	}
@@ -1034,15 +1036,27 @@ static void init() {
 }
 
 static void update( float delta ) {
+
+	if( sm == NULL ) {
+		return;
+	}
+
 	// Update the StateMachine
 	// This runs s->tick and passes along delta
 	prismaticStateMachine->update( sm, delta );
+
 }
 
 static void destroy() {
+
+	if( sm == NULL ) {
+		return;
+	}
+
 	// Free the StateMachine
 	// This will also free its States and their interal allocated memory
 	prismaticStateMachine->delete( sm );
+
 }
 
 static void enter() {
@@ -1117,11 +1131,304 @@ static void tick( float delta ) {
 
 **Example**: See [demo](#creating-a-game)
 
-### Sprites
+### Sprites & Animations
 
+**Type Name**: `PrismSprite`
+
+- `string id`: A unique identifier for the `Sprite`
+
+- `LCDSprite* sprite`: The underlying Playdate `LCDSprite*`
+
+	- Used for movement, collision, etc
+
+- `LCDBitmap** imgs`: For `Sprite`s with a `PrismAnimation`, the array of `LCDBitmap*`s that make up the animation
+
+- `PrismAnimation* animation`: The `Sprite`'s animation - Will be NULL if the sprite has 1 or less images
+
+- `void ( *update )( PrismSprite*, float )`: The `Sprite`'s update function
+
+	- **Param**: `PrismSprite* self` - A reference to the `PrismSprite` for use inside the update function
+	- **Param**: `float delta` - The time, in seconds, since the last update
+
+- `void ( *destroy )( PrismSprite* )`: The function that runs just before the `Sprite` is destroyed
+
+	- **Param**: `PrismSprite* self` - A reference to the `PrismSprite` for use inside the destroy function
+
+
+**Type Name**: `PrismAnimation`
+
+- `LCDBitmap** frames`: The array of `LCDBitmap*`s that make up the `PrismAnimation`'s frames
+
+- `size_t frameCount`: The length of `animation->frames`
+
+- `size_t currentFrame`: The `PrismAnimation`'s current frame index
+
+- `size_t customOrderPtr`: Internal index used to keep track of frames when a custom play order is specified
+
+- `float playSpeed`: The number of seconds between each frame
+
+- `PrismSprite* sprite`: The `PrismSprite` associated with the `PrismAnimation`
+
+- `bool looping`: Is this a looping animation? - Default: True
+
+- `bool finished`: Is the animation finished? - Always false for looping animations
+
+- `bool paused`: Flag used to pause the `PrismAnimation` - Default: False
+
+- `float timer`: Internal timer used for handling frame changes
+
+- `void ( *complete )( PrismAnimation* )`: Fires every time the animation reaches it's final frame
+
+	- **Param**: `PrismAnimation* self` - A reference to the `PrismAnimation` for use inside the complete function
+
+
+**Example**:
+
+```C
+// game.c
+// Define our custom functions
+static void sprite_update( float );
+
+// Define static vars
+static PrismSprite* s;
+
+static void init() {
+	
+	// Create a new Sprite with an Animation that has a .1 second delay between each frame
+	string paths[2] = { "assets/images/my_sprite_frame1", "assets/images/my_sprite_frame2" };
+	s = prismaticSprite->newFromPath( paths, 2, 0.10f );
+	
+	if( s != NULL ) {
+		// Set the Sprite's update function to our custom function
+		s->update = sprite_update;
+	}
+
+}
+
+static void update( float delta ) {
+
+	// Run s->update() if Sprite and its update function are not NULL
+	if( s != NULL && s->update != NULL ) {
+		s->update( s, delta );
+	}
+
+}
+
+static void destroy() {
+	// Free the Sprite when the game is shut down
+	prismaticSprite->delete( s );
+}
+
+static void sprite_update( PrismSprite* self, float delta ) {
+	// Move the Sprite by (1,1) each pass through the update loop
+	sprites->moveBy( self->sprite, 1, 1 );
+	
+	// Play Sprite's animation every time we run sprite->update()
+	prismaticAnimation->play( self->animation, delta );
+}
+
+```
 
 ### Transitions
 
+Transitions are effects that can be applied to any `LCDBitmap*`. The primary intention for transitions is to be used as transitions between scenes, but they could also be used as effects applied to Sprite images.
 
+A transition can only be applied to a single `LCDBitmap*` image, not directly to a `PrismSprite` or a `PrismAnimation`.
+
+The fundamental concept behind how transitions work is this: 
+
+- Obtain a static image (i.e.: a screen snapshot)
+
+- Position the static image at the transition's (x,y) coordinates
+
+- Start with an initial LCDPattern state (usually fully visible or fully hidden)
+
+- On each pass through the transition's update function, operate on the LCDPattern to change its appearance
+
+- On each pass through the transition's draw function:
+
+	- Turn the LCDPattern into an image and store it in `transition->mask`
+	- Apply `transition->mask` to `transition->image` as a bitmap mask
+	- Store the rendered result in `transition->_rendered`
+	- Draw `transition->_rendered` to the screen
+
+
+**Type Name**: `PrismTransition`
+
+- `int type`: The `PrismTransitionType` for the transition
+
+- `float speed`: The speed at which the transition should play, in seconds
+
+- `float elapsed`: Internal timer used to keep track of playing the transition
+
+- `float runTime`: A running total of the time a transition has been playing
+
+- `int x`: The x position of the transition image
+
+- `int y`: The y position of the transition image 
+
+- `LCDBitmapFlip flipped`: The flip value of the transition image
+
+- `LCDPattern pattern`: The pattern used to generate the transition
+
+- `LCDBitmap* mask`: Internal image used when converting the pattern into a bitmap mask
+
+- `LCDBitmap* image`: The base image to apply the transition on
+
+- `LCDBitmap* _rendered`: Internal image used to store the final render for each step of the transition
+
+- `bool finished`: Is the transition finished?
+
+- `uint8_t _exp1`: Internal value for storing exponents used in 8-bit math
+
+- `uint8_t _exp2`: Internal value for storing exponents used in 8-bit math
+
+- `void ( *enter )( struct PrismTransition* )`: Function that runs when the transition is entered - If you use a pre-defined transition type, this will be set for you
+
+	- **Param**: `PrismTransition* self` - A reference to the `PrismTransition` for use inside the enter function
+
+- `void ( *update )( struct PrismTransition*, float )`: The transition's update function - If you use a pre-defined transition type, this will be set for you
+	
+	- **Param**: `PrismTransition* self` - A reference to the `PrismTransition` for use inside the update function
+	- **Param**: `float delta` - The time, in seconds, since the last update
+
+- `void ( *draw )( struct PrismTransition*, float )`: The transition's draw function - If you use a pre-defined transition type, this will be set for you
+
+	- **Param**: `PrismTransition* self` - A reference to the `PrismTransition` for use inside the draw`function
+	- **Param**: `float delta` - The time, in seconds, since the last draw
+
+- `void ( *complete )( struct PrismTransition* )`: Fires when a transition has completed - If you use a pre-defined transition type, this will be set for you
+
+	- **Param**: `PrismTransition* self` - A reference to the `PrismTransition` for use inside the complete function
+
+#### Transition Type Values
+
+- `PrismTransitionType_LTRIn`: Left-to-right draw in effect
+
+- `PrismTransitionType_LTROut`: Left-to-right draw out effect
+
+- `PrismTransitionType_RTLIn`: Right-to-left draw in effect
+
+- `PrismTransitionType_RTLOut`: Right-to-left draw out effect
+
+- `PrismTransitionType_GrowFromCenter`: Grow out from center
+
+- `PrismTransitionType_ShrinkToCenter`: Shrink in to center
+
+- `PrismTransitionType_Custom`: User-defined effect - You are repsonsible for implementation
+
+#### Custom Transitions
+
+As outlined above, transitions are essentially controllers to create an animated `LCDPattern`. This is done via constant updates in `transition->update` and `transition->draw`.
+
+In order to create a custom transition animation, you will need to have a good understanding of how `LCDPattern`s work, and some understanding of binary math.
+
+There is not much documentation on `LCDPattern` from Playdate, so I will ouline my understanding of it here.
+
+`LCDPattern` is an alias for `uint8_t[16]`. A `uint8_t` is an 8-bit unsigned integer or, in other words, a value from 0-255. Since it's an 8-bit int, we can easily represent its values with hex (0x00-0xFF) or binary (b00000000-b11111111).
+
+If you are going to create a pattern by hand, I find the binary representation to be the easiest to work with since it (almost) visually represents what you will see in the pattern.
+
+If you are creating a math-based transition effect, then you can store the numbers however makes sense to you.
+
+The way that the pattern works is that the first 8 elements in the array represent the pattern bitmap, and the last 8 elements in the array represent "opacity". Since the playdate is 1-bit, it's not true opacity, but you can think of it in a similar way. It is basically an additional bitmap mask to be applied over the pattern.
+
+So, to define a pattern where the image being masked is fully visible, we'd set all elements to 255, 0xFF, or b11111111.
+
+```C
+LCDPattern pattern = {
+	// bitmap
+	b11111111,b11111111,b11111111,b11111111,
+	b11111111,b11111111,b11111111,b11111111,
+	// mask
+	b11111111,b11111111,b11111111,b11111111,
+	b11111111,b11111111,b11111111,b11111111,
+};
+```
+
+And conversely, to define a fully invisible image we'd leave the mask bits high (255) and set the bitmap bits low (0).
+
+```C
+LCDPattern pattern = {
+	// bitmap
+	b00000000,b00000000,b00000000,b00000000,
+	b00000000,b00000000,b00000000,b00000000,
+	// mask
+	b11111111,b11111111,b11111111,b11111111,
+	b11111111,b11111111,b11111111,b11111111,
+};
+```
+
+To explain how building a pattern works, I will defer to one of the built-in patterns: `GrowFromCenter`
+
+```C
+transition->_exp1 = 3;
+transition->_exp2 = 4;
+
+...
+
+static void GrowFromCenter_update( PrismTransition* self, float delta ) {
+
+    bool done = true;
+
+    for( uint8_t i = 0; i < 8; i++ ) {
+        
+        if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+            self->pattern[i] += ( prismaticUtils->uint8_pow( 2, self->_exp1 ) + prismaticUtils->uint8_pow( 2, self->_exp2 ) );
+
+            if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+                done = false;
+            }
+        } else {
+            self->pattern[i] = PRISM_TRANSITION_MAX;
+        }
+
+    }
+
+    if( self->_exp1 > 0 ) self->_exp1--;
+    if( self->_exp2 < 7 ) self->_exp2++;
+
+    if( done ) {
+        prismaticTransition->complete( self );
+    }
+
+}
+```
+
+What's going on in the above is as follows:
+
+- Set `_exp1` to 3 and `_exp2` to 4
+
+- Each pass through update:
+
+	- Loop through the first 8 elements of the pattern
+		- Check if the current element is less than 255
+		- If so, then update its value to `current_value + 2^_exp1 + 2^_exp2`
+		- Check if each value has reached 255, if not, keep updating until they all reach 255
+	- Decrement `_exp1`, unless it has already reached 0
+	- Increment `_exp2`, unless it has already reached 7
+	- If all 8 elements have reached 255 complete the transition (stop running update)
+
+The math works like this, I'm only showing a single number for simplicity:
+
+- We have a binary number starting at 0: `x = 00000000`
+
+- In order to fill out the number from the center we start at bits 3 and 4
+
+- On our first pass, we say `x = 0 + (2^3) + (2^4)`, and we end up with `x = 0 + 8 + 16` or `x = 24`
+
+	- 24 in binary is `00011000`, we've filled out the 2 center bits!
+
+- Next, we decrement our first exponent to move left one bit, and increment our second one to move right one bit.
+
+- On the next pass we say `x = 24 + (2^2) + (2^5)`, and we end up with `x = 24 + 4 + 32` or `x = 60`
+
+	- 60 in binary is `00111100`, we've got the next two 
+
+- Continuing down this path will eventually lead to 255 or `11111111` at which point the transition will complete
 
 ### Strings
+
+**Type Name**: `string`
+
+A `string` is simply an alias for `char*`, for convenience purposes, and can be used interchangably with `char*` and `const char*`.
