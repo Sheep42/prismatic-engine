@@ -6,7 +6,7 @@
 #include "sprite.h"
 
 static LCDSprite* newLCDSprite( LCDBitmap* image );
-static PrismSprite* newFromPath( string* paths, size_t pathCount );
+static PrismSprite* newFromPath( string* paths, size_t pathCount, float playSpeed );
 static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float playSpeed );
 static void deleteSprite( PrismSprite* sp );
 static void freeImages( LCDBitmap** images );
@@ -36,10 +36,9 @@ static LCDSprite* newLCDSprite( LCDBitmap* image ) {
 
 }
 
-static PrismSprite* newFromPath( string* path, size_t pathCount) {
+static PrismSprite* newFromPath( string* path, size_t pathCount, float playSpeed ) {
 
 	size_t start = 0;
-	float speed = 0;
 
 	LCDBitmap** imgs = loadImages( path, pathCount );
 	if( imgs == NULL ) {
@@ -47,7 +46,7 @@ static PrismSprite* newFromPath( string* path, size_t pathCount) {
 		return NULL;
 	}
 
-	PrismSprite* s = newFromImages( imgs, start, speed );
+	PrismSprite* s = newFromImages( imgs, start, playSpeed );
 	
 	if( s == NULL ) {
 		prismaticLogger->errorf( "Could not create Sprite from path '%s'", path );

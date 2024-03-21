@@ -57,7 +57,9 @@ typedef struct SpriteFn {
 	// string* paths
 	// 
 	// size_t pathCount - The length of paths
-	PrismSprite* ( *newFromPath )( string*, size_t );
+	// 
+	// float playSpeed - The number of seconds elapsed between frame changes
+	PrismSprite* ( *newFromPath )( string*, size_t, float );
 
 	// Create a new Sprite from an array of LCDBitmap*s
 	// 

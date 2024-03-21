@@ -129,7 +129,7 @@ SceneManager* initScenes() {
     // Create Sprite 2 directly from path //
     ////////////////////////////////////////
     string paths2[1] = { "assets/images/entities/player/player" };
-    s2 = prismaticSprite->newFromPath( paths2, 1 );
+    s2 = prismaticSprite->newFromPath( paths2, 1, 0 );
     s2->update = spr2_update; // Set Sprite 2's update method
 
 
