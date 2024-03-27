@@ -57,7 +57,7 @@ set(HEADER_FILES
 )
 
 # Glob all files in core game dir
-file(GLOB CORE "src/core/*.c" "src/core/*.h")
+file(GLOB CORE "src/core/*.c" "src/core/*.h" "src/core/**/*.c" "src/core/**/*.h")
 
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_executable(${PLAYDATE_GAME_DEVICE} ${SOURCE_FILES} ${HEADER_FILES} ${CORE})
