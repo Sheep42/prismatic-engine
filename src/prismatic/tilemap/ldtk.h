@@ -1,24 +1,15 @@
 #ifndef LDTK_H
 #define LDTK_H
 
-#ifndef PRISMATIC_INCLUDED
-	#define PRISMATIC_INCLUDED
-	#include "../../prismatic/prismatic.h"
+#ifndef PD_API_INCLUDED
+	#define PD_API_INCLUDED
+	#include "pd_api.h"
 #endif
 
-typedef struct LDtkTileMap {
-	string id;
-	string iid;
-	int worldX;
-	int worldY;
-	int width;
-	int height;	
-	LDtkTileMapRef* neighborLevels;
-	LDtkLayer* layers;
-	LCDBitmap* composite;
-	void ( *enter )( void );
-	void ( *exit )( void );
-} LDtkTileMap;
+#ifndef TEXT_INCLUDED
+	#define TEXT_INCLUDED
+	#include "../text/text.h"
+#endif
 
 typedef struct LDtkLayer {
 	string filename;
@@ -42,6 +33,20 @@ typedef struct LDtkTileMapRef {
 	string dir;
 } LDtkTileMapRef;
 
+typedef struct LDtkTileMap {
+	string id;
+	string iid;
+	int worldX;
+	int worldY;
+	int width;
+	int height;	
+	LDtkTileMapRef* neighborLevels;
+	LDtkLayer* layers;
+	LCDBitmap* composite;
+	void ( *enter )( void );
+	void ( *exit )( void );
+} LDtkTileMap;
+
 typedef struct LDtkMapManager {
 	LDtkTileMap** maps;
 	LDtkTileMap* currentMap;
@@ -57,14 +62,14 @@ typedef struct LDtkTileMapFn {
 	// ----
 	// 
 	// string path
-	LDtkTileMap* ( *newLDtkTileMap )( string );
+	LDtkTileMap* ( *new )( string );
 
 	// Delete the LDtkTileMap
 	//
 	// ----
 	//
 	// LDtkTileMap* map
-	void ( *deleteLDtkTileMap )( LDtkTileMap* );
+	void ( *delete )( LDtkTileMap* );
 } LDtkTileMapFn;
 
 typedef struct LDtkMapManagerFn {

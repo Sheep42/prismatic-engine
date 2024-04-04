@@ -43,6 +43,11 @@
 	#include "transition/transition.h"
 #endif
 
+#ifndef LDTK_INCLUDED
+	#define LDTK_INCLUDED
+	#include "tilemap/ldtk.h"
+#endif
+
 #ifndef LOGGER_INCLUDED
 	#define LOGGER_INCLUDED
 	#include "logger/logger.h"
