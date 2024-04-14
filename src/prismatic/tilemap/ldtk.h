@@ -73,6 +73,27 @@ typedef struct LDtkTileMapFn {
 } LDtkTileMapFn;
 
 typedef struct LDtkMapManagerFn {
+	// Add a map to the Map Manager
+	//
+	// ----
+	// 
+	// LDtkMapManager* mapManager
+	//
+	// LDtkTileMap* map
+	void ( *add )( LDtkMapManager*, LDtkTileMap* );
+
+	// Remove a map from the Map Manager
+	// 
+	// Does not free the map, it is up to the caller to free the map from
+	// memory
+	//
+	// ----
+	// 
+	// LDtkMapManager* mapManager
+	//
+	// string id - The map's Id or Iid
+	void ( *remove )( LDtkMapManager*, string );
+
 	// Get a map from the Map Manager by its Iid
 	//
 	// ----
@@ -100,6 +121,9 @@ typedef struct LDtkMapManagerFn {
 	//
 	// LDtkTileMap* map
 	void ( *changeMap )( LDtkTileMap* );
+
+	// Destroy the map manager and free all of its maps
+	void ( *destroy )();
 } LDtkMapManagerFn;
 
 extern const LDtkTileMapFn* prismaticTileMap;
