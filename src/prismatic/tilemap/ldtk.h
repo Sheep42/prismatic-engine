@@ -39,10 +39,12 @@ typedef struct LDtkTileMap {
 	int worldX;
 	int worldY;
 	int width;
-	int height;	
-	LDtkTileMapRef* neighborLevels;
-	LDtkLayer* layers;
+	int height;
+	LDtkTileMapRef** neighborLevels;
+	LDtkLayer** layers;
 	LCDBitmap* composite;
+	size_t _layerCount;
+	string _path;
 	void ( *enter )( void );
 	void ( *exit )( void );
 } LDtkTileMap;
@@ -56,8 +58,8 @@ typedef struct LDtkMapManager {
 typedef struct LDtkTileMapFn {
 	// Create a new LDtkTileMap from the path
 	//
-	// The path should point to an LDtk simple export JSON file in 
-	// a directory with all of its assets 
+	// The path should point to an LDtk simple export JSON directory 
+	// containing all of its assets 
 	//
 	// ----
 	// 
