@@ -50,10 +50,10 @@ typedef struct StringUtils {
 	//
 	// ---- 
 	//
-	// string target - The string that src should be added to 
+	// string* target - The string that src should be added to 
 	//
 	// string src - The string that should be concatenated to target
-	void ( *concat )( string, string );
+	void ( *concat )( string*, string );
 } StringUtils;
 
 extern const StringUtils* prismaticString;

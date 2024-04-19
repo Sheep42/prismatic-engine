@@ -59,7 +59,6 @@ static LDtkTileMap* newLDtkTileMap( string path ) {
 	// TODO: remove
 	// for( size_t i = 0; map->layers[i] != NULL; i++ ) {
 	// 	LDtkLayer* layer = map->layers[i];
-	// 	printf( "%s", layer->filename );
 	// 	graphics->drawBitmap( layer->image, 0, 0, kBitmapUnflipped );
 	// }
 

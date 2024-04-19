@@ -12,6 +12,7 @@
 #endif
 
 typedef struct LDtkLayer {
+	string name;
 	string filename;
 	int zIndex;
 	LCDBitmap* image;
@@ -40,8 +41,10 @@ typedef struct LDtkTileMap {
 	int worldY;
 	int width;
 	int height;
+	int** collision;
 	LDtkTileMapRef** neighborLevels;
 	LDtkLayer** layers;
+	LDtkEntity** entities;
 	LCDBitmap* composite;
 	size_t _layerCount;
 	string _path;
@@ -125,7 +128,7 @@ typedef struct LDtkMapManagerFn {
 	void ( *changeMap )( LDtkTileMap* );
 
 	// Destroy the map manager and free all of its maps
-	void ( *destroy )();
+	void ( *destroy )( void );
 } LDtkMapManagerFn;
 
 extern const LDtkTileMapFn* prismaticTileMap;

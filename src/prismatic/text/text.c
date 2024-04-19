@@ -16,7 +16,7 @@ static bool stringEquals( string str1, string str2 ) {
 	return strcmp( str1, str2 ) == 0;
 }
 
-static void stringConcat( string* target, const string src ) {
+static void stringConcat( string* target, string src ) {
 
 	size_t targetLen = strlen( *target );
 	*target = sys->realloc( *target, targetLen + strlen( src ) + 1 );
