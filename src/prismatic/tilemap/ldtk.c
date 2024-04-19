@@ -293,7 +293,13 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 	layer->filename = fileName;
 
 	// TODO: Error handling
-	layer->image = graphics->loadBitmap( layerPath, NULL );
+	string err = NULL;
+	layer->image = graphics->loadBitmap( layerPath, &err );
+
+	if( err != NULL ) {
+		prismaticLogger->errorf( "%s", err );
+	}
+
 	if( layer->image == NULL ) {
 		prismaticLogger->errorf( "Layer image at %s could not be loaded!", layerPath );
 	}
