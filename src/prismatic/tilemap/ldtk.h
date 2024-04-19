@@ -61,13 +61,16 @@ typedef struct LDtkMapManager {
 typedef struct LDtkTileMapFn {
 	// Create a new LDtkTileMap from the path
 	//
-	// The path should point to an LDtk simple export JSON directory 
+	// The path should point to an LDtk simple export directory 
 	// containing all of its assets 
 	//
 	// ----
 	// 
-	// string path
-	LDtkTileMap* ( *new )( string );
+	// string path - The path to the directory containing the LDtk Level export 
+	//
+	// string collistionLayer - The name of the csv file containing collision
+	// information
+	LDtkTileMap* ( *new )( string, string );
 
 	// Delete the LDtkTileMap
 	//

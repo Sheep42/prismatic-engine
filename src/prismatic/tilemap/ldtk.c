@@ -4,13 +4,16 @@
 #include "../prismatic.h"
 #include "ldtk.h"
 
-static LDtkTileMap* newLDtkTileMap( string path );
+static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer );
 static void deleteLDtkTileMap( LDtkTileMap* map );
 
 static LDtkTileMap* getMapByIid( string iid );
 static void changeMapByIid( string iid );
 static void changeMapByName( string id );
 static void changeMap( LDtkTileMap* map );
+
+static void parseCollision( SDFile* file, LDtkTileMap* map );
+static void stripNewlines( string str );
 
 static void decodeError( json_decoder* decoder, const char* error, int linenum );
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
@@ -25,25 +28,45 @@ static int readfile( void* readud, uint8_t* buf, int bufsize );
 
 // TileMap
 
-static LDtkTileMap* newLDtkTileMap( string path ) {
+static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer ) {
 
 	const string dataFile = "/data.json";
 	string trimmedPath = prismaticString->trimLast( path, '/' );
 
 	string dataPath = prismaticString->new( trimmedPath );
-	dataPath = sys->realloc( dataPath, strlen( trimmedPath ) + strlen( dataFile ) + 1 );
-	strcat( dataPath, dataFile );
+	prismaticString->concat( &dataPath, dataFile );
 
 	LDtkTileMap* map = calloc( 1, sizeof( LDtkTileMap ) );
 	json_reader* mapReader = calloc( 1, sizeof( json_reader ) );
 	json_decoder* mapDecoder = calloc( 1, sizeof( json_decoder ) );
-	SDFile* file = pd->file->open( dataPath, kFileRead );
+	SDFile* jsonFile = pd->file->open( dataPath, kFileRead );
+	SDFile* collisionFile = NULL;
+
+	if( jsonFile == NULL ) {
+		prismaticLogger->errorf( "Failed to open JSON at path \"%s\"", dataPath );
+		return NULL;
+	}
+
+	if( strlen( collisionLayer ) > 0 ) {
+
+		string collisionPath = prismaticString->new( trimmedPath );
+		prismaticString->concat( &collisionPath, "/" );
+		prismaticString->concat( &collisionPath, collisionLayer );
+		prismaticString->concat( &collisionPath, ".csv" );
+
+		collisionFile = pd->file->open( collisionPath, kFileRead );
+		if( collisionFile == NULL ) {
+			prismaticLogger->errorf( "Failed to open collision csv at path \"%s\"", collisionPath );
+			return NULL;
+		}
+
+	}
 
 	map->_path = trimmedPath;
 	map->_layerCount = 0;
 	
 	mapReader->read = readfile;
-	mapReader->userdata = file;
+	mapReader->userdata = jsonFile;
 
 	mapDecoder->decodeError = decodeError;
 	mapDecoder->shouldDecodeTableValueForKey = shouldDecodeTableValueForKey;
@@ -55,6 +78,7 @@ static LDtkTileMap* newLDtkTileMap( string path ) {
 	mapDecoder->userdata = map;
 
 	pd->json->decode( mapDecoder, *mapReader, NULL );
+	parseCollision( collisionFile, map );
 
 	// TODO: remove
 	// for( size_t i = 0; map->layers[i] != NULL; i++ ) {
@@ -67,6 +91,10 @@ static LDtkTileMap* newLDtkTileMap( string path ) {
 	prismaticString->delete( dataPath );
 	sys->realloc( mapReader, 0 );
 	sys->realloc( mapDecoder, 0 );
+
+	// Close Files
+	pd->file->close( jsonFile );
+	pd->file->close( collisionFile );
 
 	return map;
 
@@ -101,6 +129,64 @@ static void changeMap( LDtkTileMap* map ) {
 
 }
 
+
+// Collisions
+
+static void parseCollision( SDFile* file, LDtkTileMap* map ) {
+
+	if( file == NULL || map == NULL ) {
+		return;
+	}
+
+	int seekEndErr = pd->file->seek( file, 0, SEEK_END );
+	if( seekEndErr == -1 ) {
+		prismaticLogger->error( "Could not seek EOF for collision file" );
+		return;
+	}
+
+	int fsize = pd->file->tell( file );
+	if( fsize == -1 ) {
+		prismaticLogger->error( "Could not determine file size for collision file" );
+		return;
+	}
+
+	int seekSetErr = pd->file->seek( file, 0, SEEK_SET );
+	if( seekSetErr == -1 ) {
+		prismaticLogger->error( "Could not reset seek pointer in collision file" );
+		return;
+	}
+
+	string rawCollisionData = sys->realloc( NULL, fsize + 1 );
+	int readErr = pd->file->read( file, rawCollisionData, fsize );	
+	if( readErr == -1 ) {
+		prismaticLogger->error( "Could not read collision file" );
+		return;
+	}
+
+	stripNewlines( rawCollisionData );
+
+	prismaticLogger->debug( rawCollisionData );
+	
+	free( rawCollisionData );
+
+}
+
+static void stripNewlines( string str ) {
+
+    string src = str;
+    string dst = str;
+    
+    while( *src ) {
+        if( *src != '\n' && *src != '\r' ) {
+            *dst++ = *src;
+        }
+
+        src++;
+    }
+    
+    *dst = '\0';
+
+}
 
 // JSON Parsing
 
