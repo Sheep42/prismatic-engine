@@ -16,6 +16,10 @@ static bool stringEquals( string str1, string str2 ) {
 	return strcmp( str1, str2 ) == 0;
 }
 
+static bool stringContains( string needle, string haystack ) {
+	return strstr( haystack, needle ) != NULL ? true : false;
+}
+
 static void stringConcat( string* target, string src ) {
 
 	size_t targetLen = strlen( *target );
@@ -51,6 +55,7 @@ const StringUtils* prismaticString = &(StringUtils) {
 	.new = newString,
 	.delete = deleteString,
 	.equals = stringEquals,
+	.contains = stringContains,
 	.trimLast = trimLast,
 	.concat = stringConcat,
 };

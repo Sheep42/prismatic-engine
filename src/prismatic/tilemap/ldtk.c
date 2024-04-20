@@ -6,6 +6,8 @@
 
 static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionLayer );
 static void deleteLDtkTileMap( LDtkTileMap* map );
+static void freeMapCollisions( LDtkTileMap* map );
+static void freeMapRefs( LDtkTileMap* map );
 
 static LDtkTileMap* getMapByIid( string iid );
 static void changeMapByIid( string iid );
@@ -24,6 +26,8 @@ static int shouldDecodeArrayValueAtIndex( json_decoder* decoder, int pos ) ;
 static void didDecodeArrayValue( json_decoder* decoder, int pos, json_value value );
 static void didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
 static void decodeLayers( json_decoder* decoder, int pos, json_value value );
+static int newNeighbor( json_decoder* decoder, int pos );
+static void decodeNeighbor( json_decoder* decoder, const char* key, json_value value );
 
 static int readfile( void* readud, uint8_t* buf, int bufsize );
 
@@ -86,6 +90,7 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 
 	map->_path = trimmedPath;
 	map->_layerCount = 0;
+	map->_neighborCount = 0;
 	map->tileSize = tileSize;
 	
 	mapReader->read = readfile;
@@ -133,16 +138,42 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	sys->realloc( map->id, 0 );
 	sys->realloc( map->iid, 0 );
 
-	for( int i = 0; i < map->gridWidth; i++ ) {
-		sys->realloc( map->collision[i], 0 );
-	}
-	
-	sys->realloc( map->collision, 0 );
+	freeMapCollisions( map );
+	freeMapRefs( map );
 
 	sys->realloc( map, 0 );
 
 }
 
+static void freeMapCollisions( LDtkTileMap* map ) {
+
+	if( map->collision == NULL ) {
+		return;
+	}
+
+	for( int i = 0; i < map->gridWidth; i++ ) {
+		sys->realloc( map->collision[i], 0 );
+	}
+	
+	sys->realloc( map->collision, 0 );
+}
+
+static void freeMapRefs( LDtkTileMap* map ) {
+
+	if( map->_neighborCount <= 0 ) {
+		return;
+	}
+
+	for( int i = 0; map->neighborLevels[i] != NULL; i++ ) {
+		sys->realloc( map->neighborLevels[i]->levelIid, 0 );
+		sys->realloc( map->neighborLevels[i]->dir, 0 );
+
+		sys->realloc( map->neighborLevels[i], 0 );
+	}
+
+	sys->realloc( map->neighborLevels, 0 );
+
+}
 
 // MapManager
 
@@ -289,12 +320,20 @@ static void decodeError( json_decoder* decoder, const char* error, int linenum )
 
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
 	
+	decoder->didDecodeArrayValue = didDecodeArrayValue;
+	decoder->didDecodeTableValue = didDecodeTableValue;
+	decoder->shouldDecodeArrayValueAtIndex = shouldDecodeArrayValueAtIndex;
+	
 	if( prismaticString->equals( "layers", name ) ) {
 		decoder->didDecodeArrayValue = decodeLayers;
 		return;
 	}
 
-	decoder->didDecodeArrayValue = didDecodeArrayValue;
+	if( prismaticString->contains( "neighbourLevels", name ) ) {
+		decoder->shouldDecodeArrayValueAtIndex = newNeighbor;
+		decoder->didDecodeTableValue = decodeNeighbor;
+		return;
+	}
 
 }
 
@@ -303,10 +342,6 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 	LDtkTileMap* map = decoder->userdata;
 
 	if( prismaticString->equals( "bgColor", key ) ) {
-		return 0;
-	}
-
-	if( prismaticString->equals( "neighbourLevels", key ) ) {
 		return 0;
 	}
 
@@ -403,6 +438,8 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 
 	if( map->layers == NULL ) {
         prismaticLogger->errorf( "Memory allocation failed for adding layer: %s", fileName );
+		sys->realloc( fileName, 0 );
+		sys->realloc( layerPath, 0 );
         return;
     }
     
@@ -411,6 +448,41 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 
 	sys->realloc( fileName, 0 );
 	sys->realloc( layerPath, 0 );
+
+}
+
+static int newNeighbor( json_decoder* decoder, int pos ) {
+	
+	LDtkTileMap* map = decoder->userdata;
+
+	map->_neighborCount++;
+	map->neighborLevels = sys->realloc( NULL, map->_neighborCount * sizeof( LDtkTileMapRef* ) + 1 );
+	if( map->neighborLevels == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for neighborLevels!" );
+		return 0;
+	}
+
+	map->neighborLevels[map->_neighborCount - 1] = calloc( 1, sizeof( LDtkTileMapRef ) );
+	map->neighborLevels[map->_neighborCount] = NULL;
+	
+	return 1;
+
+}
+
+static void decodeNeighbor( json_decoder* decoder, const char* key, json_value value ) {
+
+	LDtkTileMap* map = decoder->userdata;
+	LDtkTileMapRef* neighbor = map->neighborLevels[map->_neighborCount - 1];
+
+	if( prismaticString->equals( "levelIid", key ) ) {
+		neighbor->levelIid = prismaticString->new( json_stringValue( value ) );
+		return;
+	}
+
+	if( prismaticString->equals( "dir", key ) ) {
+		neighbor->dir = prismaticString->new( json_stringValue( value ) );
+		return;
+	}
 
 }
 

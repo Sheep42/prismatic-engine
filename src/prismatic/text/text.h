@@ -18,19 +18,28 @@ typedef struct StringUtils {
 
 	// Delete a string
 	// 
-	// ---
+	// ----
 	// 
 	// string str
 	void ( *delete )( string );
 
 	// Check if two strings are equal
 	// 
-	// ---
+	// ----
 	// 
 	// string str1
 	// 
 	// string str2
 	bool ( *equals )( string, string );
+
+	// Check if a string contains another string
+	//
+	// ----
+	//
+	// string needle - The substring to search for
+	//
+	// string haystack - The string to search through
+	bool ( *contains )( string, string );
 
 	// Trim the trailing character of a string, if it exists
 	//

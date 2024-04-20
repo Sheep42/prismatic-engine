@@ -45,6 +45,7 @@ typedef struct LDtkTileMap {
 	int gridHeight;
 	int gridWidth;
 	int** collision;
+	int _neighborCount;
 	LDtkTileMapRef** neighborLevels;
 	LDtkLayer** layers;
 	LDtkEntity** entities;
