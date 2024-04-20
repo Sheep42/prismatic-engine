@@ -41,6 +41,9 @@ typedef struct LDtkTileMap {
 	int worldY;
 	int width;
 	int height;
+	int tileSize;
+	int gridHeight;
+	int gridWidth;
 	int** collision;
 	LDtkTileMapRef** neighborLevels;
 	LDtkLayer** layers;
@@ -68,9 +71,11 @@ typedef struct LDtkTileMapFn {
 	// 
 	// string path - The path to the directory containing the LDtk Level export 
 	//
+	// int tileSize - The size, in pixels, of a single tile 
+	//
 	// string collistionLayer - The name of the csv file containing collision
-	// information
-	LDtkTileMap* ( *new )( string, string );
+	// information. Pass an empty string ("") if no collision layer.
+	LDtkTileMap* ( *new )( string, int, string );
 
 	// Delete the LDtkTileMap
 	//

@@ -4,7 +4,7 @@
 #include "../prismatic.h"
 #include "ldtk.h"
 
-static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer );
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionLayer );
 static void deleteLDtkTileMap( LDtkTileMap* map );
 
 static LDtkTileMap* getMapByIid( string iid );
@@ -14,6 +14,7 @@ static void changeMap( LDtkTileMap* map );
 
 static void parseCollision( SDFile* file, LDtkTileMap* map );
 static void stripNewlines( string str );
+static void csvToCollision( string str, LDtkTileMap* map );
 
 static void decodeError( json_decoder* decoder, const char* error, int linenum );
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
@@ -28,7 +29,7 @@ static int readfile( void* readud, uint8_t* buf, int bufsize );
 
 // TileMap
 
-static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer ) {
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionLayer ) {
 
 	const string dataFile = "/data.json";
 	string trimmedPath = prismaticString->trimLast( path, '/' );
@@ -44,6 +45,13 @@ static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer ) {
 
 	if( jsonFile == NULL ) {
 		prismaticLogger->errorf( "Failed to open JSON at path \"%s\"", dataPath );
+
+		// Free allocated memory
+		prismaticString->delete( trimmedPath );
+		prismaticString->delete( dataPath );
+		sys->realloc( mapReader, 0 );
+		sys->realloc( mapDecoder, 0 );
+		
 		return NULL;
 	}
 
@@ -57,13 +65,28 @@ static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer ) {
 		collisionFile = pd->file->open( collisionPath, kFileRead );
 		if( collisionFile == NULL ) {
 			prismaticLogger->errorf( "Failed to open collision csv at path \"%s\"", collisionPath );
+
+			// Free allocated memory
+			prismaticString->delete( trimmedPath );
+			prismaticString->delete( dataPath );
+			prismaticString->delete( collisionPath );
+
+			sys->realloc( mapReader, 0 );
+			sys->realloc( mapDecoder, 0 );
+
+			// Close Files
+			pd->file->close( jsonFile );
 			return NULL;
 		}
+
+		// free collisionPath
+		prismaticString->delete( collisionPath );
 
 	}
 
 	map->_path = trimmedPath;
 	map->_layerCount = 0;
+	map->tileSize = tileSize;
 	
 	mapReader->read = readfile;
 	mapReader->userdata = jsonFile;
@@ -78,6 +101,10 @@ static LDtkTileMap* newLDtkTileMap( string path, string collisionLayer ) {
 	mapDecoder->userdata = map;
 
 	pd->json->decode( mapDecoder, *mapReader, NULL );
+
+	map->gridWidth = map->width / map->tileSize;
+	map->gridHeight = map->height / map->tileSize;
+
 	parseCollision( collisionFile, map );
 
 	// TODO: remove
@@ -105,6 +132,12 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	// Since our strings are duplicated, we need to explicitly free them
 	sys->realloc( map->id, 0 );
 	sys->realloc( map->iid, 0 );
+
+	for( int i = 0; i < map->gridWidth; i++ ) {
+		sys->realloc( map->collision[i], 0 );
+	}
+	
+	sys->realloc( map->collision, 0 );
 
 	sys->realloc( map, 0 );
 
@@ -157,16 +190,30 @@ static void parseCollision( SDFile* file, LDtkTileMap* map ) {
 	}
 
 	string rawCollisionData = sys->realloc( NULL, fsize + 1 );
+	if( rawCollisionData == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for collision data" );
+		return;
+	}
+
 	int readErr = pd->file->read( file, rawCollisionData, fsize );	
 	if( readErr == -1 ) {
 		prismaticLogger->error( "Could not read collision file" );
+		free( rawCollisionData );
 		return;
 	}
 
 	stripNewlines( rawCollisionData );
+	csvToCollision( rawCollisionData, map );
 
-	prismaticLogger->debug( rawCollisionData );
-	
+	// TODO: Remove - Testing
+	// for( int x = 0; x < map->gridWidth; x++ ) {
+	// 	for( int y = 0; y < map->gridHeight; y++ ) {
+	// 		if( map->collision[x][y] == 1 ) {
+	// 			graphics->drawRect( x * map->tileSize, y * map->tileSize, map->tileSize, map->tileSize, kColorBlack );
+	// 		}
+	// 	}
+	// }
+
 	free( rawCollisionData );
 
 }
@@ -185,6 +232,52 @@ static void stripNewlines( string str ) {
     }
     
     *dst = '\0';
+
+}
+
+static void csvToCollision( string str, LDtkTileMap* map ) {
+	
+	// Memory allocation
+	map->collision = sys->realloc( NULL, sizeof( int* ) * map->gridWidth );
+	if( map->collision == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for collision" );
+		return;
+	}
+
+	for( int x = 0; x < map->gridWidth; x++ ) {
+		map->collision[x] = sys->realloc( NULL, sizeof( int ) * map->gridHeight );
+		if( map->collision[x] == NULL ) {
+			// xxx: It is the caller's responsibility to call the map deletion function and free map->collision
+			prismaticLogger->errorf( "Could not allocate memory for map->collision[%d]", x );
+			return;
+		}
+	}
+
+	// Build the array
+	const char* ptr = str;
+	int x = 0, y = 0;
+
+    while( y < map->gridHeight ) {
+
+		while( x < map->gridWidth ) {
+
+			// Skip commas
+			if( *ptr == ',' ) {
+				*ptr++;
+				continue;
+			}
+
+            map->collision[x][y] = *ptr - '0';
+
+			*ptr++;
+			x++;
+
+        }		
+
+		x = 0;
+		y++;
+
+    }
 
 }
 
@@ -292,7 +385,6 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 	LDtkLayer* layer = calloc( 1, sizeof( LDtkLayer ) );
 	layer->filename = fileName;
 
-	// TODO: Error handling
 	string err = NULL;
 	layer->image = graphics->loadBitmap( layerPath, &err );
 
