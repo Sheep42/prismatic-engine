@@ -12,7 +12,6 @@
 #endif
 
 typedef struct LDtkLayer {
-	string name;
 	string filename;
 	int zIndex;
 	LCDBitmap* image;

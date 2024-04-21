@@ -8,6 +8,9 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 static void deleteLDtkTileMap( LDtkTileMap* map );
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
+static void freeMapLayers( LDtkTileMap* map );
+
+static void freeLayer( LDtkLayer* layer );
 
 static LDtkTileMap* getMapByIid( string iid );
 static void changeMapByIid( string iid );
@@ -53,8 +56,8 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 		// Free allocated memory
 		prismaticString->delete( trimmedPath );
 		prismaticString->delete( dataPath );
-		sys->realloc( mapReader, 0 );
-		sys->realloc( mapDecoder, 0 );
+		free( mapReader );
+		free( mapDecoder );
 		
 		return NULL;
 	}
@@ -75,8 +78,8 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 			prismaticString->delete( dataPath );
 			prismaticString->delete( collisionPath );
 
-			sys->realloc( mapReader, 0 );
-			sys->realloc( mapDecoder, 0 );
+			free( mapReader );
+			free( mapDecoder );
 
 			// Close Files
 			pd->file->close( jsonFile );
@@ -118,11 +121,20 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 	// 	graphics->drawBitmap( layer->image, 0, 0, kBitmapUnflipped );
 	// }
 
+	// TODO: Remove - Testing
+	// for( int x = 0; x < map->gridWidth; x++ ) {
+	// 	for( int y = 0; y < map->gridHeight; y++ ) {
+	// 		if( map->collision[x][y] == 1 ) {
+	// 			graphics->drawRect( x * map->tileSize, y * map->tileSize, map->tileSize, map->tileSize, kColorBlack );
+	// 		}
+	// 	}
+	// }
+
 	// Free allocated memory
 	prismaticString->delete( trimmedPath );
 	prismaticString->delete( dataPath );
-	sys->realloc( mapReader, 0 );
-	sys->realloc( mapDecoder, 0 );
+	free( mapReader );
+	free( mapDecoder );
 
 	// Close Files
 	pd->file->close( jsonFile );
@@ -135,13 +147,14 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 static void deleteLDtkTileMap( LDtkTileMap* map ) {
 
 	// Since our strings are duplicated, we need to explicitly free them
-	sys->realloc( map->id, 0 );
-	sys->realloc( map->iid, 0 );
+	prismaticString->delete( map->id );
+	prismaticString->delete( map->iid );
 
-	freeMapCollisions( map );
+	// freeMapCollisions( map );
 	freeMapRefs( map );
+	freeMapLayers( map );
 
-	sys->realloc( map, 0 );
+	free( map );
 
 }
 
@@ -156,6 +169,7 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 	}
 	
 	sys->realloc( map->collision, 0 );
+	
 }
 
 static void freeMapRefs( LDtkTileMap* map ) {
@@ -165,13 +179,29 @@ static void freeMapRefs( LDtkTileMap* map ) {
 	}
 
 	for( int i = 0; map->neighborLevels[i] != NULL; i++ ) {
-		sys->realloc( map->neighborLevels[i]->levelIid, 0 );
-		sys->realloc( map->neighborLevels[i]->dir, 0 );
+		prismaticString->delete( map->neighborLevels[i]->levelIid );
+		prismaticString->delete( map->neighborLevels[i]->dir );
 
-		sys->realloc( map->neighborLevels[i], 0 );
+		free( map->neighborLevels[i] );
 	}
 
 	sys->realloc( map->neighborLevels, 0 );
+	map->_neighborCount = 0;
+
+}
+
+static void freeMapLayers( LDtkTileMap* map ) {
+
+	if( map->_layerCount <= 0 ) {
+		return;
+	}
+
+	for( int i = 0; map->layers[i] != NULL; i++ ) {		
+		freeLayer( map->layers[i] );
+	}
+
+	sys->realloc( map->layers, 0 );
+	map->_layerCount = 0;
 
 }
 
@@ -229,23 +259,14 @@ static void parseCollision( SDFile* file, LDtkTileMap* map ) {
 	int readErr = pd->file->read( file, rawCollisionData, fsize );	
 	if( readErr == -1 ) {
 		prismaticLogger->error( "Could not read collision file" );
-		free( rawCollisionData );
+		sys->realloc( rawCollisionData, 0 );
 		return;
 	}
 
 	stripNewlines( rawCollisionData );
 	csvToCollision( rawCollisionData, map );
 
-	// TODO: Remove - Testing
-	// for( int x = 0; x < map->gridWidth; x++ ) {
-	// 	for( int y = 0; y < map->gridHeight; y++ ) {
-	// 		if( map->collision[x][y] == 1 ) {
-	// 			graphics->drawRect( x * map->tileSize, y * map->tileSize, map->tileSize, map->tileSize, kColorBlack );
-	// 		}
-	// 	}
-	// }
-
-	free( rawCollisionData );
+	sys->realloc( rawCollisionData, 0 );
 
 }
 
@@ -410,15 +431,17 @@ static void didDecodeSublist( json_decoder* decoder, const char* name, json_valu
 static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 
 	LDtkTileMap* map = decoder->userdata;
+	LDtkLayer* layer = calloc( 1, sizeof( LDtkLayer ) );
+	if( layer == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for new map layer" );
+		return;
+	}
 
-	string fileName = prismaticString->new( json_stringValue( value ) );
+	layer->filename = prismaticString->new( json_stringValue( value ) );
 
 	string layerPath = prismaticString->new( map->_path );
 	prismaticString->concat( &layerPath, "/" );
-	prismaticString->concat( &layerPath, fileName );
-
-	LDtkLayer* layer = calloc( 1, sizeof( LDtkLayer ) );
-	layer->filename = fileName;
+	prismaticString->concat( &layerPath, layer->filename );
 
 	string err = NULL;
 	layer->image = graphics->loadBitmap( layerPath, &err );
@@ -437,17 +460,16 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 	map->layers = sys->realloc( map->layers, sizeof( LDtkLayer* ) * map->_layerCount + 1 );
 
 	if( map->layers == NULL ) {
-        prismaticLogger->errorf( "Memory allocation failed for adding layer: %s", fileName );
-		sys->realloc( fileName, 0 );
-		sys->realloc( layerPath, 0 );
+        prismaticLogger->errorf( "Memory allocation failed for adding layer: %s", layer->filename );
+		prismaticString->delete( layerPath );
+		freeLayer( layer );
         return;
     }
     
     map->layers[map->_layerCount - 1] = layer;
     map->layers[map->_layerCount] = NULL;
 
-	sys->realloc( fileName, 0 );
-	sys->realloc( layerPath, 0 );
+	prismaticString->delete( layerPath );
 
 }
 
@@ -488,6 +510,18 @@ static void decodeNeighbor( json_decoder* decoder, const char* key, json_value v
 
 static int readfile( void* readud, uint8_t* buf, int bufsize ) {
 	return pd->file->read( (SDFile*)readud, buf, bufsize );
+}
+
+static void freeLayer( LDtkLayer* layer ) {
+
+	prismaticString->delete( layer->filename );
+
+	if( layer->image != NULL ) {
+		graphics->freeBitmap( layer->image );
+	}
+
+	free( layer );
+
 }
 
 const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
