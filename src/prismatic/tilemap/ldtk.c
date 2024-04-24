@@ -116,16 +116,34 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 	parseCollision( collisionFile, map );
 
 	// TODO: remove
-	// for( size_t i = 0; map->layers[i] != NULL; i++ ) {
-	// 	LDtkLayer* layer = map->layers[i];
-	// 	graphics->drawBitmap( layer->image, 0, 0, kBitmapUnflipped );
-	// }
+	for( size_t i = 0; map->layers[i] != NULL; i++ ) {
+		LDtkLayer* layer = map->layers[i];
+		graphics->drawBitmap( layer->image, 0, 0, kBitmapUnflipped );
+	}
 
 	// TODO: Remove - Testing
 	// for( int x = 0; x < map->gridWidth; x++ ) {
-	// 	for( int y = 0; y < map->gridHeight; y++ ) {
-	// 		if( map->collision[x][y] == 1 ) {
-	// 			graphics->drawRect( x * map->tileSize, y * map->tileSize, map->tileSize, map->tileSize, kColorBlack );
+		// for( int y = 0; y < map->gridHeight; y++ ) {
+			// if( map->collision[x][y] == 1 ) {
+				// LCDSprite* col = sprites->newSprite();
+				// PDRect r = (PDRect){
+				// 	.x = 0.0,
+				// 	.y = 0.0,
+				// 	.width = (float)(map->tileSize),
+				// 	.height = (float)(map->tileSize),
+				// };
+
+				// float xf = (float)(x * map->tileSize);
+				// float yf = (float)(y * map->tileSize);
+
+				// sprites->setCenter( col, 0.0, 0.0 );
+				// sprites->setCollisionsEnabled( col, 1 );
+				// sprites->setVisible( col, 0 );
+				// sprites->setBounds( col, r );
+				// sprites->setCollideRect( col, r );
+				// sprites->moveTo( col, xf, yf );
+				// sprites->addSprite( col );
+				// graphics->drawRect( x * map->tileSize, y * map->tileSize, map->tileSize, map->tileSize, kColorBlack );
 	// 		}
 	// 	}
 	// }
@@ -164,11 +182,18 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 		return;
 	}
 
-	for( int i = 0; i < map->gridWidth; i++ ) {
+	for( int i = 0; map->collision[i] != NULL; i++ ) {
+
+		for( int j = 0; j < map->gridWidth; j++ ) {
+			sys->realloc( map->collision[i]->collision[j], 0 );
+			// sys->realloc( map->collision[i]->rects[j], 0 );
+		}
+
 		sys->realloc( map->collision[i], 0 );
-	}
+
+	}	
 	
-	sys->realloc( map->collision, 0 );
+	free( map->collision );
 	
 }
 
@@ -290,17 +315,22 @@ static void stripNewlines( string str ) {
 static void csvToCollision( string str, LDtkTileMap* map ) {
 	
 	// Memory allocation
-	map->collision = sys->realloc( NULL, sizeof( int* ) * map->gridWidth );
-	if( map->collision == NULL ) {
+	LDtkCollisionLayer* collisionLayer = calloc( 1, sizeof( LDtkCollisionLayer ) );
+
+	map->_collisionLayerCount += 1;
+	map->collision = sys->realloc( map->collision, sizeof( LDtkCollisionLayer* ) * map->_collisionLayerCount + 1 );
+
+	collisionLayer->collision = sys->realloc( NULL, sizeof( int* ) * map->gridWidth );
+	if( collisionLayer->collision == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for collision" );
 		return;
 	}
 
 	for( int x = 0; x < map->gridWidth; x++ ) {
-		map->collision[x] = sys->realloc( NULL, sizeof( int ) * map->gridHeight );
-		if( map->collision[x] == NULL ) {
+		collisionLayer->collision[x] = sys->realloc( NULL, sizeof( int ) * map->gridHeight );
+		if( collisionLayer->collision[x] == NULL ) {
 			// xxx: It is the caller's responsibility to call the map deletion function and free map->collision
-			prismaticLogger->errorf( "Could not allocate memory for map->collision[%d]", x );
+			prismaticLogger->errorf( "Could not allocate memory for collisionLayer->collision[%d]", x );
 			return;
 		}
 	}
@@ -319,7 +349,7 @@ static void csvToCollision( string str, LDtkTileMap* map ) {
 				continue;
 			}
 
-            map->collision[x][y] = *ptr - '0';
+            collisionLayer->collision[x][y] = *ptr - '0';
 
 			*ptr++;
 			x++;
@@ -330,6 +360,9 @@ static void csvToCollision( string str, LDtkTileMap* map ) {
 		y++;
 
     }
+
+	map->collision[map->_collisionLayerCount - 1] = collisionLayer;
+	map->collision[map->_collisionLayerCount] = NULL;
 
 }
 

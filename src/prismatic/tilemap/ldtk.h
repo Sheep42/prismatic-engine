@@ -33,6 +33,11 @@ typedef struct LDtkTileMapRef {
 	string dir;
 } LDtkTileMapRef;
 
+typedef struct LDtkCollisionLayer {
+	int** collision;
+	LCDSprite** rects;
+} LDtkCollisionLayer;
+
 typedef struct LDtkTileMap {
 	string id;
 	string iid;
@@ -43,12 +48,12 @@ typedef struct LDtkTileMap {
 	int tileSize;
 	int gridHeight;
 	int gridWidth;
-	int** collision;
-	int _neighborCount;
+	size_t _neighborCount;
+	size_t _collisionLayerCount;
+	LDtkCollisionLayer** collision;
 	LDtkTileMapRef** neighborLevels;
 	LDtkLayer** layers;
 	LDtkEntity** entities;
-	LCDBitmap* composite;
 	size_t _layerCount;
 	string _path;
 	void ( *enter )( void );
