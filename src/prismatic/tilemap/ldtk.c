@@ -145,7 +145,7 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	prismaticString->delete( map->id );
 	prismaticString->delete( map->iid );
 
-	// freeMapCollisions( map );
+	freeMapCollisions( map );
 	freeMapRefs( map );
 	freeMapLayers( map );
 
@@ -179,11 +179,9 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 		sys->realloc( map->collision[i], 0 );
 		map->collision[i] = NULL;
 
-
-	}	
+	}
 	
-	
-	free( map->collision );
+	sys->realloc( map->collision, 0 );
 	map->collision = NULL;
 	map->_collisionLayerCount = 0;
 	
