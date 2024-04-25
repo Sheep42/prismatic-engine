@@ -78,9 +78,9 @@ typedef struct LDtkTileMapFn {
 	//
 	// int tileSize - The size, in pixels, of a single tile 
 	//
-	// string collistionLayer - The name of the csv file containing collision
-	// information. Pass an empty string ("") if no collision layer.
-	LDtkTileMap* ( *new )( string, int, string );
+	// string* collistionLayers - A list of csv files containing collision
+	// information. Pass NULL for no collision layer. Must be NULL terminated 
+	LDtkTileMap* ( *new )( string, int, string* );
 
 	// Delete the LDtkTileMap
 	//

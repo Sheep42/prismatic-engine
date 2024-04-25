@@ -4,7 +4,7 @@
 #include "../prismatic.h"
 #include "ldtk.h"
 
-static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionLayer );
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers );
 static void deleteLDtkTileMap( LDtkTileMap* map );
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
@@ -36,7 +36,7 @@ static int readfile( void* readud, uint8_t* buf, int bufsize );
 
 // TileMap
 
-static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionLayer ) {
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers ) {
 
 	const string dataFile = "/data.json";
 	string trimmedPath = prismaticString->trimLast( path, '/' );
@@ -48,7 +48,6 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 	json_reader* mapReader = calloc( 1, sizeof( json_reader ) );
 	json_decoder* mapDecoder = calloc( 1, sizeof( json_decoder ) );
 	SDFile* jsonFile = pd->file->open( dataPath, kFileRead );
-	SDFile* collisionFile = NULL;
 
 	if( jsonFile == NULL ) {
 		prismaticLogger->errorf( "Failed to open JSON at path \"%s\"", dataPath );
@@ -60,35 +59,6 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 		free( mapDecoder );
 		
 		return NULL;
-	}
-
-	if( strlen( collisionLayer ) > 0 ) {
-
-		string collisionPath = prismaticString->new( trimmedPath );
-		prismaticString->concat( &collisionPath, "/" );
-		prismaticString->concat( &collisionPath, collisionLayer );
-		prismaticString->concat( &collisionPath, ".csv" );
-
-		collisionFile = pd->file->open( collisionPath, kFileRead );
-		if( collisionFile == NULL ) {
-			prismaticLogger->errorf( "Failed to open collision csv at path \"%s\"", collisionPath );
-
-			// Free allocated memory
-			prismaticString->delete( trimmedPath );
-			prismaticString->delete( dataPath );
-			prismaticString->delete( collisionPath );
-
-			free( mapReader );
-			free( mapDecoder );
-
-			// Close Files
-			pd->file->close( jsonFile );
-			return NULL;
-		}
-
-		// free collisionPath
-		prismaticString->delete( collisionPath );
-
 	}
 
 	map->_path = trimmedPath;
@@ -113,7 +83,48 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 	map->gridWidth = map->width / map->tileSize;
 	map->gridHeight = map->height / map->tileSize;
 
-	parseCollision( collisionFile, map );
+	if( collisionLayers != NULL ) {
+
+		for( size_t i = 0; collisionLayers[i] != NULL; i++ ) {
+
+			if( collisionLayers[i] == "" ) {
+				continue;
+			}
+
+			SDFile* collisionFile = NULL;
+			string collisionPath = prismaticString->new( trimmedPath );
+			prismaticString->concat( &collisionPath, "/" );
+			prismaticString->concat( &collisionPath, collisionLayers[i] );
+			prismaticString->concat( &collisionPath, ".csv" );
+
+			collisionFile = pd->file->open( collisionPath, kFileRead );
+			if( collisionFile == NULL ) {
+				prismaticLogger->errorf( "Failed to open collision csv at path \"%s\"", collisionPath );
+
+				// Free allocated memory
+				prismaticString->delete( trimmedPath );
+				prismaticString->delete( dataPath );
+				prismaticString->delete( collisionPath );
+
+				free( mapReader );
+				free( mapDecoder );
+
+				// Close Files
+				pd->file->close( jsonFile );
+				return NULL;
+			}
+
+			parseCollision( collisionFile, map );
+
+			// free collisionPath
+			prismaticString->delete( collisionPath );
+
+			// Close collisionFile
+			pd->file->close( collisionFile );
+
+		}
+
+	}
 
 	// Free allocated memory
 	prismaticString->delete( trimmedPath );
@@ -123,8 +134,7 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string collisionL
 
 	// Close Files
 	pd->file->close( jsonFile );
-	pd->file->close( collisionFile );
-
+	
 	return map;
 
 }
