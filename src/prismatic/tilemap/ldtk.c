@@ -153,6 +153,7 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 
 		for( int j = 0; j < map->gridWidth; j++ ) {
 			sys->realloc( map->collision[i]->collision[j], 0 );
+			map->collision[i]->collision[j] = NULL;
 		}
 		
 		for( int k = 0; map->collision[i]->rects[k] != NULL; k++ ) {
@@ -160,13 +161,21 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 		}
 		
 		sys->realloc( map->collision[i]->rects, 0 );
+		map->collision[i]->rects = NULL;
+
 		sys->realloc( map->collision[i]->collision, 0 );
+		map->collision[i]->collision = NULL;
+
 		sys->realloc( map->collision[i], 0 );
+		map->collision[i] = NULL;
+
 
 	}	
 	
 	
 	free( map->collision );
+	map->collision = NULL;
+	map->_collisionLayerCount = 0;
 	
 }
 
@@ -181,9 +190,11 @@ static void freeMapRefs( LDtkTileMap* map ) {
 		prismaticString->delete( map->neighborLevels[i]->dir );
 
 		free( map->neighborLevels[i] );
+		map->neighborLevels[i] = NULL;
 	}
 
 	sys->realloc( map->neighborLevels, 0 );
+	map->neighborLevels = NULL;
 	map->_neighborCount = 0;
 
 }
@@ -199,6 +210,7 @@ static void freeMapLayers( LDtkTileMap* map ) {
 	}
 
 	sys->realloc( map->layers, 0 );
+	map->layers = NULL;
 	map->_layerCount = 0;
 
 }
@@ -561,6 +573,7 @@ static void freeLayer( LDtkLayer* layer ) {
 	}
 
 	free( layer );
+	layer = NULL;
 
 }
 
