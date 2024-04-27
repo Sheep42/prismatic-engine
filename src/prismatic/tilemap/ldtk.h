@@ -56,8 +56,20 @@ typedef struct LDtkTileMap {
 	LDtkEntity** entities;
 	size_t _layerCount;
 	string _path;
-	void ( *enter )( void );
-	void ( *exit )( void );
+	// Optional callback for when the map is set as current in the MapManager
+	//
+	// ---
+	//
+	// LDtkTileMap* self
+	void ( *enter )( struct LDtkTileMap* );
+
+	// Optional callback for when the map transitions away from current in the 
+	// MapManager
+	//
+	// ---
+	//
+	// LDtkTileMap* self
+	void ( *exit )( struct LDtkTileMap* );
 } LDtkTileMap;
 
 typedef struct LDtkMapManager {
@@ -88,6 +100,56 @@ typedef struct LDtkTileMapFn {
 	//
 	// LDtkTileMap* map
 	void ( *delete )( LDtkTileMap* );
+
+	// Draw the map's layers to screen as raw LCDBitmap*s 
+	//
+	// This is a convenience function, you may choose to draw the map yourself
+	// if doing so is preferable.
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	void ( *draw )( LDtkTileMap* );
+
+	// Draw the map's layers to screen as Sprites
+	//
+	// This is a convenience function, you may choose to draw the map yourself
+	// if doing so is preferable.
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	void ( *add )( LDtkTileMap* );
+
+	// Remove the map's layers from the screen.
+	//
+	// This is a convenience function, you may choose to draw the map yourself
+	// if doing so is preferable.
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	void ( *remove )( LDtkTileMap* );
+	
+	// Add the map's collision layers to the screen.
+	//
+	// This is a convenience function, you may choose to manage the collision 
+	// yourself if doing so is preferable.
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	void ( *addCollision )( LDtkTileMap* );
+
+	// Remove the map's collision layers from the screen.
+	//
+	// This is a convenience function, you may choose to manage the collision 
+	// yourself if doing so is preferable.
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	void ( *removeCollision )( LDtkTileMap* );
 } LDtkTileMapFn;
 
 typedef struct LDtkMapManagerFn {

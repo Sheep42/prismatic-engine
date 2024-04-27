@@ -6,6 +6,12 @@
 
 static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers );
 static void deleteLDtkTileMap( LDtkTileMap* map );
+static void drawLDtkTileMap( LDtkTileMap* map );
+static void addLDtkTileMap( LDtkTileMap* map );
+static void removeLDtkTileMap( LDtkTileMap* map );
+static void addCollisionLDtkTileMap( LDtkTileMap* map );
+static void removeCollisionLDtkTileMap( LDtkTileMap* map );
+
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
 static void freeMapLayers( LDtkTileMap* map );
@@ -152,6 +158,32 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	free( map );
 
 }
+
+static void drawLDtkTileMap( LDtkTileMap* map ) {
+
+    for( size_t i = 0; map->layers[i] != NULL; i++ ) {
+		LDtkLayer* layer = map->layers[i];
+		graphics->drawBitmap( layer->image, 0, 0, kBitmapUnflipped );
+	}
+
+}
+
+static void addLDtkTileMap( LDtkTileMap* map ) {
+
+}
+
+static void removeLDtkTileMap( LDtkTileMap* map ) {
+
+}
+
+static void addCollisionLDtkTileMap( LDtkTileMap* map ) {
+
+}
+
+static void removeCollisionLDtkTileMap( LDtkTileMap* map ) {
+
+}
+
 
 static void freeMapCollisions( LDtkTileMap* map ) {
 
@@ -588,6 +620,7 @@ static void freeLayer( LDtkLayer* layer ) {
 const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.new = newLDtkTileMap,
 	.delete = deleteLDtkTileMap,
+	.draw = drawLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
