@@ -48,13 +48,15 @@ typedef struct LDtkTileMap {
 	int tileSize;
 	int gridHeight;
 	int gridWidth;
-	size_t _neighborCount;
 	size_t _collisionLayerCount;
 	LDtkCollisionLayer** collision;
+	size_t _neighborCount;
 	LDtkTileMapRef** neighborLevels;
+	size_t _layerCount;
 	LDtkLayer** layers;
 	LDtkEntity** entities;
-	size_t _layerCount;
+	size_t _layerSpriteCount;
+	LCDSprite** _layerSprites;
 	string _path;
 	// Optional callback for when the map is set as current in the MapManager
 	//

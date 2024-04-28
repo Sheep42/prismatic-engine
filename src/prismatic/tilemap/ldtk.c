@@ -169,6 +169,33 @@ static void drawLDtkTileMap( LDtkTileMap* map ) {
 }
 
 static void addLDtkTileMap( LDtkTileMap* map ) {
+ 
+	if( map->layers == NULL ) {
+		return;
+	}
+
+    for( size_t i = 0; map->layers[i] != NULL; i++ ) {
+
+		map->_layerSpriteCount++;
+		map->_layerSprites = sys->realloc( map->_layerSprites, sizeof( LCDSprite* ) * map->_layerSpriteCount + 1 );
+		if( map->_layerSprites == NULL ) {
+			prismaticLogger->error( "Could not allocate memory for layer sprites" );
+			return;
+		}
+
+		LDtkLayer* layer = map->layers[i];
+		LCDSprite* sprite = sprites->newSprite();
+		sprites->setCenter( sprite, 0.0, 0.0 );
+		sprites->setImage( sprite, layer->image, kBitmapUnflipped );
+		sprites->setSize( sprite, map->width, map->height );
+		sprites->moveTo( sprite, map->worldX, map->worldY );
+		sprites->setZIndex( sprite, layer->zIndex );
+		sprites->addSprite( sprite );
+
+		map->_layerSprites[map->_layerSpriteCount - 1] = sprite;
+		map->_layerSprites[map->_layerSpriteCount] = NULL;
+
+	}
 
 }
 
@@ -248,6 +275,11 @@ static void freeMapLayers( LDtkTileMap* map ) {
 	for( int i = 0; map->layers[i] != NULL; i++ ) {		
 		freeLayer( map->layers[i] );
 	}
+
+	// if( map->_layerSprites != NULL ) {
+	// 	for( int i = 0; map->_layerSprites[i] != NULL; i++ ) {
+	// 	}
+	// }
 
 	sys->realloc( map->layers, 0 );
 	map->layers = NULL;
@@ -621,6 +653,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.new = newLDtkTileMap,
 	.delete = deleteLDtkTileMap,
 	.draw = drawLDtkTileMap,
+	.add = addLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
