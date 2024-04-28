@@ -743,7 +743,6 @@ static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map ) {
 	if( mapManager->maps != NULL ) {
 		for( size_t i = 0; mapManager->maps[i] != NULL; i++ ) {
 			if( mapManager->maps[i] == map ) {
-				prismaticLogger->debug( "Map already exists in MapManager. Skipping..." );
 				return;
 			}
 		}

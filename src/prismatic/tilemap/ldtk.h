@@ -180,7 +180,7 @@ typedef struct LDtkMapManagerFn {
 	// LDtkMapManager* mapManager
 	void ( *delete )( LDtkMapManager* );
 
-	// Add a map to the Map Manager
+	// Add a map to the Map Manager, if it is not already added.
 	//
 	// ----
 	// 
@@ -192,7 +192,7 @@ typedef struct LDtkMapManagerFn {
 	// Remove a map from the Map Manager
 	// 
 	// Does not free the map, it is up to the caller to free the map from
-	// memory
+	// memory.
 	//
 	// ----
 	// 
@@ -228,7 +228,8 @@ typedef struct LDtkMapManagerFn {
 	// string id - The map's identifier
 	void ( *changeMapByName )( LDtkMapManager*, string );
 
-	// Change the current map to the specified map
+	// Change the current map to the specified map. Adds the map to the MapManager
+	// if it is not already added. Can be used as a shorthand to add & set current Map.
 	//
 	// ----
 	//

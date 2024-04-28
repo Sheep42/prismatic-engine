@@ -748,6 +748,91 @@ void ( *addCollision )( LDtkTileMap* );
 //
 // LDtkTileMap* map
 void ( *removeCollision )( LDtkTileMap* );
+
+// Tag a the Sprites in a map's collision layer
+//
+// ---
+//
+// LDtkTileMap* map
+//
+// string layerName
+//
+// uint8_t tag 
+void ( *tagCollision )( LDtkTileMap*, string, uint8_t );
+```
+
+#### prismaticMapManager
+
+```C
+// Create a new MapManager
+LDtkMapManager* ( *new )( void );
+
+// Delete a MapManager
+//
+// Does not free the MapManager's maps, it is up to the caller to call 
+// prismaticTileMap->delete on their maps.
+// ---
+//
+// LDtkMapManager* mapManager
+void ( *delete )( LDtkMapManager* );
+
+// Add a map to the Map Manager, if it is not already added.
+//
+// ----
+// 
+// LDtkMapManager* mapManager
+//
+// LDtkTileMap* map
+void ( *add )( LDtkMapManager*, LDtkTileMap* );
+
+// Remove a map from the Map Manager
+// 
+// Does not free the map, it is up to the caller to free the map from
+// memory
+//
+// ----
+// 
+// LDtkMapManager* mapManager
+//
+// string id - The map's Id or Iid
+void ( *remove )( LDtkMapManager*, string );
+
+// Get a map from the Map Manager by its Iid
+//
+// ----
+//
+// LDtkMapManager* mapManager
+//
+// string id - The map's Id or Iid
+LDtkTileMap* ( *getMap )( LDtkMapManager*, string );
+
+// Change the current map to the map with the specified Iid
+//
+// ----
+//
+// LDtkMapManager* mapManager
+//
+// string iid - The map's Iid
+void ( *changeMapByIid )( LDtkMapManager*, string );
+
+// Change the current map to the map with the specified Identifier
+//
+// ----
+//
+// LDtkMapManager* mapManager
+//
+// string id - The map's identifier
+void ( *changeMapByName )( LDtkMapManager*, string );
+
+// Change the current map to the specified map. Adds the map to the MapManager
+// if it is not already added. Can be used as a shorthand to add & set current Map.
+//
+// ----
+//
+// LDtkMapManager* mapManager
+//
+// LDtkTileMap* map
+void ( *changeMap )( LDtkMapManager*, LDtkTileMap* );
 ```
 
 ---
@@ -1554,11 +1639,90 @@ of Integer Grid layers to represent your collision layers. These layers will be 
 csv files in your Level export directory. You need to specify an array of file names for 
 collision layers when initializing your map.
 
+**Type Name**: `LDtkTileMap`
+
+- `string id`: The Map's identifier
+
+- `string iid`: The Map's unique identifier
+
+- `int worldX`: The X position of the Map in the "World" (i.e.: Screen Space)
+
+- `int worldY`: The Y position of the Map in the "World" (i.e.: Screen Space)
+
+- `int width`: The width of the Map
+
+- `int height`: The height of the Map
+
+- `int tileSize`: The tile size of the Map
+
+- `int gridHeight`: The Map's grid height ( height / tileSize ), used for collision & sprite positioning
+
+- `int gridWidth`: The Map's grid width ( width / tileSize ), used for collision & sprite positioning
+
+- `size_t _collisionLayerCount`: The total number of collision layers for the Map
+
+- `LDtkCollisionLayer** collision`: The Map's collision layers
+
+- `size_t _neighborCount`: The total number of neighbor references 
+
+- `LDtkTileMapRef** neighborLevels`: The Map's Neighbor Levels
+
+- `size_t _layerCount`: The total number of Map layers
+
+- `LDtkLayer** layers`: The Map's layers
+
+- `LDtkEntity** entities`: The Map's Entities (not implemented, coming soon)
+
+- `size_t _layerSpriteCount`: The total number of layer Sprites
+
+- `LCDSprite** _layerSprites`: The Map's layer Sprites
+
+- `string _path`: The path to the Map's files
+
+- `void ( *enter )( struct LDtkTileMap* )`: Optional callback for when the map is set as current in the MapManager
+
+	- **Param**: `LDtkTileMap* self`
+
+- `void ( *exit )( struct LDtkTileMap* )`: Optional callback for when the map transitions away from current in the MapManager
+
+	- **Param**: `LDtkTileMap* self`
+
+
+**Type Name**: `LDtkLayer`
+
+- `string filename`: The file name for the Layer.
+
+- `int zIndex`: The Layer's z-index. Set automatically, based on import. Applies to Layer Sprites when rendering Layers as Sprites.
+
+- `LCDBitmap* image`: The raw `LCDBitmap*` containing the Layer image.
+
+
+**Type Name**: `LDtkTileMapRef`
+
+- `string levelIid`: The unique id for the referenced Map
+
+- `string dir`: A string representing the direction of the neighbor. "n, s, e, w"
+
+
+**Type Name**: `LDtkCollisionLayer`
+
+- `string name`: The name of the Collision Layer (matches file name).
+
+- `int** collision`: The int array representing the Collision Layer definition.
+
+- `LCDSprite** rects`: The Collision Layer sprites.
+
+
 **Example**:
 
 ```C
 const int TILE_SIZE = 16;
 static LDtkTileMap* map;
+
+typedef enum {
+	kFloor = 0,
+	kWall = 1,
+} CollisionType;
 
 // Use init to hook into the Engine's initialization function. This runs 
 // before the first call to update but after the engine has initialized itself
@@ -1575,6 +1739,9 @@ static void init() {
 	// Add the map layers and collision to the screen
     prismaticTileMap->add( map );
     prismaticTileMap->addCollision( map );
+
+	prismaticTileMap->tagCollision( map, collision[0], kFloor );
+	prismaticTileMap->tagCollision( map, collision[1], kWall );
 
 }
 
@@ -1598,6 +1765,96 @@ static void draw( float delta ) {
 // destroy is called when the game is shut down, before the game itself is
 // freed from memory
 static void destroy() {
+    prismaticTileMap->delete( map );
+}
+```
+
+**Type Name**: `LDtkMapManager`
+
+`LDtkMapManager` is a convenience type for keeping track of active maps.
+
+Maps can be added to the map manager, and it will track the current map and the previous map. You can use multiple MapManager at once, if desirable.
+
+When a Map in a MapManager becomes the current Map, it will run its `enter` function, if one has been set.
+
+When a Map in a MapManager leaves the current state, it will run its `exit` function, if one has been set.
+
+- `size_t _mapCount`: The number of Maps stored in the MapManager
+
+- `LDtkTileMap** maps`: The MapManager's Maps
+
+- `LDtkTileMap* currentMap`: The MapManager's current Map
+
+- `LDtkTileMap* previousMap`: The MapManager's previous Map
+
+**Example**:
+
+```C
+const int TILE_SIZE = 16;
+static LDtkTileMap* map;
+static LDtkMapManager* mm;
+
+typedef enum {
+	kFloor = 0,
+	kWall = 1,
+} CollisionType;
+
+static void mapEnter( LDtkTileMap* self ) {
+
+	// Add the map layers and collision to the screen
+    prismaticTileMap->add( self );
+    prismaticTileMap->addCollision( self );
+
+}
+
+static void mapExit( LDtkTileMap* self ) {
+
+	// Remove the map layers and collision from the screen
+    prismaticTileMap->remove( self );
+    prismaticTileMap->removeCollision( self );
+
+}
+
+// Use init to hook into the Engine's initialization function. This runs 
+// before the first call to update but after the engine has initialized itself
+static void init() {
+    
+    prismaticLogger->info( "init" );
+
+	// assets/maps/Level_0/Floor.csv & assets/maps/Level_0/Walls.csv
+    string collision[] = { "Floor", "Walls", NULL }; 
+
+	// Initialize the map
+    map = prismaticTileMap->new( "assets/maps/Level_0/", TILE_SIZE, collision );
+
+	prismaticTileMap->tagCollision( map, collision[0], kFloor );
+	prismaticTileMap->tagCollision( map, collision[1], kWall );
+
+	map->enter = mapEnter;
+	map->exit = mapExit;
+
+	// Add map to the Map Manager, and set it as current
+    prismaticMapManager->changeMap( mm, map );
+
+}
+
+float e = 0.0;
+// update is your game's entry point to the engine
+static void update( float delta ) {
+
+}
+
+// draw should be used to handle screen drawing operations. It is called after 
+// update
+static void draw( float delta ) {
+    sprites->updateAndDrawSprites();
+    sys->drawFPS( 0, 0 );
+}
+
+// destroy is called when the game is shut down, before the game itself is
+// freed from memory
+static void destroy() {
+	prismaticMapManager->delete( mm );
     prismaticTileMap->delete( map );
 }
 ```
