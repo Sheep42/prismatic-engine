@@ -23,9 +23,9 @@ static void changeMapByIid( string iid );
 static void changeMapByName( string id );
 static void changeMap( LDtkTileMap* map );
 
-static void parseCollision( SDFile* file, LDtkTileMap* map );
+static void parseCollision( string layerName, SDFile* file, LDtkTileMap* map );
 static void stripNewlines( string str );
-static void csvToCollision( string str, LDtkTileMap* map );
+static void csvToCollision( string layerName, string rawCollisionData, LDtkTileMap* map );
 
 static void decodeError( json_decoder* decoder, const char* error, int linenum );
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
@@ -120,7 +120,7 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 				return NULL;
 			}
 
-			parseCollision( collisionFile, map );
+			parseCollision( collisionLayers[i], collisionFile, map );
 
 			// free collisionPath
 			prismaticString->delete( collisionPath );
@@ -352,7 +352,7 @@ static void changeMap( LDtkTileMap* map ) {
 
 // Collisions
 
-static void parseCollision( SDFile* file, LDtkTileMap* map ) {
+static void parseCollision( string layerName, SDFile* file, LDtkTileMap* map ) {
 
 	if( file == NULL || map == NULL ) {
 		return;
@@ -390,7 +390,7 @@ static void parseCollision( SDFile* file, LDtkTileMap* map ) {
 	}
 
 	stripNewlines( rawCollisionData );
-	csvToCollision( rawCollisionData, map );
+	csvToCollision( layerName, rawCollisionData, map );
 
 	sys->realloc( rawCollisionData, 0 );
 
@@ -413,10 +413,16 @@ static void stripNewlines( string str ) {
 
 }
 
-static void csvToCollision( string str, LDtkTileMap* map ) {
+static void csvToCollision( string layerName, string rawCollisionData, LDtkTileMap* map ) {
 	
 	// Memory allocation
 	LDtkCollisionLayer* collisionLayer = calloc( 1, sizeof( LDtkCollisionLayer ) );
+	if( collisionLayer == NULL ) {
+		prismaticLogger->error( "Could not allocate collision layer memory" );
+		return;
+	}
+
+	collisionLayer->name = layerName;
 
 	map->_collisionLayerCount += 1;
 	map->collision = sys->realloc( map->collision, sizeof( LDtkCollisionLayer* ) * map->_collisionLayerCount + 1 );
@@ -436,8 +442,8 @@ static void csvToCollision( string str, LDtkTileMap* map ) {
 		}
 	}
 
-	// // Build the array
-	const char* ptr = str;
+	// Build the array
+	const char* ptr = rawCollisionData;
 	int x = 0, y = 0;
 	size_t collisionRects = 0;
 

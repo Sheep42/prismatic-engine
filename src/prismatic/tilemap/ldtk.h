@@ -34,6 +34,7 @@ typedef struct LDtkTileMapRef {
 } LDtkTileMapRef;
 
 typedef struct LDtkCollisionLayer {
+	string name;
 	int** collision;
 	LCDSprite** rects;
 } LDtkCollisionLayer;
