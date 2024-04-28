@@ -174,32 +174,49 @@ static void addLDtkTileMap( LDtkTileMap* map ) {
 		return;
 	}
 
-    for( size_t i = 0; map->layers[i] != NULL; i++ ) {
+	if( map->_layerSprites == NULL ) {
 
-		map->_layerSpriteCount++;
-		map->_layerSprites = sys->realloc( map->_layerSprites, sizeof( LCDSprite* ) * map->_layerSpriteCount + 1 );
-		if( map->_layerSprites == NULL ) {
-			prismaticLogger->error( "Could not allocate memory for layer sprites" );
-			return;
+	    for( size_t i = 0; map->layers[i] != NULL; i++ ) {
+			map->_layerSpriteCount++;
+			map->_layerSprites = sys->realloc( map->_layerSprites, sizeof( LCDSprite* ) * map->_layerSpriteCount + 1 );
+			if( map->_layerSprites == NULL ) {
+				prismaticLogger->error( "Could not allocate memory for layer sprites" );
+				return;
+			}
+
+			LDtkLayer* layer = map->layers[i];
+			LCDSprite* sprite = sprites->newSprite();
+			sprites->setCenter( sprite, 0.0, 0.0 );
+			sprites->setImage( sprite, layer->image, kBitmapUnflipped );
+			sprites->setSize( sprite, map->width, map->height );
+			sprites->moveTo( sprite, map->worldX, map->worldY );
+			sprites->setZIndex( sprite, layer->zIndex );
+			sprites->addSprite( sprite );
+
+			map->_layerSprites[map->_layerSpriteCount - 1] = sprite;
+			map->_layerSprites[map->_layerSpriteCount] = NULL;
 		}
 
-		LDtkLayer* layer = map->layers[i];
-		LCDSprite* sprite = sprites->newSprite();
-		sprites->setCenter( sprite, 0.0, 0.0 );
-		sprites->setImage( sprite, layer->image, kBitmapUnflipped );
-		sprites->setSize( sprite, map->width, map->height );
-		sprites->moveTo( sprite, map->worldX, map->worldY );
-		sprites->setZIndex( sprite, layer->zIndex );
-		sprites->addSprite( sprite );
+	} else {
 
-		map->_layerSprites[map->_layerSpriteCount - 1] = sprite;
-		map->_layerSprites[map->_layerSpriteCount] = NULL;
+
+		for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
+			sprites->addSprite( map->_layerSprites[i] );
+		}
 
 	}
 
 }
 
 static void removeLDtkTileMap( LDtkTileMap* map ) {
+
+	if( map->_layerSprites == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
+		sprites->removeSprite( map->_layerSprites[i] );
+	}
 
 }
 
@@ -654,6 +671,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.delete = deleteLDtkTileMap,
 	.draw = drawLDtkTileMap,
 	.add = addLDtkTileMap,
+	.remove = removeLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
