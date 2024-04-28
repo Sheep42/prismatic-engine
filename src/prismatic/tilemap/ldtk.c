@@ -293,14 +293,21 @@ static void freeMapLayers( LDtkTileMap* map ) {
 		freeLayer( map->layers[i] );
 	}
 
-	// if( map->_layerSprites != NULL ) {
-	// 	for( int i = 0; map->_layerSprites[i] != NULL; i++ ) {
-	// 	}
-	// }
-
 	sys->realloc( map->layers, 0 );
 	map->layers = NULL;
 	map->_layerCount = 0;
+
+	if( map->_layerSprites != NULL ) {
+
+		for( int i = 0; map->_layerSprites[i] != NULL; i++ ) {
+			sprites->freeSprite( map->_layerSprites[i] );
+		}
+
+		sys->realloc( map->_layerSprites, 0 );
+		map->_layerSprites = NULL;
+		map->_layerSpriteCount = 0;
+
+	}
 
 }
 
