@@ -23,7 +23,7 @@ static LDtkMapManager* newMapManager( void );
 static void deleteMapManager( LDtkMapManager* mapManager );
 static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map );
 static void removeMapManager( LDtkMapManager* mapManager, string mapId );
-static LDtkTileMap* getMapByIid( LDtkMapManager* mapManager, string iid );
+static LDtkTileMap* getMap( LDtkMapManager* mapManager, string mapId );
 static void changeMapByIid( LDtkMapManager* mapManager, string iid );
 static void changeMapByName( LDtkMapManager* mapManager, string id );
 static void changeMap( LDtkMapManager* mapManager, LDtkTileMap* map );
@@ -740,6 +740,15 @@ static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map ) {
 		return;
 	}
 
+	if( mapManager->maps != NULL ) {
+		for( size_t i = 0; mapManager->maps[i] != NULL; i++ ) {
+			if( mapManager->maps[i] == map ) {
+				prismaticLogger->debug( "Map already exists in MapManager. Skipping..." );
+				return;
+			}
+		}
+	}
+
 	mapManager->_mapCount++;
 	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * mapManager->_mapCount + 1 );
 	if( mapManager == NULL ) {
@@ -798,19 +807,87 @@ static void removeMapManager( LDtkMapManager* mapManager, string mapId ) {
 
 }
 
-static LDtkTileMap* getMapByIid( LDtkMapManager* mapManager, string iid ) {
+static LDtkTileMap* getMap( LDtkMapManager* mapManager, string mapId ) {
+
+	if( mapManager->maps == NULL ) {
+		prismaticLogger->info( "getMap: MapManager is NULL!" );
+		return NULL;
+	}
+
+	size_t i = 0;
+	for( i = 0; mapManager->maps[i] != NULL; i++ ) {
+
+		if( !prismaticString->equals( mapManager->maps[i]->iid, mapId ) && !prismaticString->equals( mapManager->maps[i]-> id, mapId ) ) {
+			continue;
+		}
+
+		break;
+
+	}
+
+	if( mapManager->maps[i] == NULL ) {
+		prismaticLogger->infof( "No map with mapId '%s' was found in the MapManager", mapId );
+		return NULL;
+	}
+
+	return mapManager->maps[i];
 
 }
 
 static void changeMapByIid( LDtkMapManager* mapManager, string iid ) {
 
+	if( mapManager->maps == NULL || prismaticString->equals( "", iid ) ) {
+		return;
+	}
+
+	LDtkTileMap* map = getMap( mapManager, iid );
+
+	if( map == NULL ) {
+		prismaticLogger->infof( "Map with iid '%s' was not found in MapManager", iid );
+		return;
+	}
+
+	changeMap( mapManager, map );
+
 }
 
 static void changeMapByName( LDtkMapManager* mapManager, string id ) {
 
+	if( mapManager->maps == NULL || prismaticString->equals( "", id ) ) {
+		return;
+	}
+
+	LDtkTileMap* map = getMap( mapManager, id );
+
+	if( map == NULL ) {
+		prismaticLogger->infof( "Map with id '%s' was not found in MapManager", id );
+		return;
+	}
+
+	changeMap( mapManager, map );
+
 }
 
 static void changeMap( LDtkMapManager* mapManager, LDtkTileMap* map ) {
+
+	if( map == NULL ) {
+		prismaticLogger->error( "Cannot change to NULL map!" );
+		return;
+	}
+
+	addMapManager( mapManager, map );
+
+	if( mapManager->currentMap != NULL ) {
+		if( mapManager->currentMap->exit != NULL ) {
+			mapManager->currentMap->exit( mapManager->currentMap );
+		}
+		mapManager->previousMap = mapManager->currentMap;
+	}
+
+	mapManager->currentMap = map;
+	if( mapManager->currentMap->enter != NULL ) {
+		mapManager->currentMap->enter( mapManager->currentMap );
+	}
 
 }
 
@@ -832,8 +909,8 @@ const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
 	.delete = deleteMapManager,
 	.add = addMapManager,
 	.remove = removeMapManager,
-	// .getMapByIid = ,
-	// .changeMapByIid = ,
-	// .changeMapByName = ,
-	// .changeMap = ,
+	.getMap = getMap,
+	.changeMapByIid = changeMapByIid,
+	.changeMapByName = changeMapByName,
+	.changeMap = changeMap,
 };

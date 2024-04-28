@@ -207,8 +207,8 @@ typedef struct LDtkMapManagerFn {
 	//
 	// LDtkMapManager* mapManager
 	//
-	// string iid - The map's Iid
-	LDtkTileMap* ( *getMapByIid )( LDtkMapManager*, string );
+	// string id - The map's Id or Iid
+	LDtkTileMap* ( *getMap )( LDtkMapManager*, string );
 
 	// Change the current map to the map with the specified Iid
 	//
