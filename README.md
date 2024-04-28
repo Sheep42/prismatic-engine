@@ -1130,9 +1130,9 @@ SceneManager* initScenes() {
 
 **Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. You'll need to update accordingly if building on Windows or Mac.
 
-Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`.
+Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`. You'll also need to make sure that you've installed `make`, `cmake`, and the `arm-none-eabi-newlib` packages via your package manager. It is also not a bad idea to install `build-essential`, `base-devel`, or your OS' equivalent essential C/C++ build tools before attempting compilation.
 
-Optionally rename the `prismatic-game` directory
+Optionally rename the `prismatic-game` directory.
 
 Find all instances of `~/Projects/Playdate/prismatic-game/` that appear in the project directory, and replace them with the path to your project.
 
