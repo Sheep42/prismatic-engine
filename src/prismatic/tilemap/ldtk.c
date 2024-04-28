@@ -222,9 +222,29 @@ static void removeLDtkTileMap( LDtkTileMap* map ) {
 
 static void addCollisionLDtkTileMap( LDtkTileMap* map ) {
 
+	if( map->collision == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
+			sprites->addSprite( map->collision[i]->rects[j] );
+		}
+	}
+
 }
 
 static void removeCollisionLDtkTileMap( LDtkTileMap* map ) {
+   
+	if( map->collision == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
+			sprites->removeSprite( map->collision[i]->rects[j] );
+		}
+	}
 
 }
 
@@ -679,6 +699,8 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.draw = drawLDtkTileMap,
 	.add = addLDtkTileMap,
 	.remove = removeLDtkTileMap,
+	.addCollision = addCollisionLDtkTileMap,
+	.removeCollision = removeCollisionLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
