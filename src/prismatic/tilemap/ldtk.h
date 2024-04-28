@@ -76,6 +76,7 @@ typedef struct LDtkTileMap {
 } LDtkTileMap;
 
 typedef struct LDtkMapManager {
+	size_t _mapCount;
 	LDtkTileMap** maps;
 	LDtkTileMap* currentMap;
 	LDtkTileMap* previousMap;
@@ -167,6 +168,18 @@ typedef struct LDtkTileMapFn {
 } LDtkTileMapFn;
 
 typedef struct LDtkMapManagerFn {
+	// Create a new MapManager
+	LDtkMapManager* ( *new )( void );
+
+	// Delete a MapManager
+	//
+	// Does not free the MapManager's maps, it is up to the caller to call 
+	// prismaticTileMap->delete on their maps.
+	// ---
+	//
+	// LDtkMapManager* mapManager
+	void ( *delete )( LDtkMapManager* );
+
 	// Add a map to the Map Manager
 	//
 	// ----
@@ -192,32 +205,37 @@ typedef struct LDtkMapManagerFn {
 	//
 	// ----
 	//
-	// string Iid - The map's Iid
-	LDtkTileMap* ( *getMapByIid )( string );
+	// LDtkMapManager* mapManager
+	//
+	// string iid - The map's Iid
+	LDtkTileMap* ( *getMapByIid )( LDtkMapManager*, string );
 
 	// Change the current map to the map with the specified Iid
 	//
 	// ----
 	//
+	// LDtkMapManager* mapManager
+	//
 	// string iid - The map's Iid
-	void ( *changeMapByIid )( string );
+	void ( *changeMapByIid )( LDtkMapManager*, string );
 
 	// Change the current map to the map with the specified Identifier
 	//
 	// ----
 	//
+	// LDtkMapManager* mapManager
+	//
 	// string id - The map's identifier
-	void ( *changeMapByName )( string );
+	void ( *changeMapByName )( LDtkMapManager*, string );
 
 	// Change the current map to the specified map
 	//
 	// ----
 	//
+	// LDtkMapManager* mapManager
+	//
 	// LDtkTileMap* map
-	void ( *changeMap )( LDtkTileMap* );
-
-	// Destroy the map manager and free all of its maps
-	void ( *destroy )( void );
+	void ( *changeMap )( LDtkMapManager*, LDtkTileMap* );
 } LDtkMapManagerFn;
 
 extern const LDtkTileMapFn* prismaticTileMap;

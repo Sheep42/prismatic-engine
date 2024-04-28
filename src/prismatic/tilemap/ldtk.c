@@ -19,10 +19,14 @@ static void freeMapLayers( LDtkTileMap* map );
 
 static void freeLayer( LDtkLayer* layer );
 
-static LDtkTileMap* getMapByIid( string iid );
-static void changeMapByIid( string iid );
-static void changeMapByName( string id );
-static void changeMap( LDtkTileMap* map );
+static LDtkMapManager* newMapManager( void );
+static void deleteMapManager( LDtkMapManager* mapManager );
+static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map );
+static void removeMapManager( LDtkMapManager* mapManager, string mapId );
+static LDtkTileMap* getMapByIid( LDtkMapManager* mapManager, string iid );
+static void changeMapByIid( LDtkMapManager* mapManager, string iid );
+static void changeMapByName( LDtkMapManager* mapManager, string id );
+static void changeMap( LDtkMapManager* mapManager, LDtkTileMap* map );
 
 static void parseCollision( string layerName, SDFile* file, LDtkTileMap* map );
 static void stripNewlines( string str );
@@ -94,7 +98,7 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 
 		for( size_t i = 0; collisionLayers[i] != NULL; i++ ) {
 
-			if( collisionLayers[i] == "" ) {
+			if( prismaticString->equals( collisionLayers[i], "" ) ) {
 				continue;
 			}
 
@@ -251,7 +255,7 @@ static void removeCollisionLDtkTileMap( LDtkTileMap* map ) {
 
 static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag ) {
 
-	if( layerName == NULL || layerName == "" ) {
+	if( layerName == NULL || prismaticString->equals( layerName, "" ) ) {
 		return;
 	}
 
@@ -358,25 +362,6 @@ static void freeMapLayers( LDtkTileMap* map ) {
 	}
 
 }
-
-// MapManager
-
-static LDtkTileMap* getMapByIid( string iid ) {
-	return NULL;
-}
-
-static void changeMapByIid( string iid ) {
-
-}
-
-static void changeMapByName( string id ) {
-
-}
-
-static void changeMap( LDtkTileMap* map ) {
-
-}
-
 
 // Collisions
 
@@ -727,6 +712,110 @@ static void freeLayer( LDtkLayer* layer ) {
 
 }
 
+// MapManager
+
+static LDtkMapManager* newMapManager() {
+
+	LDtkMapManager* mapManager = calloc( 1, sizeof( LDtkMapManager ) );
+	return mapManager;
+
+}
+
+static void deleteMapManager( LDtkMapManager* mapManager ) {
+
+	if( mapManager->maps != NULL ) {
+		sys->realloc( mapManager->maps, 0 );
+		mapManager->maps = NULL;
+	}
+
+	free( mapManager );
+	mapManager = NULL;
+
+}
+
+static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map ) {
+
+	if( map == NULL ) {
+		prismaticLogger->info( "Cannot add NULL map to MapManager! Skipping..." );
+		return;
+	}
+
+	mapManager->_mapCount++;
+	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * mapManager->_mapCount + 1 );
+	if( mapManager == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for MapManager maps" );
+		return;
+	}
+
+	mapManager->maps[mapManager->_mapCount - 1] = map;
+	mapManager->maps[mapManager->_mapCount] = NULL;
+
+}
+
+static void removeMapManager( LDtkMapManager* mapManager, string mapId ) {
+
+	if( mapId == NULL || prismaticString->equals( "", mapId ) ) {
+		return;
+	}
+
+	if( mapManager->maps == NULL ) {
+		return;
+	}
+
+	size_t i = 0;
+	for( i = 0; mapManager->maps[i] != NULL; i++ ) {
+
+		if( !prismaticString->equals( mapManager->maps[i]->id, mapId ) && !prismaticString->equals( mapManager->maps[i]->iid, mapId ) ) {
+			continue;
+		}
+
+		if( mapManager->maps[i] == mapManager->currentMap ) {
+			prismaticLogger->infof( "Cannot remove current map! Map: %s. Use prismaticMapManager->destroy() to delete the map manager", mapId );
+			return;
+		}
+
+		break;
+
+	}
+
+	if( mapManager->maps[i] == NULL ) {
+		prismaticLogger->infof( "Map Id '%s' was not found in MapManager", mapId );
+		return;
+	}
+
+	// Shift elements to the left
+	for( size_t j = i; mapManager->maps[j] != NULL; j++ ) {
+		mapManager->maps[j] = mapManager->maps[j + 1];
+	}
+
+	// Reallocate the memory for mapManager->maps
+	mapManager->_mapCount--;
+	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * mapManager->_mapCount + 1 );
+	if( mapManager == NULL ) {
+		prismaticLogger->error( "Could not reallocate memory for MapManager maps" );
+		return;
+	}
+
+}
+
+static LDtkTileMap* getMapByIid( LDtkMapManager* mapManager, string iid ) {
+
+}
+
+static void changeMapByIid( LDtkMapManager* mapManager, string iid ) {
+
+}
+
+static void changeMapByName( LDtkMapManager* mapManager, string id ) {
+
+}
+
+static void changeMap( LDtkMapManager* mapManager, LDtkTileMap* map ) {
+
+}
+
+// Util Functions
+
 const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.new = newLDtkTileMap,
 	.delete = deleteLDtkTileMap,
@@ -739,8 +828,12 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
-	.getMapByIid = getMapByIid,
-	.changeMapByIid = changeMapByIid,
-	.changeMapByName = changeMapByName,
-	.changeMap = changeMap,
+	.new = newMapManager,
+	.delete = deleteMapManager,
+	.add = addMapManager,
+	.remove = removeMapManager,
+	// .getMapByIid = ,
+	// .changeMapByIid = ,
+	// .changeMapByName = ,
+	// .changeMap = ,
 };
