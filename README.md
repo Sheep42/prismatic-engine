@@ -18,7 +18,40 @@ The engine is built directly into the project, but separated into its own `prism
 
 ---
 
-## Architecture
+## Building / Running a Game
+
+**Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. You'll need to update accordingly if building on Windows or Mac.
+
+Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`. You'll also need to make sure that you've installed `make`, `cmake`, and the `arm-none-eabi-newlib` packages via your package manager. It is also not a bad idea to install `build-essential`, `base-devel`, or your OS' equivalent essential C/C++ build tools before attempting compilation.
+
+Optionally rename the `prismatic-game` directory.
+
+Find all instances of `~/Projects/Playdate/prismatic-game/` that appear in the project directory, and replace them with the path to your project.
+
+```bash
+cd /path/to/project/
+find ./ -type f -exec sed -i 's#~/Projects/Playdate/prismatic-game/#/path/to/project/#g' {} +
+```
+
+### Running on the Simulator
+
+Run `./build-run.sh` 
+
+After cmake output, the simulator should launch with the latest compiled version of your game.
+
+---
+
+### Building for the Device
+
+Run `./build.sh`
+
+You'll see a `build` directory should be created. In that directory you will see a `prismatic-game.pdx.zip` file after a successful build.
+
+**Alternative Method**: You can run your game on the simulator and use the "Upload to Device" option there to sideload your game for quick testing.
+
+---
+
+## Engine Architecture
 
 ### Game & Engine Files
 
@@ -1123,39 +1156,6 @@ SceneManager* initScenes() {
 
 }
 ```
-
----
-
-## Building / Running a Game
-
-**Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. You'll need to update accordingly if building on Windows or Mac.
-
-Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`. You'll also need to make sure that you've installed `make`, `cmake`, and the `arm-none-eabi-newlib` packages via your package manager. It is also not a bad idea to install `build-essential`, `base-devel`, or your OS' equivalent essential C/C++ build tools before attempting compilation.
-
-Optionally rename the `prismatic-game` directory.
-
-Find all instances of `~/Projects/Playdate/prismatic-game/` that appear in the project directory, and replace them with the path to your project.
-
-```bash
-cd /path/to/project/
-find ./ -type f -exec sed -i 's#~/Projects/Playdate/prismatic-game/#/path/to/project/#g' {} +
-```
-
-### Running on the Simulator
-
-Run `./build-run.sh` 
-
-After cmake output, the simulator should launch with the latest compiled version of your game.
-
----
-
-### Building for the Device
-
-Run `./build.sh`
-
-You'll see a `build` directory should be created. In that directory you will see a `prismatic-game.pdx.zip` file after a successful build.
-
-**Alternative Method**: You can run your game on the simulator and use the "Upload to Device" option there to sideload your game for quick testing.
 
 ---
 
