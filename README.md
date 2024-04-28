@@ -1745,7 +1745,6 @@ static void init() {
 
 }
 
-float e = 0.0;
 // update is your game's entry point to the engine
 static void update( float delta ) {
 
@@ -1838,7 +1837,6 @@ static void init() {
 
 }
 
-float e = 0.0;
 // update is your game's entry point to the engine
 static void update( float delta ) {
 
