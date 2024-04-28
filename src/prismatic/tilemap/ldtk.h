@@ -153,6 +153,17 @@ typedef struct LDtkTileMapFn {
 	//
 	// LDtkTileMap* map
 	void ( *removeCollision )( LDtkTileMap* );
+
+	// Tag a the Sprites in a map's collision layer
+	//
+	// ---
+	//
+	// LDtkTileMap* map
+	//
+	// string layerName
+	//
+	// uint8_t tag 
+	void ( *tagCollision )( LDtkTileMap*, string, uint8_t );
 } LDtkTileMapFn;
 
 typedef struct LDtkMapManagerFn {

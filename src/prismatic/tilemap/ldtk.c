@@ -11,6 +11,7 @@ static void addLDtkTileMap( LDtkTileMap* map );
 static void removeLDtkTileMap( LDtkTileMap* map );
 static void addCollisionLDtkTileMap( LDtkTileMap* map );
 static void removeCollisionLDtkTileMap( LDtkTileMap* map );
+static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag );
 
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
@@ -248,6 +249,33 @@ static void removeCollisionLDtkTileMap( LDtkTileMap* map ) {
 
 }
 
+static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag ) {
+
+	if( layerName == NULL || layerName == "" ) {
+		return;
+	}
+
+	if( map->collision == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+
+		if( map->collision[i]->name != layerName ) {
+			continue;
+		}
+
+		if( map->collision[i]->rects == NULL ) {
+			continue;
+		}
+
+		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
+			sprites->setTag( map->collision[i]->rects[j], tag );
+		}
+
+	}
+
+}
 
 static void freeMapCollisions( LDtkTileMap* map ) {
 
@@ -707,6 +735,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.remove = removeLDtkTileMap,
 	.addCollision = addCollisionLDtkTileMap,
 	.removeCollision = removeCollisionLDtkTileMap,
+	.tagCollision = tagCollisionLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
