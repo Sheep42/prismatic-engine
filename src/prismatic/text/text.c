@@ -10,6 +10,7 @@ static string newString( string str ) {
 
 static void deleteString( string str ) {
 	free( str );
+	str = NULL;
 }
 
 static bool stringEquals( string str1, string str2 ) {
