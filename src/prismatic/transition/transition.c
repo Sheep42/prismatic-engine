@@ -107,6 +107,7 @@ static void deleteTransition( PrismTransition* transition ) {
     }
 
     free( transition );
+    transition = NULL;
 
 }
 
