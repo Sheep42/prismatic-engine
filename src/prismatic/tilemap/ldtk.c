@@ -66,8 +66,12 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 		// Free allocated memory
 		prismaticString->delete( trimmedPath );
 		prismaticString->delete( dataPath );
+		
 		free( mapReader );
+		mapReader = NULL;
+		
 		free( mapDecoder );
+		mapDecoder = NULL;
 		
 		return NULL;
 	}
@@ -118,7 +122,10 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 				prismaticString->delete( collisionPath );
 
 				free( mapReader );
+				mapReader = NULL;
+
 				free( mapDecoder );
+				mapDecoder = NULL;
 
 				// Close Files
 				pd->file->close( jsonFile );
@@ -140,8 +147,12 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 	// Free allocated memory
 	prismaticString->delete( trimmedPath );
 	prismaticString->delete( dataPath );
+	
 	free( mapReader );
+	mapReader = NULL;
+
 	free( mapDecoder );
+	mapDecoder = NULL;
 
 	// Close Files
 	pd->file->close( jsonFile );
@@ -161,6 +172,7 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	freeMapLayers( map );
 
 	free( map );
+	map = NULL;
 
 }
 
