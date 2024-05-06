@@ -8,6 +8,7 @@
 
 static StateMachine* new( State* );
 static void delete( StateMachine* );
+static void freeStates( StateMachine* stateMachine );
 static void update( StateMachine*, float );
 static State* changeStateByName( StateMachine* stateMachine, char* name );
 static State* changeState( StateMachine* stateMachine, State* state );
@@ -38,8 +39,24 @@ static void delete( StateMachine* stateMachine ) {
 	if( stateMachine == NULL )
 		return;
 
-	free( stateMachine->states );
+	freeStates( stateMachine );
+
 	free( stateMachine );
+	stateMachine = NULL;
+
+}
+
+static void freeStates( StateMachine* stateMachine ) {
+	
+	for( int i = 0; i < stateMachine->totalStates; i++ ) {
+		stateMachine->states[i] = sys->realloc( stateMachine->states[i], 0 );
+		stateMachine->states[i] = NULL;
+	}
+
+	stateMachine->totalStates = 0;
+
+	free( stateMachine->states );
+	stateMachine->states = NULL;
 
 }
 
@@ -174,6 +191,7 @@ static State* newState( const char* name ) {
 
 static void deleteState( State* state ) {
 	free( state );
+	state = NULL;
 }
 
 const StateFn* prismaticState = &(StateFn) {
