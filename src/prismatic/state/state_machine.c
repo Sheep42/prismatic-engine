@@ -49,13 +49,13 @@ static void delete( StateMachine* stateMachine ) {
 static void freeStates( StateMachine* stateMachine ) {
 	
 	for( int i = 0; i < stateMachine->totalStates; i++ ) {
-		stateMachine->states[i] = sys->realloc( stateMachine->states[i], 0 );
+		sys->realloc( stateMachine->states[i], 0 );
 		stateMachine->states[i] = NULL;
 	}
 
 	stateMachine->totalStates = 0;
 
-	free( stateMachine->states );
+	sys->realloc( stateMachine->states, 0 );
 	stateMachine->states = NULL;
 
 }
