@@ -2,6 +2,7 @@
 #include "transition.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float speed, int type );
@@ -9,6 +10,7 @@ static void deleteTransition( PrismTransition* transition );
 static void playTransition( PrismTransition* transition, float delta );
 static void completeTransition( PrismTransition* transition );
 static void drawTransition( PrismTransition* self, float delta );
+static void cleanTransitionImages( PrismTransition* transition );
 
 static void initializeShow( PrismTransition* transition );
 static void initializeHide( PrismTransition* transition );
@@ -126,6 +128,7 @@ static void playTransition( PrismTransition* transition, float delta ) {
     transition->runTime += delta;
 
     if( transition->draw != NULL ) {
+        cleanTransitionImages( transition );
         transition->draw( transition, delta );
     }
 
@@ -163,11 +166,27 @@ static void completeTransition( PrismTransition* transition ) {
         return;
     }
 
+    transition->finished = true;
+
+    cleanTransitionImages( transition );
+
     if( transition->complete != NULL ) {
         transition->complete( transition );
     }
 
-    transition->finished = true;
+}
+
+static void cleanTransitionImages( PrismTransition* transition ) {
+
+    if( transition->_rendered != NULL ) {
+        graphics->freeBitmap( transition->_rendered );
+        transition->_rendered = NULL;
+    }
+
+    if( transition->mask != NULL ) {
+        graphics->freeBitmap( transition->mask );
+        transition->mask = NULL;
+    }
 
 }
 
