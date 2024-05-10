@@ -116,6 +116,7 @@ static void deleteSprite( PrismSprite* s ) {
 	}
 
 	sys->realloc( s, 0 );
+	s = NULL;
 
 }
 
@@ -129,7 +130,8 @@ static void freeImages( LCDBitmap** images ) {
 		graphics->freeBitmap( images[i] );
 	}
 
-	images = sys->realloc( images, 0 );
+	sys->realloc( images, 0 );
+	images = NULL;
 
 }
 
@@ -222,6 +224,7 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, floa
 static void deleteAnimation( PrismAnimation* animation ) {
 
 	free( animation );
+	animation = NULL;
 
 }
 
