@@ -53,7 +53,10 @@ static void deleteSceneManager( SceneManager* sceneManager ) {
 	}
 
 	sceneManager->scenes = sys->realloc( sceneManager->scenes, 0 );
+	sceneManager->totalScenes = 0;
+	
 	free( sceneManager );
+	sceneManager = NULL;
 
 }
 
@@ -272,10 +275,12 @@ static void deleteScene( Scene* scene ) {
 		}
 
 		scene->sprites = sys->realloc( scene->sprites, 0 );
-	
+		scene->totalSprites = 0;
+
 	}
 
 	free( scene );
+	scene = NULL;
 
 }
 

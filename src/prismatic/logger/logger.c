@@ -140,7 +140,6 @@ static char* getCurrentTimestamp() {
     time( &rawtime );
     timeinfo = localtime( &rawtime );
 
-    // fixme: buffer is cutting off timestamp
     strftime( buffer, bufSize, "%Y-%m-%d %H:%M:%S", timeinfo );
     return buffer;
 
