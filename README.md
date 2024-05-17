@@ -35,6 +35,8 @@ find ./ -type f -exec sed -i 's#~/Projects/Playdate/prismatic-game/#/path/to/pro
 
 ### Running on the Simulator
 
+**Note**: Before the build can run, the Playdate Simulator needs to be linked as `/usr/bin/pdsim` or `/usr/local/bin/pdsim`, or an alias `pdsim` needs to be created in your environment.
+
 Run `./build-run.sh` 
 
 After cmake output, the simulator should launch with the latest compiled version of your game.
