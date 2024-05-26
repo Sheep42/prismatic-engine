@@ -29,6 +29,10 @@ typedef enum {
 	PrismTransitionType_GrowFromCenter,
 	// Shrink in to center
 	PrismTransitionType_ShrinkToCenter,
+	// Slide whole image to the Right
+	PrismTransitionType_SlideRight,
+	// Slide whole image to the Left
+	PrismTransitionType_SlideLeft,
 	// User-defined effect
 	PrismTransitionType_Custom,
 } PrismTransitionType;

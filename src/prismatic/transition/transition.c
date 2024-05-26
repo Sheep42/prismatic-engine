@@ -21,6 +21,8 @@ static void RTLIn_update( PrismTransition* self, float delta );
 static void RTLOut_update( PrismTransition* self, float delta );
 static void GrowFromCenter_update( PrismTransition* self, float delta );
 static void ShrinkToCenter_update( PrismTransition* self, float delta );
+static void SlideRight_update( PrismTransition* self, float delta );
+static void SlideLeft_update( PrismTransition* self, float delta );
 
 const int PRISM_TRANSITION_MIN = 0;
 const int PRISM_TRANSITION_MAX = 255;
@@ -73,7 +75,12 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
             initializeHide( transition );
             transition->update = GrowFromCenter_update;
             break;
-
+        case PrismTransitionType_SlideRight:
+            initializeShow( transition );
+            transition->update = SlideRight_update;
+        case PrismTransitionType_SlideLeft:
+            initializeShow( transition );
+            transition->update = SlideLeft_update;
         default:
             break;
     }
@@ -348,6 +355,26 @@ static void ShrinkToCenter_update( PrismTransition* self, float delta ) {
     if( self->_exp2 < 7 ) self->_exp2++;
 
     if( done ) {
+        completeTransition( self );
+    }
+
+}
+
+static void SlideRight_update( PrismTransition* self, float delta ) {
+    
+    self->x += 15;
+
+    if( self->x >= pd->display->getWidth() ) {
+        completeTransition( self );
+    }
+
+}
+
+static void SlideLeft_update( PrismTransition* self, float delta ) {
+    
+    self->x -= 15;
+
+    if( abs( self->x ) >= pd->display->getWidth() ) {
         completeTransition( self );
     }
 
