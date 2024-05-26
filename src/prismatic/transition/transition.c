@@ -441,8 +441,6 @@ static void FadeOut_update( PrismTransition* self, float delta ) {
 
     for( uint8_t i = 0; i < 8; i++ ) {
         
-        prismaticLogger->debugf( "%d", self->pattern[i] );
-
         if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
 
             if( false == self->_exp1Finished ) {
@@ -470,8 +468,6 @@ static void FadeOut_update( PrismTransition* self, float delta ) {
             self->_exp2 -= 2;
         }
     }
-
-    prismaticLogger->debugf( "%d, %d", self->_exp1, self->_exp2 );
 
     if( done ) {
         completeTransition( self );
