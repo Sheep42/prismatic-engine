@@ -33,6 +33,10 @@ typedef enum {
 	PrismTransitionType_SlideRight,
 	// Slide whole image to the Left
 	PrismTransitionType_SlideLeft,
+	// Fade in, checkerboard pattern
+	PrismTransitionType_FadeIn,
+	// Fade out, checkerboard pattern
+	PrismTransitionType_FadeOut,
 	// User-defined effect
 	PrismTransitionType_Custom,
 } PrismTransitionType;
@@ -52,6 +56,7 @@ typedef struct PrismTransition {
 	bool finished;
 	uint8_t _exp1;
 	uint8_t _exp2;
+	bool _exp1Finished;
 	// Fires when entering the PrismTransition
 	// 
 	// PrismTransition* self

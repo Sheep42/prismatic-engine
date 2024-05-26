@@ -23,6 +23,8 @@ static void GrowFromCenter_update( PrismTransition* self, float delta );
 static void ShrinkToCenter_update( PrismTransition* self, float delta );
 static void SlideRight_update( PrismTransition* self, float delta );
 static void SlideLeft_update( PrismTransition* self, float delta );
+static void FadeIn_update( PrismTransition* self, float delta );
+static void FadeOut_update( PrismTransition* self, float delta );
 
 const int PRISM_TRANSITION_MIN = 0;
 const int PRISM_TRANSITION_MAX = 255;
@@ -38,6 +40,7 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
     transition->runTime = 0.0f;
     transition->flipped = kBitmapUnflipped;
     transition->image = image;
+    transition->_exp1Finished = false;
 
     // initialize properties for built-ins
     switch( type ) {
@@ -78,9 +81,23 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
         case PrismTransitionType_SlideRight:
             initializeShow( transition );
             transition->update = SlideRight_update;
+            break;
         case PrismTransitionType_SlideLeft:
             initializeShow( transition );
             transition->update = SlideLeft_update;
+            break;
+        case PrismTransitionType_FadeIn:
+            transition->_exp1 = 0;
+            transition->_exp2 = 1;
+            initializeHide( transition );
+            transition->update = FadeIn_update;
+            break;
+        case PrismTransitionType_FadeOut:
+            transition->_exp1 = 6;
+            transition->_exp2 = 7;
+            initializeShow( transition );
+            transition->update = FadeOut_update;
+            break;
         default:
             break;
     }
@@ -375,6 +392,88 @@ static void SlideLeft_update( PrismTransition* self, float delta ) {
     self->x -= 15;
 
     if( abs( self->x ) >= pd->display->getWidth() ) {
+        completeTransition( self );
+    }
+
+}
+
+static void FadeIn_update( PrismTransition* self, float delta ) {
+
+    bool done = true;
+
+    for( uint8_t i = 0; i < 8; i++ ) {
+
+        if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+
+            if( self->_exp1 <= 6 ) {
+                self->pattern[i] += ( prismaticUtils->uint8_pow( 2, self->_exp1 ) );
+            } else {
+                self->pattern[i] += ( prismaticUtils->uint8_pow( 2, self->_exp2 ) );
+            }
+
+            if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+                done = false;
+            }
+
+        } else {
+            self->pattern[i] = PRISM_TRANSITION_MAX;
+        }
+
+    }
+
+    if( self->_exp1 <= 6 ) {
+        self->_exp1 += 2;
+    } else {
+        if( self->_exp2 < 7 ) {
+            self->_exp2 += 2;
+        }
+    }
+
+    if( done ) {
+        completeTransition( self );
+    }
+
+}
+
+static void FadeOut_update( PrismTransition* self, float delta ) {
+
+    bool done = true;
+
+    for( uint8_t i = 0; i < 8; i++ ) {
+        
+        prismaticLogger->debugf( "%d", self->pattern[i] );
+
+        if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
+
+            if( false == self->_exp1Finished ) {
+                self->pattern[i] -= ( prismaticUtils->uint8_pow( 2, self->_exp1 ) );
+            } else {
+                self->pattern[i] -= ( prismaticUtils->uint8_pow( 2, self->_exp2 ) );
+            }
+
+            if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
+                done = false;
+            }
+
+        } else {
+            self->pattern[i] = PRISM_TRANSITION_MIN;
+        }
+
+    }
+
+    if( self->_exp1 > 0 ) {
+        self->_exp1 -= 2;
+    } else {
+        if( false == self->_exp1Finished ) {
+            self->_exp1Finished = true;
+        } else if( self->_exp2 > 1 ) {
+            self->_exp2 -= 2;
+        }
+    }
+
+    prismaticLogger->debugf( "%d, %d", self->_exp1, self->_exp2 );
+
+    if( done ) {
         completeTransition( self );
     }
 
