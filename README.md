@@ -1456,6 +1456,8 @@ The fundamental concept behind how transitions work is this:
 
 - `float speed`: The speed at which the transition should play, in seconds
 
+- `float moveSpeed`: The number of pixels the transition should move in a frame - Used by Slide transitions. Default: 15
+
 - `float elapsed`: Internal timer used to keep track of playing the transition
 
 - `float runTime`: A running total of the time a transition has been playing
@@ -1511,6 +1513,14 @@ The fundamental concept behind how transitions work is this:
 - `PrismTransitionType_GrowFromCenter`: Grow out from center
 
 - `PrismTransitionType_ShrinkToCenter`: Shrink in to center
+
+- `PrismTransitionType_SlideRight`: Slide entire image to the Right
+
+- `PrismTransitionType_SlideLeft`: Slide entire image to the Left
+
+- `PrismTransitionType_FadeIn`: "Fade" in, checkerboard pattern
+
+- `PrismTransitionType_FadeOut`: "Fade" out, checkerboard pattern
 
 - `PrismTransitionType_Custom`: User-defined effect - You are repsonsible for implementation
 
