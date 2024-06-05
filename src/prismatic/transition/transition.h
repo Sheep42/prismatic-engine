@@ -44,6 +44,7 @@ typedef enum {
 typedef struct PrismTransition {
 	int type;
 	float speed;
+	float moveSpeed;
 	float elapsed;
 	float runTime;
 	int x;

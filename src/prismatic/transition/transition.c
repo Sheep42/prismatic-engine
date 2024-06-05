@@ -35,6 +35,7 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
 
     transition->type = type;
     transition->speed = speed;
+    transition->moveSpeed = 15;
     transition->finished = false;
     transition->elapsed = 0.0f;
     transition->runTime = 0.0f;
@@ -379,7 +380,7 @@ static void ShrinkToCenter_update( PrismTransition* self, float delta ) {
 
 static void SlideRight_update( PrismTransition* self, float delta ) {
     
-    self->x += 15;
+    self->x += self->moveSpeed;
 
     if( self->x >= pd->display->getWidth() ) {
         completeTransition( self );
@@ -389,7 +390,7 @@ static void SlideRight_update( PrismTransition* self, float delta ) {
 
 static void SlideLeft_update( PrismTransition* self, float delta ) {
     
-    self->x -= 15;
+    self->x -= self->moveSpeed;
 
     if( abs( self->x ) >= pd->display->getWidth() ) {
         completeTransition( self );
