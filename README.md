@@ -1456,11 +1456,15 @@ The fundamental concept behind how transitions work is this:
 
 - `float speed`: The speed at which the transition should play, in seconds
 
-- `float moveSpeed`: The number of pixels the transition should move in a frame - Used by Slide transitions. Default: 15
+- `float moveSpeed`: The number of pixels the transition should move in a frame - Used by Slide transitions. Default: 15.0
 
 - `float elapsed`: Internal timer used to keep track of playing the transition
 
+- `float completeElapsed`: Internal timer used to keep track of the completion delay
+
 - `float runTime`: A running total of the time a transition has been playing
+
+- `float completeDelay`: The amount of time, in seconds, to delay before the complete callback is called. Default 0.0
 
 - `int x`: The x position of the transition image
 
@@ -1481,6 +1485,8 @@ The fundamental concept behind how transitions work is this:
 - `uint8_t _exp1`: Internal value for storing exponents used in 8-bit math
 
 - `uint8_t _exp2`: Internal value for storing exponents used in 8-bit math
+
+- `bool _pass`: Generic flag that can be used to keep track of states in a transition - Used by Fade In/Fade Out Effects to set even bytes, then odd bytes
 
 - `void ( *enter )( struct PrismTransition* )`: Function that runs when the transition is entered - If you use a pre-defined transition type, this will be set for you
 
