@@ -8,7 +8,7 @@
 static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float speed, int type );
 static void deleteTransition( PrismTransition* transition );
 static void playTransition( PrismTransition* transition, float delta );
-static void completeTransition( PrismTransition* transition );
+static void completeTransition( PrismTransition* transition, float delta );
 static void drawTransition( PrismTransition* self, float delta );
 static void cleanTransitionImages( PrismTransition* transition );
 
@@ -38,10 +38,12 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
     transition->moveSpeed = 15;
     transition->finished = false;
     transition->elapsed = 0.0f;
+    transition->completeElapsed = 0.0f;
     transition->runTime = 0.0f;
     transition->flipped = kBitmapUnflipped;
     transition->image = image;
-    transition->_exp1Finished = false;
+    transition->_pass = false;
+    transition->completeDelay = 0;
 
     // initialize properties for built-ins
     switch( type ) {
@@ -89,12 +91,12 @@ static PrismTransition* newTransition( LCDBitmap* image, int x, int y, float spe
             break;
         case PrismTransitionType_FadeIn:
             transition->_exp1 = 0;
-            transition->_exp2 = 1;
+            transition->_exp2 = 7;
             initializeHide( transition );
             transition->update = FadeIn_update;
             break;
         case PrismTransitionType_FadeOut:
-            transition->_exp1 = 6;
+            transition->_exp1 = 0;
             transition->_exp2 = 7;
             initializeShow( transition );
             transition->update = FadeOut_update;
@@ -185,9 +187,12 @@ static void drawTransition( PrismTransition* self, float delta ) {
 
 }
 
-static void completeTransition( PrismTransition* transition ) {
+static void completeTransition( PrismTransition* transition, float delta ) {
 
-    if( transition->finished ) {
+    transition->completeElapsed += delta;
+    transition->speed = 0.0f;
+
+    if( transition->finished || transition->completeElapsed < transition->completeDelay ) {
         return;
     }
 
@@ -237,7 +242,7 @@ static void LTRIn_update( PrismTransition* self, float delta ) {
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -265,7 +270,7 @@ static void LTROut_update( PrismTransition* self, float delta ) {
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -291,7 +296,7 @@ static void RTLIn_update( PrismTransition* self, float delta ) {
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -319,7 +324,7 @@ static void RTLOut_update( PrismTransition* self, float delta ) {
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -346,7 +351,7 @@ static void GrowFromCenter_update( PrismTransition* self, float delta ) {
     if( self->_exp2 < 7 ) self->_exp2++;
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -373,7 +378,7 @@ static void ShrinkToCenter_update( PrismTransition* self, float delta ) {
     if( self->_exp2 < 7 ) self->_exp2++;
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -383,7 +388,7 @@ static void SlideRight_update( PrismTransition* self, float delta ) {
     self->x += self->moveSpeed;
 
     if( self->x >= pd->display->getWidth() ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -393,7 +398,7 @@ static void SlideLeft_update( PrismTransition* self, float delta ) {
     self->x -= self->moveSpeed;
 
     if( abs( self->x ) >= pd->display->getWidth() ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -402,36 +407,55 @@ static void FadeIn_update( PrismTransition* self, float delta ) {
 
     bool done = true;
 
-    for( uint8_t i = 0; i < 8; i++ ) {
+    if( self->pattern[0] < PRISM_TRANSITION_MAX ) {
 
-        if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
-
-            if( self->_exp1 <= 6 ) {
-                self->pattern[i] += ( prismaticUtils->uint8_pow( 2, self->_exp1 ) );
-            } else {
-                self->pattern[i] += ( prismaticUtils->uint8_pow( 2, self->_exp2 ) );
-            }
+        for( uint8_t i = 0; i < 8; i += 2 ) {
 
             if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
-                done = false;
+                self->pattern[i] += prismaticUtils->uint8_pow( 2, self->_exp1 ) + prismaticUtils->uint8_pow( 2, self->_exp2 );
+            } else {
+                self->pattern[i] = PRISM_TRANSITION_MAX;
             }
 
-        } else {
-            self->pattern[i] = PRISM_TRANSITION_MAX;
+        }
+
+    } else {
+
+        // Reset exponents and fade the odd bytes
+        if( false == self->_pass ) {
+            self->_pass = true;
+            self->_exp1 = 0;
+            self->_exp2 = 7;
+        }
+
+        for( uint8_t i = 1; i < 8; i += 2 ) {
+
+            if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+                self->pattern[i] += prismaticUtils->uint8_pow( 2, self->_exp1 ) + prismaticUtils->uint8_pow( 2, self->_exp2 );
+            } else {
+                self->pattern[i] = PRISM_TRANSITION_MAX;
+            }
+
         }
 
     }
 
-    if( self->_exp1 <= 6 ) {
+    if( self->_exp1 < 8 ) {
         self->_exp1 += 2;
-    } else {
-        if( self->_exp2 < 7 ) {
-            self->_exp2 += 2;
+    }
+
+    if( self->_exp2 > 1 ) {
+        self->_exp2 -= 2;
+    }
+
+    for( uint8_t i = 0; i < 8; i++ ) {
+        if( self->pattern[i] < PRISM_TRANSITION_MAX ) {
+            done = false;
         }
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }
@@ -440,38 +464,56 @@ static void FadeOut_update( PrismTransition* self, float delta ) {
 
     bool done = true;
 
-    for( uint8_t i = 0; i < 8; i++ ) {
-        
-        if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
+    if( self->pattern[0] > PRISM_TRANSITION_MIN ) {
 
-            if( false == self->_exp1Finished ) {
-                self->pattern[i] -= ( prismaticUtils->uint8_pow( 2, self->_exp1 ) );
-            } else {
-                self->pattern[i] -= ( prismaticUtils->uint8_pow( 2, self->_exp2 ) );
-            }
-
+        // First fade the even bytes
+        for( uint8_t i = 0; i < 8; i += 2 ) {
+            
             if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
-                done = false;
+                self->pattern[i] = self->pattern[i] - prismaticUtils->uint8_pow( 2, self->_exp1 ) - prismaticUtils->uint8_pow( 2, self->_exp2 );
+            } else {
+                self->pattern[i] = PRISM_TRANSITION_MIN;
             }
 
-        } else {
-            self->pattern[i] = PRISM_TRANSITION_MIN;
+        }
+
+    } else {
+
+        // Reset exponents and fade the odd bytes
+        if( false == self->_pass ) {
+            self->_pass = true;
+            self->_exp1 = 0;
+            self->_exp2 = 7;
+        }
+
+        for( uint8_t i = 1; i < 8; i += 2 ) {
+            
+            if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
+                self->pattern[i] = self->pattern[i] - prismaticUtils->uint8_pow( 2, self->_exp1 ) - prismaticUtils->uint8_pow( 2, self->_exp2 );
+            } else {
+                self->pattern[i] = PRISM_TRANSITION_MIN;
+            }
+
         }
 
     }
 
-    if( self->_exp1 > 0 ) {
-        self->_exp1 -= 2;
-    } else {
-        if( false == self->_exp1Finished ) {
-            self->_exp1Finished = true;
-        } else if( self->_exp2 > 1 ) {
-            self->_exp2 -= 2;
+    if( self->_exp1 < 8 ) {
+        self->_exp1 += 2;
+    } 
+    
+    if( self->_exp2 > 1 ) {
+        self->_exp2 -= 2;
+    }
+
+    for( uint8_t i = 0; i < 8; i++ ) {
+        if( self->pattern[i] > PRISM_TRANSITION_MIN ) {
+            done = false;
         }
     }
 
     if( done ) {
-        completeTransition( self );
+        completeTransition( self, delta );
     }
 
 }

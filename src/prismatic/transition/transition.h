@@ -46,7 +46,9 @@ typedef struct PrismTransition {
 	float speed;
 	float moveSpeed;
 	float elapsed;
+	float completeElapsed;
 	float runTime;
+	float completeDelay;
 	int x;
 	int y;
 	LCDBitmapFlip flipped;
@@ -57,7 +59,7 @@ typedef struct PrismTransition {
 	bool finished;
 	uint8_t _exp1;
 	uint8_t _exp2;
-	bool _exp1Finished;
+	bool _pass;
 	// Fires when entering the PrismTransition
 	// 
 	// PrismTransition* self
