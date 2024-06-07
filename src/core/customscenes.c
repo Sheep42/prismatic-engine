@@ -47,7 +47,8 @@ static void sc1_enter( Scene* self ) {
     PrismSprite* s = prismaticScene->get( self, "spr1" ); // Get Sprite 1 from the Scene
     sprites->moveTo( s->sprite, 50, 50 ); // Set Sprite 1's position to 50, 50
 
-    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_ShrinkToCenter ); // Initialize a new ShrinkToCenter Transition that animates in intervals of 0.05 seconds
+    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_FadeOut ); // Initialize a new ShrinkToCenter Transition that animates in intervals of 0.05 seconds
+    transition->completeDelay = 0.25f;
     transition->complete = transition_complete; // Set the Transition's complete method to transition_complete
 }
 
