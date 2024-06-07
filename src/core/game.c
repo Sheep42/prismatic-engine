@@ -10,6 +10,8 @@ static void draw( float );
 static void destroy( void );
 
 static SceneManager* sm;
+static StateMachine* stm;
+static State* state;
 
 // Use init to hook into the Engine's initialization function. This runs 
 // before the first call to update but after the engine has initialized itself
@@ -17,6 +19,9 @@ static void init() {
     
     prismaticLogger->info( "init" );
     sm = initScenes();
+
+    state = prismaticState->new( "State 1" );
+    stm = prismaticStateMachine->new( state );
 
 }
 
@@ -38,6 +43,7 @@ static void draw( float delta ) {
 static void destroy() {
     prismaticLogger->info( "destroy" );
     prismaticSceneManager->delete( sm );
+    prismaticStateMachine->delete( stm );
 }
 
 // Called by the Engine to bind the game to itself - if you are going to modify

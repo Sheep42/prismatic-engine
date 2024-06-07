@@ -1,5 +1,6 @@
 #include "customscenes.h"
 #include "../prismatic/prismatic.h"
+#include <stdio.h>
 
 static LCDBitmap** images;
 static float elapsed = 0.0f;
@@ -8,6 +9,13 @@ static bool bgGot = false;
 
 static SceneManager* sm;
 static PrismTransition* transition;
+static LDtkTileMap* map;
+
+typedef enum {
+    kDefault = 0,
+    kFloor = 1,
+    kWall = 2,
+} CollisionType;
 
 static void spr1_update( PrismSprite* self, float delta );
 static void spr2_update( PrismSprite* self, float delta );
@@ -47,9 +55,10 @@ static void sc1_enter( Scene* self ) {
     PrismSprite* s = prismaticScene->get( self, "spr1" ); // Get Sprite 1 from the Scene
     sprites->moveTo( s->sprite, 50, 50 ); // Set Sprite 1's position to 50, 50
 
-    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_FadeOut ); // Initialize a new ShrinkToCenter Transition that animates in intervals of 0.05 seconds
+    transition = prismaticTransition->new( NULL, 0, 0, 0.05f, PrismTransitionType_FadeOut ); // Initialize a new FadeOut Transition that animates in intervals of 0.05 seconds
     transition->completeDelay = 0.25f;
     transition->complete = transition_complete; // Set the Transition's complete method to transition_complete
+
 }
 
 static void sc1_update( Scene* self, float delta ) {
@@ -66,6 +75,10 @@ static void sc1_update( Scene* self, float delta ) {
     }
 
     if( bgGot ) {
+        // Remove map and collision before starting the transition
+        prismaticTileMap->remove( map );
+        prismaticTileMap->removeCollision( map );
+
         prismaticTransition->play( transition, delta ); // Play the transition
     }
 
@@ -165,6 +178,30 @@ SceneManager* initScenes() {
     /////////////////////////////
     prismaticScene->add( sc1, "spr1", s );
 
+    string* collision = sys->realloc( NULL, sizeof( string ) * 2 + 1 );
+    collision[0] = "Collision";
+    collision[1] = "Floor";
+    collision[2] = NULL;
+
+    /////////////////////////////////
+    // Create map from LDTK export //
+    /////////////////////////////////
+    map = prismaticTileMap->new( "assets/maps/Level_0", 16, collision );
+
+    /////////////////////////////////////
+    // Tag map collision layer Sprites //
+    /////////////////////////////////////
+    prismaticTileMap->tagCollision( map, "Collision", kWall );
+    prismaticTileMap->tagCollision( map, "Floor", kFloor );
+
+    sys->realloc( collision, 0 );
+    collision = NULL;
+
+    ///////////////////////////////////////////
+    // Add the map & collision to the screen //
+    ///////////////////////////////////////////
+    prismaticTileMap->add( map );
+    prismaticTileMap->addCollision( map );
 
     /////////////////////////////
     // Add Sprite 2 to Scene 2 //
