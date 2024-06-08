@@ -183,6 +183,7 @@ static void drawTransition( PrismTransition* self, float delta ) {
     self->mask = graphics->newBitmap( w, h, (LCDColor)self->pattern );
 
     graphics->setBitmapMask( self->_rendered, self->mask );
+    graphics->clear( kColorWhite );
     graphics->drawBitmap( self->_rendered , self->x, self->y, self->flipped );
 
 }
