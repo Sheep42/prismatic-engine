@@ -1,49 +1,39 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "customscenes.h"
 #include "../prismatic/prismatic.h"
+#include "scenes/scenes.h"
 
 static void init( void );
 static void update( float );
 static void draw( float );
 static void destroy( void );
 
-static SceneManager* sm;
-static StateMachine* stm;
-static State* state;
+static SceneManager* sceneManager;
 
 // Use init to hook into the Engine's initialization function. This runs 
 // before the first call to update but after the engine has initialized itself
 static void init() {
-    
-    prismaticLogger->info( "init" );
-    sm = initScenes();
-
-    state = prismaticState->new( "State 1" );
-    stm = prismaticStateMachine->new( state );
-
+    sceneManager = initScenes();
 }
 
 // update is your game's entry point to the engine
 static void update( float delta ) {
-    sprites->updateAndDrawSprites();
-    sys->drawFPS( 0, 0 );
-    prismaticSceneManager->update( sm, delta );
+    prismaticSceneManager->update( sceneManager, delta );
 }
 
 // draw should be used to handle screen drawing operations. It is called after 
 // update
 static void draw( float delta ) {
-
+    sprites->updateAndDrawSprites();
+    prismaticSceneManager->draw( sceneManager, delta );
+    sys->drawFPS( 0, 0 );
 }
 
 // destroy is called when the game is shut down, before the game itself is
 // freed from memory
 static void destroy() {
-    prismaticLogger->info( "destroy" );
-    prismaticSceneManager->delete( sm );
-    prismaticStateMachine->delete( stm );
+    prismaticSceneManager->delete( sceneManager );
 }
 
 // Called by the Engine to bind the game to itself - if you are going to modify
