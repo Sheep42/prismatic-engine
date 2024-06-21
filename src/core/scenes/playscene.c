@@ -4,6 +4,8 @@
 
 #include "../../prismatic/prismatic.h"
 #include "scenes.h"
+#include "splashscene.h"
+#include "titlescene.h"
 
 static void enter( Scene* self );
 static void exitScene( Scene* self );
@@ -124,6 +126,14 @@ static void enter( Scene* self ) {
     ///////////////////////////////////////////
     prismaticTileMap->add( map );
     prismaticTileMap->addCollision( map );
+
+    ///////////////////////////////////////////////////
+    // Remove Scenes we will never switch back to 	 //
+    ///////////////////////////////////////////////////
+    SplashScene splashScene = prismaticSceneManager->get( self->sceneManager, SPLASHSCENE_NAME );
+    prismaticSceneManager->remove( self->sceneManager, splashScene );
+    prismaticScene->delete( splashScene );
+
 }
 
 static void exitScene( Scene* self ) {

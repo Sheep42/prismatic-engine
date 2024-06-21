@@ -4,6 +4,7 @@
 
 #include "../../prismatic/prismatic.h"
 #include "scenes.h"
+#include "splashscene.h"
 #include "titlescene.h"
 #include "playscene.h"
 
