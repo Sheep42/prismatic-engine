@@ -13,10 +13,8 @@ static TitleScene titleScene;
 static PlayScene playScene;
 
 const string FONT_PATH_SYSTEM = "/System/Fonts/Asheville-Sans-14-Bold.pft";
-const string FONT_PATH_PIXELSPLITTER = "assets/fonts/pixelsplitter";
 
 const LCDFont* FONT_SYSTEM = NULL;
-const LCDFont* FONT_PIXELSPLITTER = NULL;
 
 SceneManager* initScenes() {
 
@@ -37,12 +35,6 @@ SceneManager* initScenes() {
 	FONT_SYSTEM = graphics->loadFont( FONT_PATH_SYSTEM, err );
 	if( FONT_SYSTEM == NULL ) {
 		prismaticLogger->errorf( "Could not load system font. err: %s", err );
-	}
-
-	err = NULL;
-	FONT_PIXELSPLITTER = graphics->loadFont( FONT_PATH_PIXELSPLITTER, err );
-	if( FONT_PIXELSPLITTER == NULL ) {
-		prismaticLogger->errorf( "Could not load pixelsplitter font. err: %s", err );
 	}
 
 	return sm;

@@ -14,9 +14,6 @@ typedef Scene* TitleScene;
 typedef Scene* PlayScene;
 
 extern const string FONT_PATH_SYSTEM;
-extern const string FONT_PATH_PIXELSPLITTER;
-
 extern const LCDFont* FONT_SYSTEM;
-extern const LCDFont* FONT_PIXELSPLITTER;
 
 #endif

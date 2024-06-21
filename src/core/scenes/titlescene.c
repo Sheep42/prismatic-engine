@@ -59,8 +59,8 @@ Scene* newTitleScene() {
 
 static void enter( Scene* self ) {
 
-	textWidth = graphics->getTextWidth( FONT_PIXELSPLITTER, START_TEXT, strlen( START_TEXT ), kUTF8Encoding, graphics->getTextTracking() );
-	fontHeight = graphics->getFontHeight( FONT_PIXELSPLITTER );
+	textWidth = graphics->getTextWidth( FONT_SYSTEM, START_TEXT, strlen( START_TEXT ), kUTF8Encoding, graphics->getTextTracking() );
+	fontHeight = graphics->getFontHeight( FONT_SYSTEM );
 
 }
 
@@ -104,7 +104,7 @@ static void draw( Scene* self, float delta ) {
 
 	// Draw Start Text
 	graphics->setDrawMode( kDrawModeInverted );
-	graphics->setFont( FONT_PIXELSPLITTER );
+	graphics->setFont( FONT_SYSTEM );
 
 	graphics->drawText( 
 		START_TEXT, strlen( START_TEXT ), 
