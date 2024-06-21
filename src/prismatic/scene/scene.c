@@ -17,6 +17,9 @@ static Scene* changeScene( SceneManager* sceneManager, Scene* scene );
 static Scene* changeToPrevious( SceneManager* sceneManager );
 static Scene* changeToDefault( SceneManager* sceneManager );
 static void addScene( SceneManager* sceneManager, Scene* scene );
+static void removeScene( SceneManager* sceneManager, Scene* scene );
+static void removeSceneByName( SceneManager* sceneManager, string sceneName );
+static Scene* getScene( SceneManager* sceneManager, string sceneName );
 static void deleteScene( Scene* scene );
 static void addSprite( Scene* scene, string id, PrismSprite* sp );
 
@@ -200,6 +203,59 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 
 }
 
+static void removeScene( SceneManager* sceneManager, Scene* scene ) {
+
+	if( scene == NULL ) {
+		prismaticLogger->infof( "Cannot remove NULL Scene from SceneManager" );
+		return;
+	}
+
+	if( sceneManager->scenes == NULL ) {
+		prismaticLogger->infof( "Scenes NULL when removing Scenes from SceneManager" );
+		return;
+	}
+		
+	if( prismaticString->equals( scene->name, sceneManager->currentScene->name ) ) {
+		prismaticLogger->infof( "Cannot remove current Scene from SceneManager" );
+		return;
+	}
+
+	size_t i = 0;
+	for( i = 0; sceneManager->scenes[i] != NULL; i++ ) {
+		
+		if( strcmp( scene->name, sceneManager->scenes[i]->name ) != 0 ) {
+			continue;
+		}
+
+		break;
+
+	}
+
+    if( sceneManager->scenes[i] == NULL ) {
+        prismaticLogger->errorf( "Did not find Scene %d in SceneManager!", scene->name );
+        return;
+    }
+
+    // Shift Scenes to remove Scene at i 
+    for( size_t j = i; sceneManager->scenes[j] != NULL; j++ ) {
+        sceneManager->scenes[j] = sceneManager->scenes[j + 1];
+    }
+
+    sceneManager->totalScenes--;
+
+}
+
+static void removeSceneByName( SceneManager* sceneManager, string sceneName ) {
+
+	Scene* scene = getScene( sceneManager, sceneName );
+	if( scene == NULL ) {
+		return;
+	}
+
+	removeScene( sceneManager, scene );
+
+}
+
 static Scene* getScene( SceneManager* sceneManager, string sceneName ) {
 
 	if( sceneManager->scenes == NULL ) {
@@ -233,6 +289,8 @@ const SceneManagerFn* prismaticSceneManager = &(SceneManagerFn){
 	.changeToPrevious = changeToPrevious,
 	.changeToDefault = changeToDefault,
 	.add = addScene,
+	.remove = removeScene,
+	.removeByName = removeSceneByName,
 	.get = getScene,
 }; 
 

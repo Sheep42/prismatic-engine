@@ -163,6 +163,32 @@ typedef struct SceneManagerFn {
 	// Scene* scene
 	void ( *add )( SceneManager*, Scene* );
 
+	// Remove a Scene from the SceneManager
+	// 
+	// Does not destroy the Scene upon removal. If a Scene is removed from a 
+	// SceneManager before the SceneManager is destroyed, the caller is 
+	// responsible for destroying the Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// Scene* scene
+	void ( *remove )( SceneManager*, Scene* );
+
+	// Remove a Scene from the SceneManager
+	// 
+	// Does not destroy the Scene upon removal. If a Scene is removed from a 
+	// SceneManager before the SceneManager is destroyed, the caller is 
+	// responsible for destroying the Scene.
+	// 
+	// ----
+	// 
+	// SceneManager* sceneManager
+	// 
+	// string sceneName - The Scene's name
+	void ( *removeByName )( SceneManager*, string );
+
 	// Get a Scene by its name from the SceneManager
 	// 
 	// ----
