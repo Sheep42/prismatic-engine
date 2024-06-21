@@ -900,7 +900,7 @@ static void destroy() {
 
 In a more complex example: We can create two Scenes, add them to a Scene Manager, and create a transition from one to the other.
 
-All scenes have been combined into a single file `customscenes.c` for documentation purposes, but you could break each Scene's logic into its own file.
+All example scenes have been combined into a single file `customscenes.c` for documentation purposes, but you could break each Scene's logic into its own file.
 
 **game.c**
 ```C
@@ -1158,6 +1158,14 @@ SceneManager* initScenes() {
 
 }
 ```
+
+---
+
+The demo project that ships with the engine contains a more realistic example, consisting of a SplashScene, TitleScene, and PlayScene, which have all of their logic broken out into individual source files.
+
+This is intended to act as a boilerplate starter project, but none of the included scenes are required.
+
+The .c source files included in `core/scenes` are where you will find the logic for each scene. 
 
 ---
 
@@ -1790,7 +1798,7 @@ static void destroy() {
 
 `LDtkMapManager` is a convenience type for keeping track of active maps.
 
-Maps can be added to the map manager, and it will track the current map and the previous map. You can use multiple MapManager at once, if desirable.
+Maps can be added to the map manager, and it will track the current map and the previous map. You can use multiple `MapManager`s at once, if desirable.
 
 When a Map in a MapManager becomes the current Map, it will run its `enter` function, if one has been set.
 
