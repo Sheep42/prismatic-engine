@@ -898,7 +898,7 @@ static void destroy() {
 
 ---
 
-In a more complex example: We can create two Scenes, add them to a Scene Manager, and create a transition from one to the other. This is the demo that the project starts with.
+In a more complex example: We can create two Scenes, add them to a Scene Manager, and create a transition from one to the other.
 
 All scenes have been combined into a single file `customscenes.c` for documentation purposes, but you could break each Scene's logic into its own file.
 
