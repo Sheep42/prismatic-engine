@@ -1,7 +1,7 @@
-name=Puzzle Platformer
+name=Prismatic Engine
 author=Unicorner Games
 description=A Game Built with the Prismatic Engine
-bundleID=com.dshedd.puzzle-platform
+bundleID=com.dshedd.prismatic-game
 imagePath=
-version=0.0.2
-buildNumber=2
+version=0.0.1
+buildNumber=1
