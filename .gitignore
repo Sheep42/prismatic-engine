@@ -1,11 +1,17 @@
+# Build Directories
 build/
 Source/pdex.*
+out/
+x64/
+Debug/
 
+# CMake Files
 CMakeFiles/
 CMakeCache.txt
 cmake-build-debug/
 .cache/
 
+# Build Packages
 prismatic-game.pdx/
 prismatic-game.pdx.zip
 
