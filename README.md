@@ -20,7 +20,9 @@ The engine is built directly into the project, but separated into its own `prism
 
 ## Building / Running a Game
 
-**Disclaimer**: The build process is configured for Linux using make, cmake, and gcc. You'll need to update accordingly if building on Windows or Mac.
+**Note:** You won't be able to build the game on a different platform than you are trying to run on. You will run into errors in the simulator if, for example, you build on Linux and run on Windows. This means WSL won't be an effective workaround. This does not apply to building for device.
+
+### Linux / Mac - Recommended
 
 Make sure that you have first set up the Playdate SDK and have set `$PLAYDATE_SDK_PATH`. You'll also need to make sure that you've installed `make`, `cmake`, and the `arm-none-eabi-newlib` packages via your package manager. It is also not a bad idea to install `build-essential`, `base-devel`, or your OS' equivalent essential C/C++ build tools before attempting compilation.
 
@@ -33,7 +35,9 @@ cd /path/to/project/
 find ./ -type f -exec sed -i 's#~/Projects/Playdate/prismatic-game/#/path/to/project/#g' {} +
 ```
 
-### Running on the Simulator
+---
+
+#### Running on the Simulator
 
 **Note**: Before the build can run, the Playdate Simulator needs to be linked as `/usr/bin/pdsim` or `/usr/local/bin/pdsim`, or an alias `pdsim` needs to be created in your environment.
 
@@ -43,11 +47,42 @@ After cmake output, the simulator should launch with the latest compiled version
 
 ---
 
-### Building for the Device
+#### Building for the Device
 
 Run `./build.sh`
 
 You'll see a `build` directory should be created. In that directory you will see a `prismatic-game.pdx.zip` file after a successful build.
+
+**Alternative Method**: You can run your game on the simulator and use the "Upload to Device" option there to sideload your game for quick testing.
+
+---
+
+### Windows
+
+**Note:** To build for Windows you will need to install Visual Studio and the Visual C++ dependencies.
+
+- Install Visual Studio
+- Install All C++ Development Workloads
+- Install MSVC, C++ Redist, C++ CMake Tools, C++ Clang Compiler, and Windows 10 SDK components
+- Install Cmake for Windows & make sure the cmake executable is added to your PATH
+- Replace all occurrences of `~/Projects/Playdate/prismatic-game/` with `C:/path/to/project/`
+- Replace all Occurrences of `C:\PlaydateSDK` with the path to your PlaydateSDK installation, and `C:\prismatic-game` and `C:/prismatic-game` with the path to your project directory (keeping forward or backslashes intact) in ALL_BUILD.vcxproj, ALL_BUILD.vcxproj.filters, ZERO_CHECK.vcxproj, and ZERO_CHECK.vcxproj.filters.
+
+#### Running on the Simulator
+
+- Open the project folder in VS
+- Press Ctrl-B to build the package
+- Run the Playdate Simulator
+- Click **File->Open**
+- Select the `prismatic-game.pdx` folder
+
+#### Building for the Device
+
+- Open the project folder in VS
+- Press Ctrl-B to build the package
+- Navigate to the `prismatic-game.pdx` folder in the Project root
+- Right click, and select "Compress to Zip"
+- Sideload the zip file onto the device
 
 **Alternative Method**: You can run your game on the simulator and use the "Upload to Device" option there to sideload your game for quick testing.
 

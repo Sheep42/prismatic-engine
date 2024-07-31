@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\prismatic-game\CMakeFiles\5be9876c3d8af00c559cda6baeee3dff\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C9EA6ECC-F681-3504-9FB8-2A7ADC4E2538}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
