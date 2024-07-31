@@ -67,6 +67,8 @@ You'll see a `build` directory should be created. In that directory you will see
 - Install Cmake for Windows & make sure the cmake executable is added to your PATH
 - Replace all occurrences of `~/Projects/Playdate/prismatic-game/` with `C:/path/to/project/`
 - Replace all Occurrences of `C:\PlaydateSDK` with the path to your PlaydateSDK installation, and `C:\prismatic-game` and `C:/prismatic-game` with the path to your project directory (keeping forward or backslashes intact) in ALL_BUILD.vcxproj, ALL_BUILD.vcxproj.filters, ZERO_CHECK.vcxproj, and ZERO_CHECK.vcxproj.filters.
+- Click **Build->Clean ALL_BUILDS**
+- Click **Build->Rebuild ALL_BUILDS**
 
 #### Running on the Simulator
 
