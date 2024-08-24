@@ -244,6 +244,10 @@ static void addCollisionLDtkTileMap( LDtkTileMap* map ) {
 	}
 
 	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+		if( map->collision[i]->rects == NULL ) {
+			continue;
+		}
+
 		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
 			sprites->addSprite( map->collision[i]->rects[j] );
 		}
@@ -258,6 +262,10 @@ static void removeCollisionLDtkTileMap( LDtkTileMap* map ) {
 	}
 
 	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+		if( map->collision[i]->rects == NULL ) {
+			continue;
+		}
+
 		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
 			sprites->removeSprite( map->collision[i]->rects[j] );
 		}
@@ -306,8 +314,10 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 			map->collision[i]->collision[j] = NULL;
 		}
 		
-		for( int k = 0; map->collision[i]->rects[k] != NULL; k++ ) {
-			sprites->freeSprite( map->collision[i]->rects[k] );
+		if( map->collision[i]->rects != NULL ) {
+			for( int k = 0; map->collision[i]->rects[k] != NULL; k++ ) {
+				sprites->freeSprite( map->collision[i]->rects[k] );
+			}
 		}
 		
 		sys->realloc( map->collision[i]->rects, 0 );
