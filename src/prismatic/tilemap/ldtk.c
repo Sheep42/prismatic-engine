@@ -38,7 +38,7 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 static void didDecodeTableValue( json_decoder* decoder, const char* key, json_value value );
 static int shouldDecodeArrayValueAtIndex( json_decoder* decoder, int pos ) ;
 static void didDecodeArrayValue( json_decoder* decoder, int pos, json_value value );
-static void didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
+static void* didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type );
 static void decodeLayers( json_decoder* decoder, int pos, json_value value );
 static int newNeighbor( json_decoder* decoder, int pos );
 static void decodeNeighbor( json_decoder* decoder, const char* key, json_value value );
@@ -633,8 +633,8 @@ static void didDecodeArrayValue( json_decoder* decoder, int pos, json_value valu
 
 }
 
-static void didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
-
+static void* didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
+	return NULL;
 }
 
 static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
