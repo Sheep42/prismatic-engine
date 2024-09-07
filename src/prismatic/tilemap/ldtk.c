@@ -16,8 +16,10 @@ static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
 static void freeMapLayers( LDtkTileMap* map );
-
 static void freeLayer( LDtkLayer* layer );
+static void freeMapEntities( LDtkTileMap* map );
+static void freeEntity( LDtkEntity* entity );
+static void freeEntityGroup( LDtkEntityGroup* entityGroup );
 
 static LDtkMapManager* newMapManager( void );
 static void deleteMapManager( LDtkMapManager* mapManager );
@@ -176,6 +178,7 @@ static void deleteLDtkTileMap( LDtkTileMap* map ) {
 	freeMapCollisions( map );
 	freeMapRefs( map );
 	freeMapLayers( map );
+	freeMapEntities( map );
 
 	free( map );
 	map = NULL;
@@ -371,9 +374,10 @@ static void freeMapLayers( LDtkTileMap* map ) {
 
 	for( int i = 0; map->layers[i] != NULL; i++ ) {		
 		freeLayer( map->layers[i] );
+		map->layers[i] = NULL;
 	}
 
-	sys->realloc( map->layers, 0 );
+	map->layers = sys->realloc( map->layers, 0 );
 	map->layers = NULL;
 	map->_layerCount = 0;
 
@@ -388,6 +392,52 @@ static void freeMapLayers( LDtkTileMap* map ) {
 		map->_layerSpriteCount = 0;
 
 	}
+
+}
+
+static void freeMapEntities( LDtkTileMap* map ) {
+
+	if( map->_entityGroupCount <= 0 ) {
+		return;
+	}
+
+	for( int i = 0; map->entities[i] != NULL; i++ ) {
+
+		if( map->entities[i]->_entityCount <= 0 ) {
+			freeEntityGroup( map->entities[i] );
+			continue;
+		}
+
+		for( int j = 0; map->entities[i]->entities[j] != NULL; j++ ) {
+			freeEntity( map->entities[i]->entities[j] );
+			map->entities[i]->entities[j] = NULL;
+		}
+
+		map->entities[i]->entities = sys->realloc( map->entities[i]->entities, 0 );
+		map->entities[i]->entities = NULL;
+		map->entities[i]->_entityCount = 0;
+
+		freeEntityGroup( map->entities[i] );
+
+	}
+
+	map->entities = sys->realloc( map->entities, 0 );
+	map->entities = NULL;
+	map->_entityGroupCount = 0;
+
+}
+
+static void freeEntity( LDtkEntity* entity ) {
+
+	free( entity );
+	entity = NULL;
+
+}
+
+static void freeEntityGroup( LDtkEntityGroup* entityGroup ) {
+
+	free( entityGroup );
+	entityGroup = NULL;
 
 }
 
@@ -887,7 +937,7 @@ static LDtkMapManager* newMapManager() {
 static void deleteMapManager( LDtkMapManager* mapManager ) {
 
 	if( mapManager->maps != NULL ) {
-		sys->realloc( mapManager->maps, 0 );
+		mapManager->maps = sys->realloc( mapManager->maps, 0 );
 		mapManager->maps = NULL;
 	}
 
