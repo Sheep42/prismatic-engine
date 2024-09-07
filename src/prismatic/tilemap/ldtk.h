@@ -1,6 +1,7 @@
 #ifndef LDTK_H
 #define LDTK_H
 
+#include <stddef.h>
 #ifndef PD_API_INCLUDED
 	#define PD_API_INCLUDED
 	#include "pd_api.h"
@@ -27,6 +28,12 @@ typedef struct LDtkEntity {
 	int width;
 	int height;
 } LDtkEntity;
+
+typedef struct LDtkEntityGroup {
+	string type;
+	size_t _entityCount;
+	LDtkEntity** entities;
+} LDtkEntityGroup;
 
 typedef struct LDtkTileMapRef {
 	string levelIid;
@@ -55,7 +62,8 @@ typedef struct LDtkTileMap {
 	LDtkTileMapRef** neighborLevels;
 	size_t _layerCount;
 	LDtkLayer** layers;
-	LDtkEntity** entities;
+	size_t _entityGroupCount;
+	LDtkEntityGroup** entities;
 	size_t _layerSpriteCount;
 	LCDSprite** _layerSprites;
 	string _path;

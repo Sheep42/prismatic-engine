@@ -42,6 +42,12 @@ static void* didDecodeSublist( json_decoder* decoder, const char* name, json_val
 static void decodeLayers( json_decoder* decoder, int pos, json_value value );
 static int newNeighbor( json_decoder* decoder, int pos );
 static void decodeNeighbor( json_decoder* decoder, const char* key, json_value value );
+static int newEntityGroup( json_decoder* decoder, const char* key );
+static void decodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type );
+static int newEntity( json_decoder* decoder, int pos );
+static void decodeEntity( json_decoder* decoder, const char* key, json_value value );
+static void* didDecodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type );
+static void* didDecodeEntity( json_decoder* decoder, const char* name, json_value_type type );
 
 static int readfile( void* readud, uint8_t* buf, int bufsize );
 
@@ -550,10 +556,6 @@ static void decodeError( json_decoder* decoder, const char* error, int linenum )
 
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
 	
-	decoder->didDecodeArrayValue = didDecodeArrayValue;
-	decoder->didDecodeTableValue = didDecodeTableValue;
-	decoder->shouldDecodeArrayValueAtIndex = shouldDecodeArrayValueAtIndex;
-	
 	if( prismaticString->equals( "layers", name ) ) {
 		decoder->didDecodeArrayValue = decodeLayers;
 		return;
@@ -562,6 +564,13 @@ static void willDecodeSublist( json_decoder* decoder, const char* name, json_val
 	if( prismaticString->contains( "neighbourLevels", name ) ) {
 		decoder->shouldDecodeArrayValueAtIndex = newNeighbor;
 		decoder->didDecodeTableValue = decodeNeighbor;
+		return;
+	}
+
+	if( prismaticString->equals( "entities", name ) ) {
+		decoder->shouldDecodeTableValueForKey = newEntityGroup;
+		decoder->willDecodeSublist = decodeEntityGroup;
+		decoder->shouldDecodeArrayValueAtIndex = newEntity;
 		return;
 	}
 
@@ -577,10 +586,6 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 
 	if( prismaticString->equals( "customFields", key ) ) {
 		// TODO: Custom Field Parsing
-		return 0;
-	}
-
-	if( prismaticString->equals( "entities", key ) ) {
 		return 0;
 	}
 
@@ -634,7 +639,22 @@ static void didDecodeArrayValue( json_decoder* decoder, int pos, json_value valu
 }
 
 static void* didDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
+
+	if( 
+		!prismaticString->equals( name, "layers" ) 
+		&& !prismaticString->equals( name, "neighbourLevels" ) 
+		&& !prismaticString->equals( name, "entities" ) 
+	) {
+		return NULL;
+	}
+
+	decoder->didDecodeArrayValue = didDecodeArrayValue;
+	decoder->didDecodeTableValue = didDecodeTableValue;
+	decoder->shouldDecodeArrayValueAtIndex = shouldDecodeArrayValueAtIndex;
+	decoder->shouldDecodeTableValueForKey = shouldDecodeTableValueForKey;
+
 	return NULL;
+
 }
 
 static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
@@ -687,7 +707,7 @@ static int newNeighbor( json_decoder* decoder, int pos ) {
 	LDtkTileMap* map = decoder->userdata;
 
 	map->_neighborCount++;
-	map->neighborLevels = sys->realloc( NULL, map->_neighborCount * sizeof( LDtkTileMapRef* ) + 1 );
+	map->neighborLevels = sys->realloc( map->neighborLevels, map->_neighborCount * sizeof( LDtkTileMapRef* ) + 1 );
 	if( map->neighborLevels == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for neighborLevels!" );
 		return 0;
@@ -714,6 +734,127 @@ static void decodeNeighbor( json_decoder* decoder, const char* key, json_value v
 		neighbor->dir = prismaticString->new( json_stringValue( value ) );
 		return;
 	}
+
+}
+
+static int newEntityGroup( json_decoder* decoder, const char* key ) {
+
+	LDtkTileMap* map = decoder->userdata;
+
+	map->_entityGroupCount++;
+	map->entities = sys->realloc( map->entities, map->_entityGroupCount * sizeof( LDtkEntityGroup* ) + 1 );
+	if( map->entities == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for entities!" );
+		return 0;
+	}
+
+	map->entities[map->_entityGroupCount - 1] = calloc( 1, sizeof( LDtkEntityGroup ) );
+	map->entities[map->_entityGroupCount] = NULL;
+
+	decoder->didDecodeSublist = didDecodeEntityGroup;
+
+	return 1;
+
+}
+
+static void decodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type ) {
+
+	LDtkTileMap* map = decoder->userdata;
+	LDtkEntityGroup* entityGroup = map->entities[map->_entityGroupCount - 1];
+
+	entityGroup->type = prismaticString->new( name );
+
+}
+
+static void* didDecodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type ) {
+
+	decoder->willDecodeSublist = willDecodeSublist;
+	decoder->didDecodeSublist = didDecodeSublist;
+
+	return NULL;
+
+}
+
+static int newEntity( json_decoder* decoder, int pos ) {
+
+	LDtkTileMap* map = decoder->userdata;
+
+	if( map->_entityGroupCount <= 0 ) {
+		return 0;
+	}
+
+	LDtkEntityGroup* group = map->entities[map->_entityGroupCount - 1];
+	
+	group->_entityCount++;
+	group->entities = sys->realloc( group->entities, group->_entityCount * sizeof( LDtkEntity* ) + 1 );
+	if( group->entities == NULL ) {
+		prismaticLogger->error( "Could not allocate memory for entity!" );
+		return 0;
+	}
+
+	group->entities[group->_entityCount - 1] = calloc( 1, sizeof( LDtkEntity ) );
+	group->entities[group->_entityCount] = NULL;
+
+	decoder->willDecodeSublist = willDecodeSublist;
+	decoder->didDecodeSublist = didDecodeEntity;
+	decoder->didDecodeTableValue = decodeEntity;
+	decoder->shouldDecodeTableValueForKey = shouldDecodeTableValueForKey;
+
+	return 1;
+
+}
+
+static void decodeEntity( json_decoder* decoder, const char* key, json_value value ) {
+
+	LDtkTileMap* map = decoder->userdata;
+	if( map->_entityGroupCount <= 0 ) {
+		return;
+	}
+
+	LDtkEntityGroup* group = map->entities[map->_entityGroupCount - 1];
+	if( group->_entityCount <= 0 ) {
+		return;
+	}
+
+	LDtkEntity* entity = group->entities[group->_entityCount - 1];
+
+	if( prismaticString->equals( key, "id" ) ) {
+		entity->id = prismaticString->new( json_stringValue( value ) );
+	}
+
+	if( prismaticString->equals( key, "iid" ) ) {
+		entity->iid = prismaticString->new( json_stringValue( value ) );
+	}
+
+	if( prismaticString->equals( key, "layer" ) ) {
+		entity->layer = prismaticString->new( json_stringValue( value ) );
+	}
+
+	if( prismaticString->equals( key, "x" ) ) {
+		entity->x = json_intValue( value );
+	}
+
+	if( prismaticString->equals( key, "y" ) ) {
+		entity->y = json_intValue( value );
+	}
+
+	if( prismaticString->equals( key, "width" ) ) {
+		entity->width = json_intValue( value );
+	}
+
+	if( prismaticString->equals( key, "height" ) ) {
+		entity->height = json_intValue( value );
+	}
+
+}
+
+static void* didDecodeEntity( json_decoder* decoder, const char* name, json_value_type type ) {
+
+	decoder->shouldDecodeTableValueForKey = newEntityGroup;
+	decoder->willDecodeSublist = decodeEntityGroup;
+	decoder->didDecodeSublist = didDecodeEntityGroup;
+
+	return NULL;
 
 }
 
