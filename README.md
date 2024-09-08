@@ -1387,6 +1387,8 @@ static void tick( float delta ) {
 
 - `PrismAnimation* animation`: The `Sprite`'s animation - Will be NULL if the sprite has 1 or less images
 
+- `void* ref`: Optional - Can be used as a pointer to a custom struct for extending a Sprite's properties
+
 - `void ( *update )( PrismSprite*, float )`: The `Sprite`'s update function
 
 	- **Param**: `PrismSprite* self` - A reference to the `PrismSprite` for use inside the update function
@@ -1434,11 +1436,21 @@ static void sprite_update( float );
 // Define static vars
 static PrismSprite* s;
 
+// Define custom properties
+typedef struct {
+	float timer;
+} SpriteProps;
+
 static void init() {
 	
 	// Create a new Sprite with an Animation that has a .1 second delay between each frame
 	string paths[2] = { "assets/images/my_sprite_frame1", "assets/images/my_sprite_frame2" };
 	s = prismaticSprite->newFromPath( paths, 2, 0.10f );
+
+	SpriteProps* props = calloc( 1, sizeof( SpriteProps ) );
+	props->timer = 0.0f;
+
+	s->ref = props;
 	
 	if( s != NULL ) {
 		// Set the Sprite's update function to our custom function
@@ -1457,13 +1469,24 @@ static void update( float delta ) {
 }
 
 static void destroy() {
+	
+	// Free the props
+	SpriteProps* props = (SpriteProps*)self->ref;
+	free( props );
+	props = NULL;
+	self->ref = NULL;
+
 	// Free the Sprite when the game is shut down
 	prismaticSprite->delete( s );
+
 }
 
 static void sprite_update( PrismSprite* self, float delta ) {
 	// Move the Sprite by (1,1) each pass through the update loop
 	sprites->moveBy( self->sprite, 1, 1 );
+
+	SpriteProps* props = (SpriteProps*)self->ref;
+	props->timer += delta;
 	
 	// Play Sprite's animation every time we run sprite->update()
 	prismaticAnimation->play( self->animation, delta );
@@ -1596,11 +1619,11 @@ So, to define a pattern where the image being masked is fully visible, we'd set 
 ```C
 LCDPattern pattern = {
 	// bitmap
-	b11111111,b11111111,b11111111,b11111111,
-	b11111111,b11111111,b11111111,b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
 	// mask
-	b11111111,b11111111,b11111111,b11111111,
-	b11111111,b11111111,b11111111,b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
 };
 ```
 
@@ -1609,11 +1632,11 @@ And conversely, to define a fully invisible image we'd leave the mask bits high 
 ```C
 LCDPattern pattern = {
 	// bitmap
-	b00000000,b00000000,b00000000,b00000000,
-	b00000000,b00000000,b00000000,b00000000,
+	0b00000000,0b00000000,0b00000000,0b00000000,
+	0b00000000,0b00000000,0b00000000,0b00000000,
 	// mask
-	b11111111,b11111111,b11111111,b11111111,
-	b11111111,b11111111,b11111111,b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
+	0b11111111,0b11111111,0b11111111,0b11111111,
 };
 ```
 
