@@ -939,6 +939,15 @@ static void deleteMapManager( LDtkMapManager* mapManager ) {
 	if( mapManager->maps != NULL ) {
 		mapManager->maps = sys->realloc( mapManager->maps, 0 );
 		mapManager->maps = NULL;
+		mapManager->_mapCount = 0;
+	}
+
+	if( mapManager->currentMap != NULL ) {
+		mapManager->currentMap = NULL;
+	}
+
+	if( mapManager->previousMap != NULL ) {
+		mapManager->previousMap = NULL;
 	}
 
 	free( mapManager );
