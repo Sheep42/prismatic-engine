@@ -109,13 +109,14 @@ static void deleteSprite( PrismSprite* s ) {
 
 	if( s->animation != NULL ) {
 		deleteAnimation( s->animation );
+		s->animation = NULL;
 	}
 
 	if( s->imgs != NULL ) {
 		freeImages( s->imgs );
 	}
 
-	sys->realloc( s, 0 );
+	s = sys->realloc( s, 0 );
 	s = NULL;
 
 }
@@ -222,6 +223,11 @@ static PrismAnimation* newAnimation( LCDBitmap** frames, size_t startFrame, floa
 }
 
 static void deleteAnimation( PrismAnimation* animation ) {
+
+	animation->frameCount = 0;
+	animation->frames = NULL;
+	animation->currentFrame = 0;
+	animation->playSpeed = 0;
 
 	free( animation );
 	animation = NULL;
