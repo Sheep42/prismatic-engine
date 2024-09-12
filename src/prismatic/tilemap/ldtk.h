@@ -46,6 +46,11 @@ typedef struct LDtkCollisionLayer {
 	LCDSprite** rects;
 } LDtkCollisionLayer;
 
+typedef struct LDtkFieldHandler {
+	// Used for handling custom fields during map decoding
+	int ( *decodeFields )( json_decoder* decoder, const char* key );
+} LDtkFieldHandler;
+
 typedef struct LDtkTileMap {
 	string id;
 	string iid;
@@ -67,6 +72,10 @@ typedef struct LDtkTileMap {
 	size_t _layerSpriteCount;
 	LCDSprite** _layerSprites;
 	string _path;
+	// Used for handling custom fields during map decoding, caller is responsible
+	// for freeing the pointer.
+	LDtkFieldHandler* _customFieldHandler;
+
 	// Optional callback for when the map is set as current in the MapManager
 	//
 	// ---
@@ -104,7 +113,9 @@ typedef struct LDtkTileMapFn {
 	//
 	// string* collisionLayers - A list of csv files containing collision
 	// information. Pass NULL for no collision layer. Must be NULL terminated 
-	LDtkTileMap* ( *new )( string, int, string* );
+	// 
+	// LDtkFieldHandler* customFieldHandler 
+	LDtkTileMap* ( *new )( string, int, string*, LDtkFieldHandler* );
 
 	// Delete the LDtkTileMap
 	//

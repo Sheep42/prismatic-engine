@@ -4,7 +4,7 @@
 #include "../prismatic.h"
 #include "ldtk.h"
 
-static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers );
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers, LDtkFieldHandler* customFieldHandler );
 static void deleteLDtkTileMap( LDtkTileMap* map );
 static void drawLDtkTileMap( LDtkTileMap* map );
 static void addLDtkTileMap( LDtkTileMap* map );
@@ -55,7 +55,7 @@ static int readfile( void* readud, uint8_t* buf, int bufsize );
 
 // TileMap
 
-static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers ) {
+static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collisionLayers, LDtkFieldHandler* customFieldHandler ) {
 
 	const string dataFile = "/data.json";
 	string trimmedPath = prismaticString->trimLast( path, '/' );
@@ -88,6 +88,10 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 	map->_layerCount = 0;
 	map->_neighborCount = 0;
 	map->tileSize = tileSize;
+
+	if( customFieldHandler != NULL ) {
+		map->_customFieldHandler = customFieldHandler;
+	}
 	
 	mapReader->read = readfile;
 	mapReader->userdata = jsonFile;
@@ -224,7 +228,6 @@ static void addLDtkTileMap( LDtkTileMap* map ) {
 		}
 
 	} else {
-
 
 		for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
 			sprites->addSprite( map->_layerSprites[i] );
@@ -635,8 +638,13 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 	}
 
 	if( prismaticString->equals( "customFields", key ) ) {
-		// TODO: Custom Field Parsing
-		return 0;
+		
+		if( map->_customFieldHandler == NULL ) {
+			return 0;
+		}
+
+		decoder->shouldDecodeTableValueForKey = map->_customFieldHandler->decodeFields;
+
 	}
 
 	return 1;
@@ -675,6 +683,11 @@ static void didDecodeTableValue( json_decoder* decoder, const char* key, json_va
 
 	if( prismaticString->equals( "height", key ) ) {
 		map->height = json_intValue( value );
+		return;
+	}
+
+	if( prismaticString->equals( "customFields", key ) ) {
+		decoder->shouldDecodeTableValueForKey = shouldDecodeTableValueForKey;
 		return;
 	}
 
