@@ -1331,6 +1331,8 @@ static void tick( float delta ) {
 
 - `struct SceneManager* sceneManager`: The `SceneManager` that the `Scene` belongs to
 
+- `void* ref`: Optional - Can be used as a pointer to a custom struct for extending a Scene's properties. Caller is responsible for freeing `ref`, and any of its contents.
+
 - `void ( *enter )( struct Scene* )`:  The function that runs when the `Scene` is entered
 
 	- **Param**: `Scene* self` - A reference to the `Scene` for use inside the enter function
@@ -1387,7 +1389,7 @@ static void tick( float delta ) {
 
 - `PrismAnimation* animation`: The `Sprite`'s animation - Will be NULL if the sprite has 1 or less images
 
-- `void* ref`: Optional - Can be used as a pointer to a custom struct for extending a Sprite's properties
+- `void* ref`: Optional - Can be used as a pointer to a custom struct for extending a Scene's properties. Caller is responsible for freeing `ref`, and any of its contents.
 
 - `void ( *update )( PrismSprite*, float )`: The `Sprite`'s update function
 
