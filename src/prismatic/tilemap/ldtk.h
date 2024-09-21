@@ -16,6 +16,7 @@ typedef struct LDtkLayer {
 	string filename;
 	int zIndex;
 	LCDBitmap* image;
+	LCDSprite* sprite;
 } LDtkLayer;
 
 typedef struct LDtkEntity {

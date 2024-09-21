@@ -224,6 +224,7 @@ static void addLDtkTileMap( LDtkTileMap* map ) {
 			sprites->setZIndex( sprite, layer->zIndex );
 			sprites->addSprite( sprite );
 
+			map->layers[i]->sprite = sprite;
 			map->_layerSprites[map->_layerSpriteCount - 1] = sprite;
 			map->_layerSprites[map->_layerSpriteCount] = NULL;
 		}
