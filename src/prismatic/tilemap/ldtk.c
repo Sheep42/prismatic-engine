@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -319,7 +320,7 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 		return;
 	}
 
-	for( int i = 0; map->collision[i] != NULL; i++ ) {
+	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
 
 		for( int j = 0; j < map->gridWidth; j++ ) {
 			sys->realloc( map->collision[i]->collision[j], 0 );
@@ -327,23 +328,23 @@ static void freeMapCollisions( LDtkTileMap* map ) {
 		}
 		
 		if( map->collision[i]->rects != NULL ) {
-			for( int k = 0; map->collision[i]->rects[k] != NULL; k++ ) {
+			for( size_t k = 0; map->collision[i]->rects[k] != NULL; k++ ) {
 				sprites->freeSprite( map->collision[i]->rects[k] );
 			}
 		}
 		
-		sys->realloc( map->collision[i]->rects, 0 );
+		map->collision[i]->rects = sys->realloc( map->collision[i]->rects, 0 );
 		map->collision[i]->rects = NULL;
 
-		sys->realloc( map->collision[i]->collision, 0 );
+		map->collision[i]->collision = sys->realloc( map->collision[i]->collision, 0 );
 		map->collision[i]->collision = NULL;
 
-		sys->realloc( map->collision[i], 0 );
+		free( map->collision[i] );
 		map->collision[i] = NULL;
 
 	}
 	
-	sys->realloc( map->collision, 0 );
+	map->collision = sys->realloc( map->collision, 0 );
 	map->collision = NULL;
 	map->_collisionLayerCount = 0;
 	
