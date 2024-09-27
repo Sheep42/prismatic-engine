@@ -383,7 +383,7 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
         return;
     }
 
-    sp->id = spriteId;
+    sp->id = prismaticString->new( spriteId );
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
 
@@ -447,7 +447,7 @@ PrismSprite* getSprite( Scene* scene, string spriteId ) {
 	size_t i = 0;
 	for( i = 0; scene->sprites[i] != NULL; i++ ) {
 		
-		if( strcmp( spriteId, scene->sprites[i]->id ) != 0 ) {
+		if( !prismaticString->equals( spriteId, scene->sprites[i]->id ) ) {
 			continue;
 		}
 

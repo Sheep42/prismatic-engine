@@ -107,6 +107,11 @@ static void deleteSprite( PrismSprite* s ) {
 	sprites->removeSprite( s->sprite );
 	sprites->freeSprite( s->sprite );
 
+	if( s->id != NULL ) {
+		prismaticString->delete( s->id );
+		s->id = NULL;
+	}
+
 	if( s->animation != NULL ) {
 		deleteAnimation( s->animation );
 		s->animation = NULL;
