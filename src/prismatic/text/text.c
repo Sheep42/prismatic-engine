@@ -45,12 +45,12 @@ static string trimLast( const string str, char ch ) {
 
 	if( str == NULL || *str == '\0' ) {
 		prismaticLogger->error( "prismaticString->trimLast: str cannot be NULL" );
-		return;
+		return "";
 	}
 
 	if( ch == '\0' ) {
 		prismaticLogger->error( "prismaticString->trimLast: Cannot trim the NULL terminator from str!" );
-		return;
+		return "";
 	}
 
 	string trimmed = newString( str );

@@ -1,6 +1,7 @@
 #ifndef LDTK_H
 #define LDTK_H
 
+#include <stddef.h>
 #ifndef PD_API_INCLUDED
 	#define PD_API_INCLUDED
 	#include "pd_api.h"
@@ -28,6 +29,12 @@ typedef struct LDtkEntity {
 	int height;
 } LDtkEntity;
 
+typedef struct LDtkEntityGroup {
+	string type;
+	size_t _entityCount;
+	LDtkEntity** entities;
+} LDtkEntityGroup;
+
 typedef struct LDtkTileMapRef {
 	string levelIid;
 	string dir;
@@ -38,6 +45,11 @@ typedef struct LDtkCollisionLayer {
 	int** collision;
 	LCDSprite** rects;
 } LDtkCollisionLayer;
+
+typedef struct LDtkFieldHandler {
+	// Used for handling custom fields during map decoding
+	int ( *decodeFields )( json_decoder* decoder, const char* key );
+} LDtkFieldHandler;
 
 typedef struct LDtkTileMap {
 	string id;
@@ -55,10 +67,15 @@ typedef struct LDtkTileMap {
 	LDtkTileMapRef** neighborLevels;
 	size_t _layerCount;
 	LDtkLayer** layers;
-	LDtkEntity** entities;
+	size_t _entityGroupCount;
+	LDtkEntityGroup** entities;
 	size_t _layerSpriteCount;
 	LCDSprite** _layerSprites;
 	string _path;
+	// Used for handling custom fields during map decoding, caller is responsible
+	// for freeing the pointer.
+	LDtkFieldHandler* _customFieldHandler;
+
 	// Optional callback for when the map is set as current in the MapManager
 	//
 	// ---
@@ -96,7 +113,9 @@ typedef struct LDtkTileMapFn {
 	//
 	// string* collisionLayers - A list of csv files containing collision
 	// information. Pass NULL for no collision layer. Must be NULL terminated 
-	LDtkTileMap* ( *new )( string, int, string* );
+	// 
+	// LDtkFieldHandler* customFieldHandler 
+	LDtkTileMap* ( *new )( string, int, string*, LDtkFieldHandler* );
 
 	// Delete the LDtkTileMap
 	//

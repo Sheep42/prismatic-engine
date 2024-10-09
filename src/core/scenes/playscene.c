@@ -36,25 +36,25 @@ static LDtkTileMap* map;
 
 Scene* newPlayScene() {
 
-	if( playScene != NULL ) {
-		return playScene;
-	}
+    if( playScene != NULL ) {
+        return playScene;
+    }
 
-	playScene = prismaticScene->new( PLAYSCENE_NAME );
-	if( playScene == NULL ) {
-		prismaticLogger->errorf( "Could not create Scene with name %s", PLAYSCENE_NAME );
-	}
+    playScene = prismaticScene->new( PLAYSCENE_NAME );
+    if( playScene == NULL ) {
+        prismaticLogger->errorf( "Could not create Scene with name %s", PLAYSCENE_NAME );
+    }
 
-	///////////////////////////////
-	// Set the Scene's functions //
-	///////////////////////////////
-	playScene->enter = enter;
-	playScene->exit = exitScene;
-	playScene->update = update;
-	playScene->draw = draw;
-	playScene->destroy = destroy;
+    ///////////////////////////////
+    // Set the Scene's functions //
+    ///////////////////////////////
+    playScene->enter = enter;
+    playScene->exit = exitScene;
+    playScene->update = update;
+    playScene->draw = draw;
+    playScene->destroy = destroy;
 
-	string* collision = sys->realloc( NULL, sizeof( string ) * 2 + 1 );
+    string* collision = sys->realloc( NULL, sizeof( string ) * 2 + 1 );
     collision[0] = "Collision";
     collision[1] = "Floor";
     collision[2] = NULL;
@@ -62,7 +62,7 @@ Scene* newPlayScene() {
     /////////////////////////////////
     // Create map from LDTK export //
     /////////////////////////////////
-    map = prismaticTileMap->new( "assets/maps/Level_0", 16, collision );
+    map = prismaticTileMap->new( "assets/maps/Level_0", 16, collision, NULL );
     if( map == NULL ) {
     	return NULL;
     }
@@ -83,7 +83,7 @@ Scene* newPlayScene() {
     }
 
     ///////////////////////////////////////////////////////////////////
-    // Register player update function 								 //
+    // Register player update function                               //
     // This runs automatically when the player is added to the Scene //
     ///////////////////////////////////////////////////////////////////
     player->update = playerUpdate;
@@ -113,13 +113,13 @@ Scene* newPlayScene() {
     sys->realloc( collision, 0 );
     collision = NULL;
 
-	return playScene;
+    return playScene;
 
 }
 
 static void enter( Scene* self ) {
-	graphics->clear( kColorWhite );
-	graphics->setDrawMode( kDrawModeFillBlack );
+    graphics->clear( kColorWhite );
+    graphics->setDrawMode( kDrawModeFillBlack );
 
     ///////////////////////////////////////////
     // Add the map & collision to the screen //

@@ -23,6 +23,7 @@ typedef struct Scene {
 	size_t totalSprites;
 	bool isActive;
 	struct SceneManager* sceneManager;
+	void* ref;
 	void ( *enter )( struct Scene* );
 	void ( *update )( struct Scene*, float );
 	void ( *draw )( struct Scene*, float );
