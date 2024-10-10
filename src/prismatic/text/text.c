@@ -64,6 +64,34 @@ static string trimLast( const string str, char ch ) {
 
 }
 
+string substr( string src, int start, int end ) {
+    
+    if( src == NULL ) {
+    	prismaticLogger->errorf( "prismaticString->substr: src cannot be NULL" );
+    	return NULL;
+    }
+    if( start < 0 || end < 0 || start >= strlen( src ) || end >= strlen( src ) || end < start ) {
+    	prismaticLogger->errorf( "prismaticString->substr: Invalid start/end parameters. start: %d, end: %d, length: %d", start, end, strlen( src ) );
+        return NULL;
+    }
+
+    int len = end - start + 1;
+
+    string result = calloc( 1, (len + 1) * sizeof(char) );
+    if( result == NULL ) {
+    	prismaticLogger->error( "prismaticString->substr: Failed to allocate memory for new string" );
+        return NULL;
+    }
+
+    strncpy( result, src + start, len );
+
+    // Null-terminate the result
+    result[len] = '\0';
+
+    return result;
+
+}
+
 const StringUtils* prismaticString = &(StringUtils) {
 	.new = newString,
 	.delete = deleteString,
@@ -71,4 +99,5 @@ const StringUtils* prismaticString = &(StringUtils) {
 	.contains = stringContains,
 	.trimLast = trimLast,
 	.concat = stringConcat,
+	.substr = substr,
 };
