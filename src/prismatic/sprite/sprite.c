@@ -92,6 +92,7 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float 
 	s->update = NULL;
 	s->destroy = NULL;
 	s->imgs = NULL;
+	s->active = true;
 
 	return s;
 

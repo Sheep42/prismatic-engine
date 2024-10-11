@@ -22,6 +22,7 @@ static void removeSceneByName( SceneManager* sceneManager, string sceneName );
 static Scene* getScene( SceneManager* sceneManager, string sceneName );
 static void deleteScene( Scene* scene );
 static void addSprite( Scene* scene, string id, PrismSprite* sp );
+static void pauseScene( Scene* scene, bool pause );
 
 static SceneManager* newSceneManager( Scene* defaultScene ) {
 	
@@ -80,7 +81,7 @@ static void updateSceneManager( SceneManager* sceneManager, float delta ) {
 		
 		PrismSprite* sp = sceneManager->currentScene->sprites[i];
 
-		if( sp->update == NULL ) {
+		if( sp->update == NULL || sp->active == false ) {
 			continue;
 		}
 
@@ -436,6 +437,15 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 
 }
 
+static void pauseScene( Scene* scene, bool pause ) {
+
+	scene->isActive = pause ? false : true;
+
+    for( size_t i = 0; scene->sprites[i] != NULL; i++ ) {
+        scene->sprites[i]->active = pause ? false : true;
+    }
+
+}
 
 PrismSprite* getSprite( Scene* scene, string spriteId ) {
 
@@ -466,4 +476,5 @@ const SceneFn* prismaticScene = &(SceneFn) {
 	.add = addSprite,
 	.remove = removeSprite,
 	.get = getSprite,
+	.pause = pauseScene,
 };

@@ -48,6 +48,18 @@ typedef struct SceneFn {
 	// string name - A unique identifier for the Scene in the SceneManager
 	Scene* ( *new )( string );
 
+	// Pause or Unpause all sprites in a Scene
+	// 
+	// This does not pause the Scene's update function, and it does not 
+	// pause the draw functions for the Scene or its Sprites
+	//
+	// ----
+	// 
+	// Scene* scene
+	// 
+	// bool pause - True/False: Pause/Unpause
+	void ( *pause )( Scene*, bool );
+
 	// Deletes the Scene
 	// 
 	// ----
