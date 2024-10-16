@@ -20,6 +20,16 @@ typedef struct PrismUtils {
 	// 
 	// uint8_t exponent
 	uint8_t ( *uint8_pow )( uint8_t, uint8_t );
+
+	// Generate a random float between min and max
+	// 
+	// Caution: This function will only work properly if rand has been
+	// seeded using srand
+	// 
+	// float min
+	// 
+	// float max
+	float (*randBetween)( float min, float max );
 } PrismUtils;
 
 
