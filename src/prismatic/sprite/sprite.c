@@ -252,7 +252,7 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 		return;
 	}
 
-	if( animation->currentFrame >= animation->frameCount ) {
+	if( animation->currentFrame >= animation->frameCount - 1 ) {
 
 		if( animation->complete != NULL ) {
 			animation->complete( animation );
