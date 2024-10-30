@@ -25,7 +25,7 @@ static uint8_t uint8_pow( uint8_t base, uint8_t exponent ) {
 }
 
 static float randBetween( float min, float max ) {
-    return ((float)rand() / (float)RAND_MAX) * (max - min);
+    return min + (((float)rand() / (float)RAND_MAX) * (max - min));
 }
 
 const PrismUtils* prismaticUtils = &(PrismUtils) {
