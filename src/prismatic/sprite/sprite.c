@@ -251,9 +251,6 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 	if( animation->timer < animation->playSpeed ) {
 		return;
 	}
-
-	sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
-	animation->timer = 0;
 	
 	if( animation->currentFrame >= animation->frameCount - 1 ) {
 
@@ -261,12 +258,12 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 			animation->complete( animation );
 		}
 
-		if( animation->looping ) {
-			animation->currentFrame = 0;
+		if( !animation->looping ) {
+			animation->finished = true;
 			return;
 		}
 		
-		animation->finished = true;
+		animation->currentFrame = 0;
 
 	} else {
 
@@ -285,6 +282,9 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 		animation->currentFrame++;
 
 	}
+
+	sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+	animation->timer = 0;
 
 }
 
