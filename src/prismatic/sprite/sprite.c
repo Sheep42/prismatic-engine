@@ -252,6 +252,9 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 		return;
 	}
 
+	sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+	animation->timer = 0;
+	
 	if( animation->currentFrame >= animation->frameCount - 1 ) {
 
 		if( animation->complete != NULL ) {
@@ -278,10 +281,7 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 			prismaticLogger->errorf( "NULL Sprite in Animation" );
 			return;
 		}
-
-		sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
 		
-		animation->timer = 0;
 		animation->currentFrame++;
 
 	}
