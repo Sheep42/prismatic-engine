@@ -384,6 +384,8 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
         return;
     }
 
+    sp->scene = scene;
+
     sp->id = prismaticString->new( spriteId );
     scene->sprites[scene->totalSprites - 1] = sp;
     scene->sprites[scene->totalSprites] = NULL;
@@ -426,6 +428,9 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 	        prismaticLogger->errorf( "Did not find Sprite %d in Scene!", sp->id );
 	        return;
 	    }
+
+	    // Stop tracking Scene on Sprite
+	    sp->scene = NULL;
 
 	    // Shift sprites to remove Sprite at i 
 	    for( size_t j = i; scene->sprites[j] != NULL; j++ ) {
