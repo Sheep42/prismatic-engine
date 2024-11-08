@@ -631,6 +631,16 @@ float ( *lerp )( float, float, float );
 // 
 // uint8_t exponent
 uint8_t ( *uint8_pow )( uint8_t, uint8_t );
+
+// Generate a random float between min and max
+// 
+// Caution: This function will only work properly if rand has been
+// seeded using srand
+// 
+// float min
+// 
+// float max
+float (*randBetween)( float min, float max );
 ```
 
 #### prismaticString
@@ -1389,7 +1399,11 @@ static void tick( float delta ) {
 
 - `PrismAnimation* animation`: The `Sprite`'s animation - Will be NULL if the sprite has 1 or less images
 
+- `Scene* scene`: Tracks the Sprite's active Scene, if it has been added to one. Will be NULL if the Sprite has not been added to, or has been removed from a Scene.
+
 - `void* ref`: Optional - Can be used as a pointer to a custom struct for extending a Scene's properties. Caller is responsible for freeing `ref`, and any of its contents.
+
+- `bool active`: Used to tell a Scene if a Sprite is active. If active is false, the Sprite's update function will be skipped.
 
 - `void ( *update )( PrismSprite*, float )`: The `Sprite`'s update function
 
