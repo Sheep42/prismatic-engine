@@ -155,6 +155,21 @@ typedef struct LDtkTileMapFn {
 	// LDtkTileMap* map
 	void ( *remove )( LDtkTileMap* );
 	
+	// Set the DrawMode for the map's layer Sprites
+	// 
+	// This does not apply when using prismaticTileMap->draw, only when
+	// using prismaticTileMap->add. If drawing the raw layer Bitmaps, you
+	// should use graphics->setDrawMode to control DrawMode.
+	// 
+	// Must be called AFTER prismaticTileMap->add has been called. 
+	// 
+	// ---
+	// 
+	// LDtkTileMap* map
+	// 
+	// LCDBitmapDrawMode drawMode
+	void ( *setLayerDrawMode )( LDtkTileMap*, LCDBitmapDrawMode );
+
 	// Add the map's collision layers to the screen.
 	//
 	// This is a convenience function, you may choose to manage the collision 

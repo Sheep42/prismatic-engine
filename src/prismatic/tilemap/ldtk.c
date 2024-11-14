@@ -10,6 +10,7 @@ static void deleteLDtkTileMap( LDtkTileMap* map );
 static void drawLDtkTileMap( LDtkTileMap* map );
 static void addLDtkTileMap( LDtkTileMap* map );
 static void removeLDtkTileMap( LDtkTileMap* map );
+static void setLDtkLayerDrawMode( LDtkTileMap* map, LCDBitmapDrawMode );
 static void addCollisionLDtkTileMap( LDtkTileMap* map );
 static void removeCollisionLDtkTileMap( LDtkTileMap* map );
 static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag );
@@ -247,6 +248,18 @@ static void removeLDtkTileMap( LDtkTileMap* map ) {
 
 	for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
 		sprites->removeSprite( map->_layerSprites[i] );
+	}
+
+}
+
+static void setLDtkLayerDrawMode( LDtkTileMap* map, LCDBitmapDrawMode drawMode ) {
+
+	if( map->_layerSprites == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
+		sprites->setDrawMode( map->_layerSprites[i], drawMode );
 	}
 
 }
@@ -1135,6 +1148,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.draw = drawLDtkTileMap,
 	.add = addLDtkTileMap,
 	.remove = removeLDtkTileMap,
+	.setLayerDrawMode = setLDtkLayerDrawMode,
 	.addCollision = addCollisionLDtkTileMap,
 	.removeCollision = removeCollisionLDtkTileMap,
 	.tagCollision = tagCollisionLDtkTileMap,
