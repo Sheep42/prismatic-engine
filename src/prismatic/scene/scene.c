@@ -414,8 +414,8 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 	if( scene->sprites != NULL ) {		
 		size_t i = 0;
 		for( i = 0; scene->sprites[i] != NULL; i++ ) {
-			
-			if( strcmp( sp->id, scene->sprites[i]->id ) != 0 ) {
+
+			if( !prismaticString->equals( sp->id, scene->sprites[i]->id ) ) {
 				continue;
 			}
 
@@ -425,7 +425,7 @@ static void removeSprite( Scene* scene, PrismSprite* sp ) {
 		}
 
 	    if( scene->sprites[i] == NULL ) {
-	        prismaticLogger->infof( "Did not find Sprite %d in Scene!", sp->id );
+	        prismaticLogger->infof( "Did not find Sprite %s in Scene!", sp->id );
 	        return;
 	    }
 
