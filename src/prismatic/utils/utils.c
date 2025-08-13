@@ -28,8 +28,13 @@ static float randBetween( float min, float max ) {
     return min + (((float)rand() / (float)RAND_MAX) * (max - min));
 }
 
+static int randIntBetween( int min, int max ) {
+    return (rand() % (max - min + 1)) + min;
+}
+
 const PrismUtils* prismaticUtils = &(PrismUtils) {
     .lerp = lerp,
     .uint8_pow = uint8_pow,
     .randBetween = randBetween,
+    .randIntBetween = randIntBetween,
 };

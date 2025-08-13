@@ -30,6 +30,16 @@ typedef struct PrismUtils {
 	// 
 	// float max
 	float (*randBetween)( float min, float max );
+
+	// Generate a random int between min and max
+	// 
+	// Caution: This function will only work properly if rand has been
+	// seeded using srand
+	// 
+	// int min
+	// 
+	// int max
+	int (*randIntBetween)( int min, int max );
 } PrismUtils;
 
 
