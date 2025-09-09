@@ -29,6 +29,7 @@ Scene* newPlayScene( void );
 
 static Scene* playScene;
 static PrismSprite* player;
+static PrismSprite* npc;
 static PDButtons input_current;
 static PDButtons input_pressed;
 static PDButtons input_released;
@@ -82,6 +83,14 @@ Scene* newPlayScene() {
     	return NULL;
     }
 
+    /////////////////////////
+    // Create an npc       //
+    /////////////////////////
+    npc = prismaticSprite->newFromPath( paths, 1, 0 );
+    if( npc == NULL ) {
+        return NULL;
+    }
+
     ///////////////////////////////////////////////////////////////////
     // Register player update function                               //
     // This runs automatically when the player is added to the Scene //
@@ -92,7 +101,10 @@ Scene* newPlayScene() {
     // Initialize the Sprite position and z-index //
     ////////////////////////////////////////////////
     sprites->moveTo( player->sprite, 32, 32 );
-    sprites->setZIndex( player->sprite, 2 );
+    sprites->setZIndex( player->sprite, 3 );
+
+    sprites->moveTo( npc->sprite, 352, 192 );
+    sprites->setZIndex( npc->sprite, 2 );
 
     /////////////////////////////////////
     // Set the Sprite's collision rect //
@@ -104,11 +116,13 @@ Scene* newPlayScene() {
     bounds.height -= 8;
 
     sprites->setCollideRect( player->sprite, bounds );
+    sprites->setCollideRect( npc->sprite, bounds );
 
     /////////////////////////////////
-    // Add the Sprite to the Scene //
+    // Add the Sprites to the Scene //
     /////////////////////////////////
     prismaticScene->add( playScene, "player", player );
+    prismaticScene->add( playScene, "npc", npc );
 
     sys->realloc( collision, 0 );
     collision = NULL;
@@ -176,15 +190,15 @@ static void playerUpdate( PrismSprite* self, float delta ) {
 	float newX = playerX, newY = playerY;
 	
 	if( input_current & kButtonUp ) {
-		newY = playerY - 1;
+		newY = playerY - 2;
 	} else if( input_current & kButtonDown ) {
-		newY = playerY + 1;
+		newY = playerY + 2;
 	}
 
 	if( input_current & kButtonLeft ) {
-		newX = playerX - 1;
+		newX = playerX - 2;
 	} else if( input_current & kButtonRight ) {
-		newX = playerX + 1;
+		newX = playerX + 2;
 	}
 	
 	sprites->moveWithCollisions( self->sprite, newX, newY, NULL, NULL, NULL );
