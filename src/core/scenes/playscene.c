@@ -16,6 +16,7 @@ static void destroy( Scene* self );
 static void playerUpdate( PrismSprite* self, float delta );
 
 static void handleInput( float delta );
+static SpriteCollisionResponseType playerCollisionResponse( LCDSprite* self, LCDSprite* other );
 
 const string PLAYSCENE_NAME = "PlayScene";
 
@@ -96,6 +97,7 @@ Scene* newPlayScene() {
     // This runs automatically when the player is added to the Scene //
     ///////////////////////////////////////////////////////////////////
     player->update = playerUpdate;
+    sprites->setCollisionResponseFunction( player->sprite, playerCollisionResponse );
 
     ////////////////////////////////////////////////
     // Initialize the Sprite position and z-index //
@@ -128,6 +130,38 @@ Scene* newPlayScene() {
     collision = NULL;
 
     return playScene;
+
+}
+
+static SpriteCollisionResponseType playerCollisionResponse( LCDSprite* self, LCDSprite* other ) {
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Handle collision with collision layers (not tracked in Scene Sprite pool) //
+    ///////////////////////////////////////////////////////////////////////////////
+    if( sprites->getTag( other ) == kWall )
+        return kCollisionTypeFreeze;
+
+    //////////////////////////////////////////////////////////
+    // Look up collided entities in the Scene's Sprite pool //
+    //////////////////////////////////////////////////////////
+    PrismSprite* player = prismaticScene->getByLCDSprite( playScene, self );
+    PrismSprite* target = prismaticScene->getByLCDSprite( playScene, other );
+
+    ///////////////////////////////////////
+    // Bail if either Sprite isn't found //
+    ///////////////////////////////////////
+    if( player == NULL || target == NULL )
+        return kCollisionTypeFreeze;
+
+    //////////////////////////////////
+    // Log the collided entity's id //
+    //////////////////////////////////
+    prismaticLogger->debugf( "self: %s, other: %s", player->id, target->id );
+
+    /////////////////////////////////
+    // Stop the player from moving //
+    /////////////////////////////////
+    return kCollisionTypeFreeze;
 
 }
 
