@@ -95,6 +95,15 @@ typedef struct SceneFn {
 	// 
 	// string spriteId
 	PrismSprite* ( *get )( struct Scene*, string );
+
+	// Get a Sprite from the Scene by its LCDSprite
+	// 
+	// ----
+	// 
+	// Scene* scene
+	// 
+	// LCDSprite* sprite
+	PrismSprite* ( *getByLCDSprite )( struct Scene*, LCDSprite* sprite );
 } SceneFn;
 
 typedef struct SceneManagerFn {
