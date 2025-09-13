@@ -33,6 +33,19 @@
 				"color": 12470831,
 				"customFields" : {}
 			}
+		],
+		"Npc": [
+			{
+				"id": "Npc",
+				"iid": "423445b0-8560-11f0-8041-97e3c156af47",
+				"layer": "Entities",
+				"x": 352,
+				"y": 192,
+				"width": 16,
+				"height": 16,
+				"color": 12470831,
+				"customFields" : {}
+			}
 		]
 	}
 }

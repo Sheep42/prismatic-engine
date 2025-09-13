@@ -23,6 +23,7 @@ static Scene* getScene( SceneManager* sceneManager, string sceneName );
 static void deleteScene( Scene* scene );
 static void addSprite( Scene* scene, string id, PrismSprite* sp );
 static void pauseScene( Scene* scene, bool pause );
+static PrismSprite* getPrismSprite( Scene* scene, LCDSprite* sprite );
 
 static SceneManager* newSceneManager( Scene* defaultScene ) {
 	
@@ -84,7 +85,7 @@ static void updateSceneManager( SceneManager* sceneManager, float delta ) {
 		if( sp->update == NULL || sp->active == false ) {
 			continue;
 		}
-
+	
 		sp->update( sp, delta );
 
 	}
@@ -475,6 +476,29 @@ PrismSprite* getSprite( Scene* scene, string spriteId ) {
 
 }
 
+static PrismSprite* getPrismSprite( Scene* scene, LCDSprite* sprite ) {
+
+	if( scene->sprites == NULL ) {
+		prismaticLogger->infof( "Scene sprites NULL when getting sprite" );
+		return NULL;
+	}
+
+	size_t i = 0;
+	for( i = 0; scene->sprites[i] != NULL; i++ ) {
+		
+		if( sprite != scene->sprites[i]->sprite ) {
+			continue;
+		}
+
+		return scene->sprites[i];
+
+	}
+
+	prismaticLogger->infof( "Sprite was not found in Scene" );
+	return NULL;
+
+}
+
 const SceneFn* prismaticScene = &(SceneFn) {
 	.new = newScene,
 	.delete = deleteScene,
@@ -482,4 +506,5 @@ const SceneFn* prismaticScene = &(SceneFn) {
 	.remove = removeSprite,
 	.get = getSprite,
 	.pause = pauseScene,
+	.getByLCDSprite = getPrismSprite,
 };
