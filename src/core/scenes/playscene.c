@@ -138,7 +138,7 @@ static SpriteCollisionResponseType playerCollisionResponse( LCDSprite* self, LCD
     ///////////////////////////////////////////////////////////////////////////////
     // Handle collision with collision layers (not tracked in Scene Sprite pool) //
     ///////////////////////////////////////////////////////////////////////////////
-    if( sprites->getTag( other ) == kWall )
+    if( sprites->getTag( other ) == kWall || sprites->getTag( other ) == kFloor )
         return kCollisionTypeFreeze;
 
     //////////////////////////////////////////////////////////
