@@ -13,6 +13,7 @@ static void removeLDtkTileMap( LDtkTileMap* map );
 static void addCollisionLDtkTileMap( LDtkTileMap* map );
 static void removeCollisionLDtkTileMap( LDtkTileMap* map );
 static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag );
+static void setCollisionResponseLDtkTileMap( LDtkTileMap* map, string layerName, LCDSpriteCollisionFilterProc* responseFn );
 
 static void freeMapCollisions( LDtkTileMap* map );
 static void freeMapRefs( LDtkTileMap* map );
@@ -308,6 +309,34 @@ static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t
 
 		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
 			sprites->setTag( map->collision[i]->rects[j], tag );
+		}
+
+	}
+
+}
+
+static void setCollisionResponseLDtkTileMap( LDtkTileMap* map, string layerName, LCDSpriteCollisionFilterProc* responseFn ) {
+
+	if( layerName == NULL || prismaticString->equals( layerName, "" ) ) {
+		return;
+	}
+
+	if( map->collision == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->collision[i] != NULL; i++ ) {
+
+		if( map->collision[i]->name != layerName ) {
+			continue;
+		}
+
+		if( map->collision[i]->rects == NULL ) {
+			continue;
+		}
+
+		for( size_t j = 0; map->collision[i]->rects[j] != NULL; j++ ) {
+			sprites->setCollisionResponseFunction( map->collision[i]->rects[j], responseFn );
 		}
 
 	}
@@ -1137,6 +1166,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.addCollision = addCollisionLDtkTileMap,
 	.removeCollision = removeCollisionLDtkTileMap,
 	.tagCollision = tagCollisionLDtkTileMap,
+	.setCollisionResponseFunction = setCollisionResponseLDtkTileMap,
 };
 
 const LDtkMapManagerFn* prismaticMapManager = &( LDtkMapManagerFn ){
