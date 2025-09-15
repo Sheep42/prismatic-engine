@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "../prismatic/prismatic.h"
+#include "dialogue/dialoguescripts.h"
 #include "scenes/scenes.h"
 
 static void init( void );
@@ -14,6 +15,7 @@ static SceneManager* sceneManager;
 // Use init to hook into the Engine's initialization function. This runs 
 // before the first call to update but after the engine has initialized itself
 static void init() {
+    bootstrapDialogue();
     sceneManager = initScenes();
 }
 
