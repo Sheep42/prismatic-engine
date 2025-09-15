@@ -48,6 +48,11 @@
 	#include "tilemap/ldtk.h"
 #endif
 
+#ifndef DIALOGUE_INCLUDED
+    #include "dialogue/dialogue.h"
+    #define DIALOGUE_INCLUDED
+#endif
+
 #ifndef LOGGER_INCLUDED
 	#define LOGGER_INCLUDED
 	#include "logger/logger.h"
