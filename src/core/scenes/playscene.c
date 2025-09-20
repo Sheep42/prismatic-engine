@@ -136,7 +136,7 @@ Scene* newPlayScene() {
     ////////////////////////////
     // Create Sample Dialogue //
     ////////////////////////////
-    dialogue = newDialogue( ((pd->display->getWidth() / 2) - 200 / 2), (pd->display->getHeight() / 2) - 120 / 2 );
+    dialogue = dialogueController->new( ((pd->display->getWidth() / 2) - 200 / 2), (pd->display->getHeight() / 2) - 120 / 2 );
     dialogueController->setBox( dialogue, 200, 120, kColorWhite );
     dialogueController->setBorder( dialogue, 8, 8, kColorBlack );
     dialogueController->enableSound( dialogue );

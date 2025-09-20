@@ -35,6 +35,7 @@ static void draw( float delta ) {
 // destroy is called when the game is shut down, before the game itself is
 // freed from memory
 static void destroy() {
+    teardownDialogue();
     prismaticSceneManager->delete( sceneManager );
 }
 

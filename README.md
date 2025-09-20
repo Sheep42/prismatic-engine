@@ -928,6 +928,309 @@ void ( *changeMap )( LDtkMapManager*, LDtkTileMap* );
 
 ---
 
+#### dialogueController
+
+```C
+// Sets text for a Dialogue box
+// 
+// --- 
+// 
+// Dialogue* dialogue 
+// 
+// string text
+void (*setText)( Dialogue* dialogue, string text );
+
+// Sets a Dialogue box's position
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float x - The dialogue box's x position
+// 
+// float y - The dialogue box's y position
+void (*setPosition)( Dialogue* dialogue, float x, float y );
+
+// Sets autohide value for a Dialogue box
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// bool autoHide - True: On, False: Off
+// 
+// float duration - How long to show the Dialogue before hiding
+void (*setAutoHide)( Dialogue* dialogue, bool autoHide, float duration );
+
+// Sets a Dialogue box width, height, and background color (LCDPatterns are supported)
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float width
+// 
+// float height
+// 
+// LCDColor boxColor
+void (*setBox)( Dialogue* dialogue, float width, float height, LCDColor boxColor );
+
+// Sets a Dialogue box border width, height, and color (LCDPatterns are supported)
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float width
+// 
+// float height
+// 
+// LCDCOlor borderColor
+void (*setBorder)( Dialogue* dialogue, float width, float height, LCDColor borderColor );
+
+// Sets a Dialogue box's font and text draw mode
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// LCDFont* font
+// 
+// LCDBitmapDrawMode drawMode
+void (*setFont)( Dialogue* dialogue, LCDFont* font, LCDBitmapDrawMode drawMode );
+
+// Sets a Dialogue box's draw offset
+// 
+// All Dialogue boxes are drawn to their own context which covers the entire screen.
+// Setting the draw offset will draw the box and text at the box's position, relative
+// to the offset x and y values, without affecting anything else on the screen.
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float x - The x offset
+// 
+// float y - The y offset
+void (*setDrawOffset)( Dialogue* dialogue, float x, float y );
+
+// Sets padding around text in a Dialogue box
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float x - The x padding (left and right)
+// 
+// float y - The y padding (top and bottom)
+void (*setTextPadding)( Dialogue* dialogue, float x, float y );
+
+// Set a Dialogue box's text speed
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float speed - Speed is the amount of seconds between character advancement. 
+// Default: 0.0f 
+void (*setSpeed)( Dialogue* dialogue, float speed );
+
+// Sets a Dialogue box's active script
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// DialogueScript* script
+void (*setScript)( Dialogue* dialogue, DialogueScript* script );
+
+// Sets a Dialogue box's audio pitch
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// float pitch
+void (*setPitch)( Dialogue* dialogue, float pitch );
+
+// Sets a Dialogue box's text alignment
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// PDTextAlignment alignment - Default: kAlignTextLeft
+void (*setAlignment)( Dialogue* dialogue, PDTextAlignment alignment );
+
+// Sets a Dialogue box's wrap mode
+// 
+// ---
+// 
+// Dialogue* dialogue
+// 
+// PDTextWrappingMode wrapMode - Default: kWrapWord
+void (*setWrapMode)( Dialogue* dialogue, PDTextWrappingMode wrapMode );
+
+// Enables audio for a Dialogue box - Disabled by default
+// 
+// ---
+// 
+// Dialogue* dialogue
+void (*enableSound)( Dialogue* dialogue );
+
+// Disables audio for a Dialogue box
+// 
+// ---
+// 
+// Dialogue* dialogue
+void (*disableSound)( Dialogue* dialogue );
+
+// Advances a Dialogue box's script to the next line
+// 
+// ---
+// 
+// Dialogue* dialogue
+void (*advance)( Dialogue* dialogue );
+
+// Shows a Dialogue box
+// 
+// ---
+// 
+// Dialogue* dialogue
+void (*show)( Dialogue* dialogue );
+
+// Hides a Dialogue box
+// 
+// ---
+// 
+// Dialogue* dialogue
+void (*hide)( Dialogue* dialogue );
+
+// Flags a Dialogue box as finished
+// 
+// ---
+//
+// Dialogue* dialogue
+void (*finish)( Dialogue* dialogue );
+
+// Draws a Dialogue box
+//
+// Generally, should be called from inside of a Scene's or a Game's draw method
+//  
+// ---
+// 
+// Dialogue* self
+// 
+// float delta
+void (*draw)( struct Dialogue* self, float delta );
+
+// Updates a Dialogue box
+//
+// Generally, should be called from inside of a Scene's or a Game's update method
+//  
+// ---
+// 
+// Dialogue* self
+// 
+// float delta
+void (*update)( struct Dialogue* self, float delta );
+
+// Creates a new Dialogue box
+// 
+// ---
+// 
+// float x - The Dialogue box's starting X position
+// 
+// float y - The Dialogue box's starting Y position
+Dialogue* (*new)( float x, float y );
+
+// Destroys a Dialogue box
+// 
+// DOES NOT free any DialogueScript* or DialogueLine* that are currently attached 
+// to the Dialogue box. It is up to the caller to delete a script and/or lines
+// separately.
+// 
+// ---
+// 
+// Dialogue* self
+void (*destroy)( struct Dialogue* self );
+```
+
+#### dialogueScriptManager
+
+```C
+// Creates a new Dialogue Script
+// 
+// ---
+// 
+// string id - A machine-friendly unique identifier for the script
+DialogueScript* (*new)( string id );
+
+// Adds a dialogue line to a script
+// 
+// --- 
+// 
+// DialogueScript* script
+// 
+// DialogueLine* line
+void (*add)( DialogueScript* script, DialogueLine* line );
+
+// Removes a dialogue line from a script
+// 
+// Does not free the dialogue line being removed - That is the responsibility of the caller
+// 
+// --- 
+// 
+// DialogueScript* script
+// 
+// DialogueLine* line
+void (*remove)( DialogueScript* script, DialogueLine* line );
+
+// Removes the dialogue line at a specific index in a script
+// 
+// Does not free the dialogue line being removed - That is the responsibility of the caller
+// 
+// --- 
+// 
+// DialogueScript* script
+// 
+// size_t index
+void (*removeIndex)( DialogueScript* script, size_t index );
+
+// Resets a dialogue script's internal pointer to 0
+// 
+// ---
+// 
+// DialogueScript* script
+void (*reset)( DialogueScript* script );
+
+// Delete's a script
+// 
+// Deleting a script DOES free any lines that are added to the script at the 
+// time of its deletion. The caller should refrain from referencing any script
+// lines after the script is deleted. If a line needs to remain active, remove 
+// it from the script prior to deletion.
+// 
+// ---
+// 
+// DialogueScript* script
+void (*delete)( DialogueScript* script );
+```
+
+#### dialogueLineManager
+
+```C
+// Create a new dialogue line
+// 
+// DialogueLineType type - The dialogue line type 
+DialogueLine* (*new)( DialogueLineType type );
+
+// Delete a dialogue line
+//  
+// DialogueLine* line - The dialogue line to delete
+void (*delete)( DialogueLine* line );
+```
+
 ## Creating a Game
 
 The simplest version of a game created with Prismatic Engine can be fully contained in `src/core/game.c`
@@ -1973,3 +2276,127 @@ static void destroy() {
 **Type Name**: `string`
 
 A `string` is simply an alias for `char*`, for convenience purposes, and can be used interchangably with `char*` and `const char*`.
+
+### Dialogue Boxes & Dialogue Management
+
+Prismatic Engine provides a robust system for creating and managing dialogue boxes within your game.
+
+The dialogue, script, and line managers outlined in the utilities section are designed to handle the creation of dialogue "scripts", which consist of "lines". 
+
+A dialogue line is simply a string or a pointer to a function. Lines that are strings will be displayed as text in a dialogue box when a script is added, and the line is active. Lines that are function pointers will execute that function when the line is active. The purpose of functions as dialogue lines is to allow you to execute game logic as dialogue (audio cues, logic flags, etc).
+
+A dialogue script is really just an array of lines with an internal pointer that is keeping track of which line is currently active. Scripts are named with unique string ids, created by you, so that a script can be easily selected and added to a dialogue box as needed.
+
+See the sample script created in `src/core/dialogue/` and how dialogue is used in `src/core/scenes/playscene.c` for more details. You don't necessarily need to implement dialogue in the same way that I have done in the example, it's just there as a starter for those who want to get running quickly.
+
+**Type Name**: `Dialogue`
+
+- `string text`: The dialogue box's current text - Controls what text is being displayed
+
+- `float x`: The dialogue box's current X position
+
+- `float y`: The dialogue box's current Y position
+
+- `float _innerX`: Used internally by Dialogue methods to track the actual X render position based on X position, X padding, border width, and box width
+
+- `float _innerY`: Used internally by Dialogue methods to track the actual Y render position based on Y position, Y padding, border height, and box height
+
+- `float camX`: The X position of the context in which the Dialogue box is rendered (The context is the size of the screen)
+
+- `float camY`: The Y position of the context in which the Dialogue box is rendered (The context is the size of the screen)
+
+- `bool autoHide`: Determines whether the dialogue box should auto-hide or not. Default: False
+
+- `float showDuration`: When autoHide is enabled, determines the amount of time the dialogue box should appear before hiding
+
+- `float boxWidth`: The width of the dialogue box before a border is added
+
+- `float boxHeight`: The height of the dialogue box before a border is added
+
+- `float borderWidth`: The width of the dialogue box's border
+
+- `float borderHeight`: The height of the dialogue box's border
+
+- `float textPaddingX`: The horizontal padding for the dialogue box's text
+
+- `float textPaddingY`: The vertical padding for the dialogue box's text
+
+- `float speed`: The text speed for the dialogue box - Speed is number of seconds before the pointer advances to the next character in the active text
+
+- `float pitch`: The pitch of the synth used for the dialogue box
+
+- `PDSynth* synth`: The synth, used internally by the dialogue box to play audio when a character is rendered
+
+- `DialogueState state`: The current state of the dialogue box (see `DialogueState`)
+
+- `DialogueType type`: The type of dialogue box (see `DialogueType`)
+
+- `LCDBitmap* _canvas`: Used internally by Dialogue - This is the context onto which the dialogue box is drawn
+
+- `LCDBitmap* _overlay`: Currently unused - Intended for indicators eventually
+
+- `LCDFont* font`: The dialogue box's font
+
+- `LCDColor borderColor`: The color of the dialogue box's border 
+
+- `LCDColor boxColor`: The background color of the dialogue box
+
+- `LCDBitmapDrawMode fontDrawMode`: The draw mode used to render the dialogue box's font
+
+- `PDTextWrappingMode wrapMode`: The wrap mode applied to text within the dialogue box
+
+- `PDTextAlignment alignment`: The text alignment applied to text within the dialouge box
+
+- `int _drawDialoguePointer`: Internal pointer used by typewriter mode to determine the active characters to display
+
+- `float _drawDialogueTimer`: Internal timer used by typewriter mode to advance to the next character
+
+- `bool _lineFinished`: Internal flag used by typewriter mode to determine when a line has finished
+
+- `PDButtons _input_current`: Used by handleInput to keep track of actively pressed buttons
+
+- `PDButtons _input_pressed`: Used by handleInput to keep track of buttons that were just pressed
+
+- `PDButtons _input_released`: Used by handleInput to keep track of buttons that were just released
+
+- `bool _finished`: Keeps track of whether the dialogue box's script is finished or not
+
+- `float _hiddenTimer`: Used internally by Dialogue to manage a small buffer after hiding a dialogue box
+
+- `bool _justHidden`: Keeps track of when a dialogue box was just hidden
+
+- `DialogueScript* _script`: The dialogue box's active script
+
+- `void (*handleInput)( struct Dialogue* dialogue, float delta )`: An optional user-created function to handle any input when the dialogue box is active 
+
+- `void (*onFinishedCallback)( struct Dialogue* dialogue )`: An optoinal user-created callback function to perform actions when the dialogue box's script is finished
+
+**Type Name**: `DialogueScript`
+
+- `string id`: The script's unique identifier - Used for lookup when the script is needed
+
+- `size_t _linePointer`: The internal pointer that keeps track of which line in the script is currently active
+
+- `DialogueLine** _lines`: The array of lines that belong to the script
+
+- `size_t _lineCount`: The total number of lines in the script
+
+**Type Name**: `DialogueLine`
+
+- `DialogueLineType type`: The type of line - See `DialogueLineType`
+
+- `string text`: The line's text 
+
+- `void (*fn)( void )`: The line's function pointer
+
+#### DialogueState Values
+- `D_Hide`: The state applied when a dialogue box is hidden - Enum Value = 0
+- `D_Show`: The state applied when a dialogue box is shown - Enum Value = 1
+
+#### DialogueType Values
+- `DT_Instant`: Render all text instantly - Enum Value = 0
+- `DT_Typewriter`: Render text one character at a time, like a typewriter - Enum Value = 1
+
+#### DialogueLineType Values
+- `DialogueLineType_String`: Represents a DialogueLine with a string value - Enum Value = 0
+- `DialogueLineType_Fn`: Represents a DialogueLine that should execute a function - Enum Value = 1

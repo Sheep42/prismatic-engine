@@ -7,6 +7,7 @@
 #include "dialogue.h"
 #include "../prismatic.h"
 
+static Dialogue* newDialogue( float x, float y );
 static void setText( Dialogue* self, string text );
 static void setPosition( Dialogue* self, float x, float y );
 static void setAutoHide( Dialogue* self, bool autoHide, float duration );
@@ -52,7 +53,7 @@ static const float SYNTH_LENGTH = 0.05f;
 static const float DIALOGUE_HIDE_BUFFER = 0.05f;
 
 // Gets or creates a Dialogue
-Dialogue* newDialogue( float x, float y ) {
+static Dialogue* newDialogue( float x, float y ) {
 
     Dialogue* d = calloc( 1, sizeof( Dialogue ) );
     d->x = x;
@@ -607,6 +608,7 @@ const DialogueController* dialogueController = &(DialogueController) {
     .finish = finish,
     .draw = draw,
     .update = update,
+    .new = newDialogue,
     .destroy = destroy,
 };
 
