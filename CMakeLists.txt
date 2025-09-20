@@ -43,6 +43,7 @@ set(SOURCE_FILES
     src/prismatic/text/text.c
     src/prismatic/transition/transition.c
     src/prismatic/tilemap/ldtk.c
+    src/prismatic/dialogue/dialogue.c
 )
 
 # Set header files
@@ -56,6 +57,7 @@ set(HEADER_FILES
     src/prismatic/text/text.h
     src/prismatic/transition/transition.h
     src/prismatic/tilemap/ldtk.h
+    src/prismatic/dialogue/dialogue.h
 )
 
 # Glob all files in core game dir

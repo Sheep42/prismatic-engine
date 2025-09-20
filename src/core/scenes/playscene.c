@@ -6,6 +6,7 @@
 #include "scenes.h"
 #include "splashscene.h"
 #include "titlescene.h"
+#include "../dialogue/dialoguescripts.h"
 
 static void enter( Scene* self );
 static void exitScene( Scene* self );
@@ -14,6 +15,8 @@ static void draw( Scene* self, float delta );
 static void destroy( Scene* self );
 
 static void playerUpdate( PrismSprite* self, float delta );
+static void handleDialogueInput( Dialogue* dialogue, float delta );
+static void onDialogueFinish( Dialogue* dialogue );
 
 static void handleInput( float delta );
 static SpriteCollisionResponseType playerCollisionResponse( LCDSprite* self, LCDSprite* other );
@@ -35,6 +38,7 @@ static PDButtons input_current;
 static PDButtons input_pressed;
 static PDButtons input_released;
 static LDtkTileMap* map;
+static Dialogue* dialogue;
 
 Scene* newPlayScene() {
 
@@ -129,6 +133,16 @@ Scene* newPlayScene() {
     sys->realloc( collision, 0 );
     collision = NULL;
 
+    ////////////////////////////
+    // Create Sample Dialogue //
+    ////////////////////////////
+    dialogue = dialogueController->new( ((pd->display->getWidth() / 2) - 200 / 2), (pd->display->getHeight() / 2) - 120 / 2 );
+    dialogueController->setBox( dialogue, 200, 120, kColorWhite );
+    dialogueController->setBorder( dialogue, 8, 8, kColorBlack );
+    dialogueController->enableSound( dialogue );
+    dialogue->handleInput = handleDialogueInput;
+    dialogue->onFinishedCallback = onDialogueFinish;
+
     return playScene;
 
 }
@@ -182,6 +196,7 @@ static void enter( Scene* self ) {
     prismaticSceneManager->remove( self->sceneManager, splashScene );
     prismaticScene->delete( splashScene );
 
+    dialogueController->setScript( dialogue, getScript( "intro" ) );
 }
 
 static void exitScene( Scene* self ) {
@@ -193,7 +208,19 @@ static void exitScene( Scene* self ) {
 }
 
 static void update( Scene* self, float delta ) {
-	handleInput( delta );
+
+    if( dialogue->_script != NULL && !dialogue->_finished ) {
+        dialogueController->show( dialogue );
+    }
+
+    dialogueController->update( dialogue, delta );
+
+    if( dialogue->state == D_Show ) {
+        return;
+    }
+
+    handleInput( delta );
+
 }
 
 static void handleInput( float delta ) {
@@ -201,7 +228,7 @@ static void handleInput( float delta ) {
 }
 
 static void draw( Scene* self, float delta ) {
-
+    dialogueController->draw( dialogue, delta );
 }
 
 static void destroy( Scene* self ) {
@@ -236,5 +263,31 @@ static void playerUpdate( PrismSprite* self, float delta ) {
 	}
 	
 	sprites->moveWithCollisions( self->sprite, newX, newY, NULL, NULL, NULL );
+
+}
+
+static void handleDialogueInput( Dialogue* dialogue, float delta ) {
+    
+    if( dialogue->_input_pressed & kButtonA ) {
+
+        if( !dialogue->_lineFinished ) {
+            dialogue->_lineFinished = true;
+            return;
+        }
+
+        dialogueController->advance( dialogue );
+        
+    }
+
+}
+
+static void onDialogueFinish( Dialogue* dialogue ) {
+
+    if( dialogue->state == D_Hide ) {
+        return;
+    }
+
+    dialogueController->setScript( dialogue, NULL );
+    dialogueController->hide( dialogue );
 
 }
