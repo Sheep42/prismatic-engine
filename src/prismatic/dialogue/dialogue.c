@@ -23,6 +23,7 @@ static void setAlignment( Dialogue* self, PDTextAlignment alignment );
 static void setWrapMode( Dialogue* self, PDTextWrappingMode wrapMode );
 static void enableSound( Dialogue* self );
 static void disableSound( Dialogue* self );
+static void setType( Dialogue* self, DialogueType type );
 static void advance( Dialogue* self );
 static void show( Dialogue* dialogue );
 static void hide( Dialogue* dialogue );
@@ -208,6 +209,10 @@ static void disableSound( Dialogue* self ) {
     sound->synth->freeSynth( self->synth );
     self->synth = NULL;
 
+}
+
+static void setType( Dialogue* self, DialogueType type ) {
+    self->type = type;
 }
 
 static void show( Dialogue* self ) {
@@ -602,6 +607,7 @@ const DialogueController* dialogueController = &(DialogueController) {
     .setScript = setScript,
     .enableSound = enableSound,
     .disableSound = disableSound,
+    .setType = setType,
     .advance = advance,
     .show = show,
     .hide = hide,

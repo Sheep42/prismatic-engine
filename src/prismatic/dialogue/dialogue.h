@@ -242,6 +242,15 @@ typedef struct DialogueController {
     // Dialogue* dialogue
     void (*disableSound)( Dialogue* dialogue );
 
+    // Sets a dialogue box's dialogue type
+    // 
+    // ---
+    // 
+    // Dialogue* dialogue
+    // 
+    // DialogueType type
+    void (*setType)( Dialogue* dialogue, DialogueType type );
+
     // Advances a Dialogue box's script to the next line
     // 
     // ---
