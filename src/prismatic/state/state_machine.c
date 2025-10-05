@@ -145,7 +145,7 @@ static void addState( StateMachine* stateMachine, State* state ) {
 	}
 
 	stateMachine->totalStates += 1;
-	stateMachine->states = sys->realloc( stateMachine->states, stateMachine->totalStates * sizeof(State) + 1 );
+	stateMachine->states = sys->realloc( stateMachine->states, (stateMachine->totalStates + 1) * sizeof(State*) );
 
 	if (stateMachine->states == NULL) {
         prismaticLogger->error( "Memory allocation failed for adding state.\n" );

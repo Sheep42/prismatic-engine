@@ -191,7 +191,7 @@ static void addScene( SceneManager* sceneManager, Scene* scene ) {
 	}
 
 	sceneManager->totalScenes++;
-	sceneManager->scenes = sys->realloc( sceneManager->scenes, sceneManager->totalScenes * sizeof(Scene) + 1 );
+	sceneManager->scenes = sys->realloc( sceneManager->scenes, (sceneManager->totalScenes + 1) * sizeof(Scene*) );
 
 	if (sceneManager->scenes == NULL) {
         prismaticLogger->errorf( "Memory allocation failed for adding scene: %s", scene->name );
@@ -378,7 +378,7 @@ static void addSprite( Scene* scene, string spriteId, PrismSprite* sp ) {
 	}
 
 	scene->totalSprites += 1;
-	scene->sprites = sys->realloc( scene->sprites, scene->totalSprites * sizeof(PrismSprite*) + 1 );
+	scene->sprites = sys->realloc( scene->sprites, (scene->totalSprites + 1) * sizeof(PrismSprite*) );
 
 	if( scene->sprites == NULL ) {
         prismaticLogger->error( "Memory allocation failed for adding sprite." );

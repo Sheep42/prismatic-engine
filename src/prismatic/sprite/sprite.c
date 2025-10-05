@@ -159,7 +159,7 @@ static LCDBitmap** loadImages( string* paths, size_t pathCount ) {
 		}
 
 		imgCount += 1;
-		images = sys->realloc( images, imgCount * sizeof(LCDBitmap*) + 1 );
+		images = sys->realloc( images, (imgCount + 1) * sizeof(LCDBitmap*) );
 		images[imgCount - 1] = img;
 
 	}
