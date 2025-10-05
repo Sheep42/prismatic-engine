@@ -5,6 +5,8 @@
 typedef struct PrismUtils {
 	// Linear interpolation implementation
 	// 
+	// ---
+	// 
 	// float start 
 	// 
 	// float end
@@ -16,6 +18,8 @@ typedef struct PrismUtils {
 	// Caution: This function does not internally protect against overflow 
 	// or underflow
 	// 
+	// ---
+	// 
 	// uint8_t base
 	// 
 	// uint8_t exponent
@@ -25,6 +29,8 @@ typedef struct PrismUtils {
 	// 
 	// Caution: This function will only work properly if rand has been
 	// seeded using srand
+	// 
+	// ---
 	// 
 	// float min
 	// 
@@ -36,10 +42,29 @@ typedef struct PrismUtils {
 	// Caution: This function will only work properly if rand has been
 	// seeded using srand
 	// 
+	// ---
+	// 
 	// int min
 	// 
 	// int max
 	int (*randIntBetween)( int min, int max );
+
+	// Retrieve the full contents of the pdxinfo file as a string
+	// 
+	// The caller IS responsible for freeing the returned value.
+	// This should be done with pd->system->realloc like so: pd->system->realloc( pdxinfo, 0 );
+	char* (*getPDXInfo)( void );
+
+	// Get game metadata from pdxinfo using its key - always returns the 
+	// value as a string
+	// 
+	// The caller IS responsible for freeing the returned value.
+	// This should be done with pd->system->realloc like so: pd->system->realloc( value, 0 );
+	// 
+	// ---
+	// 
+	// char* key - The metadata key inside pdxinfo
+	char* (*getPDXInfoValue)( char* key );
 } PrismUtils;
 
 
