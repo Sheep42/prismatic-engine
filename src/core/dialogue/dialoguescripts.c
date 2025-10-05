@@ -54,7 +54,7 @@ DialogueScript* getScript( string id ) {
 static void pushScript( DialogueScript* script ) {
 
     scriptCount++;
-    scripts = sys->realloc( scripts, scriptCount + sizeof( DialogueScript ) + 1 );
+    scripts = sys->realloc( scripts, (scriptCount + 1) * sizeof( DialogueScript* ) );
 
     scripts[scriptCount - 1] = script;
     scripts[scriptCount] = NULL;

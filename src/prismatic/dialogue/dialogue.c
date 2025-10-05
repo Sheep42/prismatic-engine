@@ -495,7 +495,7 @@ static DialogueScript* newDialogueScript( string id ) {
 static void addDialogueLine( DialogueScript* script, DialogueLine* line ) {
 
     script->_lineCount++;
-    script->_lines = sys->realloc( script->_lines, script->_lineCount * sizeof( DialogueLine ) + 1 );
+    script->_lines = sys->realloc( script->_lines, (script->_lineCount + 1) * sizeof( DialogueLine* ) );
 
     script->_lines[script->_lineCount - 1] = line;
     script->_lines[script->_lineCount] = NULL;
