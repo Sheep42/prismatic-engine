@@ -67,20 +67,24 @@ static char* getPDXInfoValue( char* key ) {
     pd->file->read( f, buf, stat.size );
     pd->file->close( f );
 
+    char* cursor = buf;
+
     size_t keyLen = strlen( key );
 
-    while( *buf ) {
+    while( *cursor ) {
         
-        char *lineEnd = strchr( buf, '\n' );
-        if( !lineEnd ) lineEnd = buf + strlen( buf );
+        char *lineEnd = strchr( cursor, '\n' );
+        if( !lineEnd ) lineEnd = cursor + strlen( cursor );
 
-        if( strncmp( buf, key, keyLen ) == 0 && buf[keyLen] == '=' ) {
-            const char* valueStart = buf + keyLen + 1;
+        if( strncmp( cursor, key, keyLen ) == 0 && cursor[keyLen] == '=' ) {
+            const char* valueStart = cursor + keyLen + 1;
             size_t valueLen = lineEnd - valueStart;
             char* result = sys->realloc( NULL, valueLen + 1 );
             
-            if( !result ) 
+            if( !result ) {
+                sys->realloc( buf, 0 );
                 return NULL;
+            }
 
             memcpy( result, valueStart, valueLen );
             result[valueLen] = '\0';
@@ -91,10 +95,11 @@ static char* getPDXInfoValue( char* key ) {
 
         }
 
-        buf = (*lineEnd) ? lineEnd + 1 : lineEnd;
+        cursor = (*lineEnd) ? lineEnd + 1 : lineEnd;
     }
 
     prismaticLogger->infof( "Key '%s' not found in pdxinfo!", key );
+    sys->realloc( buf, 0 );
 
     return NULL;
 
