@@ -92,6 +92,7 @@ static PrismSprite* newFromImages( LCDBitmap** frames, size_t startFrame, float 
 	s->update = NULL;
 	s->destroy = NULL;
 	s->imgs = NULL;
+	s->active = true;
 
 	return s;
 
@@ -158,7 +159,7 @@ static LCDBitmap** loadImages( string* paths, size_t pathCount ) {
 		}
 
 		imgCount += 1;
-		images = sys->realloc( images, imgCount * sizeof(LCDBitmap*) + 1 );
+		images = sys->realloc( images, (imgCount + 1) * sizeof(LCDBitmap*) );
 		images[imgCount - 1] = img;
 
 	}
@@ -250,19 +251,19 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 	if( animation->timer < animation->playSpeed ) {
 		return;
 	}
-
-	if( animation->currentFrame >= animation->frameCount ) {
+	
+	if( animation->currentFrame >= animation->frameCount - 1 ) {
 
 		if( animation->complete != NULL ) {
 			animation->complete( animation );
 		}
 
-		if( animation->looping ) {
-			animation->currentFrame = 0;
+		if( !animation->looping ) {
+			animation->finished = true;
 			return;
 		}
 		
-		animation->finished = true;
+		animation->currentFrame = 0;
 
 	} else {
 
@@ -277,13 +278,13 @@ static void playAnimation( PrismAnimation* animation, float delta ) {
 			prismaticLogger->errorf( "NULL Sprite in Animation" );
 			return;
 		}
-
-		sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
 		
-		animation->timer = 0;
 		animation->currentFrame++;
 
 	}
+
+	sprites->setImage( animation->sprite->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
+	animation->timer = 0;
 
 }
 

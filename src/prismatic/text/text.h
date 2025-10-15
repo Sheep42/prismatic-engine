@@ -63,6 +63,25 @@ typedef struct StringUtils {
 	//
 	// string src - The string that should be concatenated to target
 	void ( *concat )( string*, string );
+
+	// Perform a substring operation based on a start and end position in an
+	// existing string.
+	// 
+	// This creates a new string which the caller is responsible for freeing. 
+	// The new string should be freed using prismaticString->delete()
+	// 
+	// ----
+	// 
+	// string src - The string being substringed
+	// 
+	// int start - The starting position. Must be between 0 and the length of
+	// src
+	// 
+	// int end - The ending position. Must be between start and the length of 
+	// src
+	// 
+	// return string - The resulting substring
+	string ( *substr )( string, int, int );
 } StringUtils;
 
 extern const StringUtils* prismaticString;

@@ -31,6 +31,8 @@ typedef struct PrismSprite {
 	LCDSprite* sprite;
 	LCDBitmap** imgs;
 	PrismAnimation* animation;
+	struct Scene* scene;
+	bool active;
 	void* ref;
 	void ( *update )( PrismSprite*, float );
 	void ( *destroy )( PrismSprite* );

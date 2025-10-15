@@ -10,6 +10,7 @@ static void deleteLDtkTileMap( LDtkTileMap* map );
 static void drawLDtkTileMap( LDtkTileMap* map );
 static void addLDtkTileMap( LDtkTileMap* map );
 static void removeLDtkTileMap( LDtkTileMap* map );
+static void setLDtkLayerDrawMode( LDtkTileMap* map, LCDBitmapDrawMode );
 static void addCollisionLDtkTileMap( LDtkTileMap* map );
 static void removeCollisionLDtkTileMap( LDtkTileMap* map );
 static void tagCollisionLDtkTileMap( LDtkTileMap* map, string layerName, uint8_t tag );
@@ -209,7 +210,7 @@ static void addLDtkTileMap( LDtkTileMap* map ) {
 
 	    for( size_t i = 0; map->layers[i] != NULL; i++ ) {
 			map->_layerSpriteCount++;
-			map->_layerSprites = sys->realloc( map->_layerSprites, sizeof( LCDSprite* ) * map->_layerSpriteCount + 1 );
+			map->_layerSprites = sys->realloc( map->_layerSprites, sizeof( LCDSprite* ) * (map->_layerSpriteCount + 1) );
 			if( map->_layerSprites == NULL ) {
 				prismaticLogger->error( "Could not allocate memory for layer sprites" );
 				return;
@@ -224,6 +225,7 @@ static void addLDtkTileMap( LDtkTileMap* map ) {
 			sprites->setZIndex( sprite, layer->zIndex );
 			sprites->addSprite( sprite );
 
+			map->layers[i]->sprite = sprite;
 			map->_layerSprites[map->_layerSpriteCount - 1] = sprite;
 			map->_layerSprites[map->_layerSpriteCount] = NULL;
 		}
@@ -246,6 +248,18 @@ static void removeLDtkTileMap( LDtkTileMap* map ) {
 
 	for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
 		sprites->removeSprite( map->_layerSprites[i] );
+	}
+
+}
+
+static void setLDtkLayerDrawMode( LDtkTileMap* map, LCDBitmapDrawMode drawMode ) {
+
+	if( map->_layerSprites == NULL ) {
+		return;
+	}
+
+	for( size_t i = 0; map->_layerSprites[i] != NULL; i++ ) {
+		sprites->setDrawMode( map->_layerSprites[i], drawMode );
 	}
 
 }
@@ -520,7 +534,7 @@ static void csvToCollision( string layerName, string rawCollisionData, LDtkTileM
 	collisionLayer->name = layerName;
 
 	map->_collisionLayerCount += 1;
-	map->collision = sys->realloc( map->collision, sizeof( LDtkCollisionLayer* ) * map->_collisionLayerCount + 1 );
+	map->collision = sys->realloc( map->collision, sizeof( LDtkCollisionLayer* ) * (map->_collisionLayerCount + 1) );
 
 	collisionLayer->collision = sys->realloc( NULL, sizeof( int* ) * map->gridWidth );
 	if( collisionLayer->collision == NULL ) {
@@ -558,7 +572,7 @@ static void csvToCollision( string layerName, string rawCollisionData, LDtkTileM
 			if( collisionLayer->collision[x][y] == 1 ) {
 
 				collisionRects++;
-				collisionLayer->rects = sys->realloc( collisionLayer->rects, sizeof( LCDSprite* ) * collisionRects + 1 );
+				collisionLayer->rects = sys->realloc( collisionLayer->rects, sizeof( LCDSprite* ) * (collisionRects + 1) );
 				if( collisionLayer->rects == NULL ) {
 					prismaticLogger->error( "Could not allocate memory for collisionLayer->rects" );
 					return;
@@ -750,7 +764,7 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 	layer->zIndex = pos;
 
 	map->_layerCount += 1;
-	map->layers = sys->realloc( map->layers, sizeof( LDtkLayer* ) * map->_layerCount + 1 );
+	map->layers = sys->realloc( map->layers, sizeof( LDtkLayer* ) * (map->_layerCount + 1) );
 
 	if( map->layers == NULL ) {
         prismaticLogger->errorf( "Memory allocation failed for adding layer: %s", layer->filename );
@@ -806,7 +820,7 @@ static int newEntityGroup( json_decoder* decoder, const char* key ) {
 	LDtkTileMap* map = decoder->userdata;
 
 	map->_entityGroupCount++;
-	map->entities = sys->realloc( map->entities, map->_entityGroupCount * sizeof( LDtkEntityGroup* ) + 1 );
+	map->entities = sys->realloc( map->entities, (map->_entityGroupCount + 1) * sizeof( LDtkEntityGroup* ) );
 	if( map->entities == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for entities!" );
 		return 0;
@@ -850,7 +864,7 @@ static int newEntity( json_decoder* decoder, int pos ) {
 	LDtkEntityGroup* group = map->entities[map->_entityGroupCount - 1];
 	
 	group->_entityCount++;
-	group->entities = sys->realloc( group->entities, group->_entityCount * sizeof( LDtkEntity* ) + 1 );
+	group->entities = sys->realloc( group->entities, (group->_entityCount + 1) * sizeof( LDtkEntity* ) );
 	if( group->entities == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for entity!" );
 		return 0;
@@ -985,7 +999,7 @@ static void addMapManager( LDtkMapManager* mapManager, LDtkTileMap* map ) {
 	}
 
 	mapManager->_mapCount++;
-	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * mapManager->_mapCount + 1 );
+	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * ( mapManager->_mapCount + 1 ) );
 	if( mapManager == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for MapManager maps" );
 		return;
@@ -1034,7 +1048,7 @@ static void removeMapManager( LDtkMapManager* mapManager, string mapId ) {
 
 	// Reallocate the memory for mapManager->maps
 	mapManager->_mapCount--;
-	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * mapManager->_mapCount + 1 );
+	mapManager->maps = sys->realloc( mapManager->maps, sizeof( LDtkTileMap* ) * ( mapManager->_mapCount + 1 ) );
 	if( mapManager == NULL ) {
 		prismaticLogger->error( "Could not reallocate memory for MapManager maps" );
 		return;
@@ -1134,6 +1148,7 @@ const LDtkTileMapFn* prismaticTileMap = &( LDtkTileMapFn ){
 	.draw = drawLDtkTileMap,
 	.add = addLDtkTileMap,
 	.remove = removeLDtkTileMap,
+	.setLayerDrawMode = setLDtkLayerDrawMode,
 	.addCollision = addCollisionLDtkTileMap,
 	.removeCollision = removeCollisionLDtkTileMap,
 	.tagCollision = tagCollisionLDtkTileMap,
