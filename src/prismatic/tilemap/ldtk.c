@@ -750,7 +750,7 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 	prismaticString->concat( &layerPath, "/" );
 	prismaticString->concat( &layerPath, layer->filename );
 
-	string err = NULL;
+	const char* err = NULL;
 	layer->image = graphics->loadBitmap( layerPath, &err );
 
 	if( err != NULL ) {
