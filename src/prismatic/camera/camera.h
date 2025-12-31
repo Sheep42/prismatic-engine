@@ -1,9 +1,14 @@
 #include <stddef.h>
 #ifndef CAMERA_H
 
-#ifndef PRISMATIC_INCLUDED
-    #include "../../prismatic/prismatic.h"
-    #define PRISMATIC_INCLUDED
+#ifndef SPRITE_INCLUDED
+    #define SPRITE_INCLUDED
+    #include "../sprite/sprite.h"
+#endif
+
+#ifndef DIALOGUE_INCLUDED
+    #include "../dialogue/dialogue.h"
+    #define DIALOGUE_INCLUDED
 #endif
 
 #define CAMERA_H
