@@ -52,6 +52,9 @@ typedef struct LDtkCollisionLayer {
 typedef struct LDtkFieldHandler {
 	// Used for handling custom fields during map decoding
 	void ( *decodeFields )( json_decoder* decoder, const char* key, json_value value );
+
+	// Used to override willDecodeSublist for custom array & nested object handling
+	void ( *willDecodeSublist )( json_decoder* decoder, const char* name, json_value_type type );
 } LDtkFieldHandler;
 
 typedef struct LDtkTileMap {

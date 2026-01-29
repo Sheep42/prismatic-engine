@@ -671,6 +671,10 @@ static void willDecodeSublist( json_decoder* decoder, const char* name, json_val
 		decoder->didDecodeTableValue = didDecodeTableValue;
 		decoder->didDecodeSublist = didDecodeField;
 
+		if( userData->map->_customFieldHandler->willDecodeSublist != NULL ) {
+			userData->map->_customFieldHandler->willDecodeSublist( decoder, name, type );
+		}
+
 		return;
 	}
 
@@ -984,6 +988,7 @@ static void* didDecodeEntityFields( json_decoder* decoder, const char* name, jso
 	decoder->didDecodeSublist = didDecodeEntity;
 	decoder->didDecodeTableValue = decodeEntity;
 	decoder->shouldDecodeArrayValueAtIndex = newEntity;
+	decoder->willDecodeSublist = willDecodeSublist;
 	userData->entity = NULL;
 
 	return NULL;
@@ -994,6 +999,8 @@ static void* didDecodeField( json_decoder* decoder, const char* name, json_value
 
 	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
 	decoder->didDecodeSublist = didDecodeEntityFields;
+	decoder->didDecodeArrayValue = didDecodeArrayValue;
+	decoder->willDecodeSublist = willDecodeSublist;
 	if( userData->map->_customFieldHandler != NULL ) {
 		decoder->didDecodeTableValue = userData->map->_customFieldHandler->decodeFields;
 	}
