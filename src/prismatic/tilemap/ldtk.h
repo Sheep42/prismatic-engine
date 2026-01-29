@@ -23,11 +23,13 @@ typedef struct LDtkEntity {
 	string id;
 	string iid;
 	string layer;
+	string entityGroupType;
 	int x;
 	int y;
 	int zIndex;
 	int width;
 	int height;
+	void* customFields;
 } LDtkEntity;
 
 typedef struct LDtkEntityGroup {
@@ -49,7 +51,7 @@ typedef struct LDtkCollisionLayer {
 
 typedef struct LDtkFieldHandler {
 	// Used for handling custom fields during map decoding
-	int ( *decodeFields )( json_decoder* decoder, const char* key );
+	void ( *decodeFields )( json_decoder* decoder, const char* key, json_value value );
 } LDtkFieldHandler;
 
 typedef struct LDtkTileMap {
@@ -73,6 +75,8 @@ typedef struct LDtkTileMap {
 	size_t _layerSpriteCount;
 	LCDSprite** _layerSprites;
 	string _path;
+	void* customFields;
+
 	// Used for handling custom fields during map decoding, caller is responsible
 	// for freeing the pointer.
 	LDtkFieldHandler* _customFieldHandler;
@@ -92,6 +96,11 @@ typedef struct LDtkTileMap {
 	// LDtkTileMap* self
 	void ( *exit )( struct LDtkTileMap* );
 } LDtkTileMap;
+
+typedef struct LDtkDecoderUserData {
+	LDtkTileMap* map;
+	LDtkEntity* entity;
+} LDtkDecoderUserData;
 
 typedef struct LDtkMapManager {
 	size_t _mapCount;
