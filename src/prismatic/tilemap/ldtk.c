@@ -52,6 +52,8 @@ static int newEntity( json_decoder* decoder, int pos );
 static void decodeEntity( json_decoder* decoder, const char* key, json_value value );
 static void* didDecodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type );
 static void* didDecodeEntity( json_decoder* decoder, const char* name, json_value_type type );
+static void* didDecodeEntityFields( json_decoder* decoder, const char* name, json_value_type type  );
+static void* didDecodeField( json_decoder* decoder, const char* name, json_value_type type  );
 
 static int readfile( void* readud, uint8_t* buf, int bufsize );
 
@@ -105,7 +107,11 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 	mapDecoder->shouldDecodeArrayValueAtIndex = shouldDecodeArrayValueAtIndex;
 	mapDecoder->didDecodeArrayValue = didDecodeArrayValue;
 	mapDecoder->didDecodeSublist = didDecodeSublist;
-	mapDecoder->userdata = map;
+	mapDecoder->userdata = calloc( 1, sizeof( LDtkDecoderUserData ) );
+
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)mapDecoder->userdata;
+	userData->map = map;
+	userData->entity = NULL;
 
 	pd->json->decode( mapDecoder, *mapReader, NULL );
 
@@ -164,6 +170,9 @@ static LDtkTileMap* newLDtkTileMap( string path, int tileSize, string* collision
 	
 	free( mapReader );
 	mapReader = NULL;
+
+	free( mapDecoder->userdata );
+	mapDecoder->userdata = NULL;
 
 	free( mapDecoder );
 	mapDecoder = NULL;
@@ -624,6 +633,8 @@ static void decodeError( json_decoder* decoder, const char* error, int linenum )
 
 static void willDecodeSublist( json_decoder* decoder, const char* name, json_value_type type ) {
 	
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+
 	if( prismaticString->equals( "layers", name ) ) {
 		decoder->didDecodeArrayValue = decodeLayers;
 		return;
@@ -642,11 +653,37 @@ static void willDecodeSublist( json_decoder* decoder, const char* name, json_val
 		return;
 	}
 
+	if( prismaticString->equals( "customFields", name ) ) {
+
+		if( userData->map->_customFieldHandler != NULL ) {
+			decoder->didDecodeTableValue = userData->map->_customFieldHandler->decodeFields;
+			decoder->shouldDecodeArrayValueAtIndex = shouldDecodeArrayValueAtIndex;
+
+			if( userData->entity != NULL ) {
+				decoder->didDecodeSublist = didDecodeEntityFields;
+			}
+		}
+
+		return;
+	}
+
+	if( decoder->didDecodeSublist == didDecodeEntityFields ) {
+		decoder->didDecodeTableValue = didDecodeTableValue;
+		decoder->didDecodeSublist = didDecodeField;
+
+		if( userData->map->_customFieldHandler->willDecodeSublist != NULL ) {
+			userData->map->_customFieldHandler->willDecodeSublist( decoder, name, type );
+		}
+
+		return;
+	}
+
 }
 
 static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key ) { 
 	
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 
 	if( prismaticString->equals( "bgColor", key ) ) {
 		return 0;
@@ -658,8 +695,6 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 			return 0;
 		}
 
-		decoder->shouldDecodeTableValueForKey = map->_customFieldHandler->decodeFields;
-
 	}
 
 	return 1;
@@ -668,7 +703,8 @@ static int shouldDecodeTableValueForKey( json_decoder* decoder, const char* key 
 
 static void didDecodeTableValue( json_decoder* decoder, const char* key, json_value value ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 
 	if( prismaticString->equals( "identifier", key ) ) {
 		map->id = prismaticString->new( json_stringValue( value ) );
@@ -701,11 +737,6 @@ static void didDecodeTableValue( json_decoder* decoder, const char* key, json_va
 		return;
 	}
 
-	if( prismaticString->equals( "customFields", key ) ) {
-		decoder->shouldDecodeTableValueForKey = shouldDecodeTableValueForKey;
-		return;
-	}
-
 }
 
 static int shouldDecodeArrayValueAtIndex( json_decoder* decoder, int pos ) { 
@@ -722,6 +753,7 @@ static void* didDecodeSublist( json_decoder* decoder, const char* name, json_val
 		!prismaticString->equals( name, "layers" ) 
 		&& !prismaticString->equals( name, "neighbourLevels" ) 
 		&& !prismaticString->equals( name, "entities" ) 
+		&& !prismaticString->equals( name, "customFields" )
 	) {
 		return NULL;
 	}
@@ -737,7 +769,9 @@ static void* didDecodeSublist( json_decoder* decoder, const char* name, json_val
 
 static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
+
 	LDtkLayer* layer = calloc( 1, sizeof( LDtkLayer ) );
 	if( layer == NULL ) {
 		prismaticLogger->error( "Could not allocate memory for new map layer" );
@@ -782,7 +816,8 @@ static void decodeLayers( json_decoder* decoder, int pos, json_value value ) {
 
 static int newNeighbor( json_decoder* decoder, int pos ) {
 	
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 
 	map->_neighborCount++;
 	map->neighborLevels = sys->realloc( map->neighborLevels, map->_neighborCount * sizeof( LDtkTileMapRef* ) + 1 );
@@ -800,7 +835,9 @@ static int newNeighbor( json_decoder* decoder, int pos ) {
 
 static void decodeNeighbor( json_decoder* decoder, const char* key, json_value value ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
+
 	LDtkTileMapRef* neighbor = map->neighborLevels[map->_neighborCount - 1];
 
 	if( prismaticString->equals( "levelIid", key ) ) {
@@ -817,7 +854,8 @@ static void decodeNeighbor( json_decoder* decoder, const char* key, json_value v
 
 static int newEntityGroup( json_decoder* decoder, const char* key ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 
 	map->_entityGroupCount++;
 	map->entities = sys->realloc( map->entities, (map->_entityGroupCount + 1) * sizeof( LDtkEntityGroup* ) );
@@ -837,7 +875,8 @@ static int newEntityGroup( json_decoder* decoder, const char* key ) {
 
 static void decodeEntityGroup( json_decoder* decoder, const char* name, json_value_type type ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 	LDtkEntityGroup* entityGroup = map->entities[map->_entityGroupCount - 1];
 
 	entityGroup->type = prismaticString->new( name );
@@ -855,7 +894,8 @@ static void* didDecodeEntityGroup( json_decoder* decoder, const char* name, json
 
 static int newEntity( json_decoder* decoder, int pos ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
 
 	if( map->_entityGroupCount <= 0 ) {
 		return 0;
@@ -884,7 +924,9 @@ static int newEntity( json_decoder* decoder, int pos ) {
 
 static void decodeEntity( json_decoder* decoder, const char* key, json_value value ) {
 
-	LDtkTileMap* map = decoder->userdata;
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	LDtkTileMap* map = userData->map;
+
 	if( map->_entityGroupCount <= 0 ) {
 		return;
 	}
@@ -894,7 +936,11 @@ static void decodeEntity( json_decoder* decoder, const char* key, json_value val
 		return;
 	}
 
+
 	LDtkEntity* entity = group->entities[group->_entityCount - 1];
+
+	userData->entity = entity;
+	entity->entityGroupType = group->type;
 
 	if( prismaticString->equals( key, "id" ) ) {
 		entity->id = prismaticString->new( json_stringValue( value ) );
@@ -932,6 +978,32 @@ static void* didDecodeEntity( json_decoder* decoder, const char* name, json_valu
 	decoder->willDecodeSublist = decodeEntityGroup;
 	decoder->didDecodeSublist = didDecodeEntityGroup;
 
+	return NULL;
+
+}
+
+static void* didDecodeEntityFields( json_decoder* decoder, const char* name, json_value_type type  ) {
+
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	decoder->didDecodeSublist = didDecodeEntity;
+	decoder->didDecodeTableValue = decodeEntity;
+	decoder->shouldDecodeArrayValueAtIndex = newEntity;
+	decoder->willDecodeSublist = willDecodeSublist;
+	userData->entity = NULL;
+
+	return NULL;
+
+}
+
+static void* didDecodeField( json_decoder* decoder, const char* name, json_value_type type  ) {
+
+	LDtkDecoderUserData* userData = (LDtkDecoderUserData*)decoder->userdata;
+	decoder->didDecodeSublist = didDecodeEntityFields;
+	decoder->didDecodeArrayValue = didDecodeArrayValue;
+	decoder->willDecodeSublist = willDecodeSublist;
+	if( userData->map->_customFieldHandler != NULL ) {
+		decoder->didDecodeTableValue = userData->map->_customFieldHandler->decodeFields;
+	}
 	return NULL;
 
 }
