@@ -2280,6 +2280,19 @@ static void destroy() {
 }
 ```
 
+#### Map & Entity Custom Fields
+
+LDtk supports a number of types of custom fields that can be set either on a Level (LDtkTileMap in our case) or on an Entity (LDtkEntity).
+
+The approach that the engine takes here is, rather than assuming how you want to handle custom fields, it allows you to handle them yourself in a way that is specific to your game. The tradeoff is that you will need to understand how Playdate's `json_decoder` works, and you will need to implement any custom field handling from scratch.
+
+`LDtkEntity` and `LDtkTileMap` both have a `void* customFields` property, which is initialized NULL. You can hook into the map decoding process using `LDtkFieldHandler` and fill `customFields` with any data - most likely a struct representing your Entity/Map's custom fields.
+
+JSON decoding in C on the playdate is somewhat complex, but the engine will handle the majority of the complexity for you. Before tackling a complex custom field import, you should have at least a passing understanding of Playdate's `json_decoder` and the `json_value` functions.
+
+More specific information can be found in the [playdate documentation](https://sdk.play.date/Inside%20Playdate%20with%20C.html#_decoding).
+
+
 ### Strings
 
 **Type Name**: `string`
