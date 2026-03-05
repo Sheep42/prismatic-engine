@@ -1240,6 +1240,82 @@ DialogueLine* (*new)( DialogueLineType type );
 void (*delete)( DialogueLine* line );
 ```
 
+#### cameraController
+
+```C
+typedef struct CameraController {
+    Camera* (*newFixedCam)( float x, float y );
+    Camera* (*newLerpCam)( float startX, float startY, float time );
+    Camera* (*newFollowCam)( PrismSprite* target );
+    Camera* (*newFollowLerpCam)( PrismSprite* target, float time );
+    
+    // Set origin x & y position for a Camera
+    void (*setOrigin)( Camera* self, float x, float y );
+
+    // Set current x & y position for a Camera
+    void (*setPos)( Camera* self, float x, float y );
+    
+    // Set min bouds or a restricted Camera
+    void (*setMinBounds)( Camera* self, float minX, float minY );
+    
+    // Set max bounds for a restricted Camera
+    void (*setMaxBounds)( Camera* self, float maxX, float maxY );
+    
+    // Set restricted value
+    void (*setRestricted)( Camera* self, bool restricted );
+
+    // Move a Camera to a new position. Will have different effect depending on camera type:
+    // 
+    // ---
+    // 
+    // Fixed Cam - Same as setPos( x, y )
+    // 
+    // Lerp Cam - Will move from current (x, y) to new (x, y)
+    // 
+    // Follow & Follow Lerp Cams - no effect
+    // 
+    // ---
+    // 
+    // Camera* self - The Camera
+    // 
+    // float newX
+    // 
+    // float newY
+    void (*moveTo)( Camera* self, float newX, float newY );
+
+    // Push a Dialogue box into this camera, so that the Dialogue box is
+    // rendered within the camera's active space
+    // 
+    // Camera* self - The Camera
+    // 
+    // Dialogue* dialogue - The Dialogue box
+    void (*pushDialogue)( Camera* self, Dialogue* dialogue );
+
+    // Remove a Dialogue box that has been pushed to this camera
+    // 
+    // NOTE: This DOES NOT free the Dialogue, that must be done separately
+    // 
+    // Camera* self - The Camera
+    // 
+    // Dialogue* dialogue - The Dialogue box
+    void (*removeDialogue)( Camera* self, Dialogue* dialogue );
+    
+    // The Camera's update function
+    // 
+    // ---
+    // 
+    // Camera* self - The Camera
+    // 
+    // float delta
+    void (*update)( Camera* self, float delta );
+
+    // Destroy a Camera
+    // 
+    // // NOTE: This DOES NOT free Dialogues attached to the Camera, that must be done separately
+    void (*destroy)( Camera* self );
+} CameraController;
+```
+
 ## Creating a Game
 
 The simplest version of a game created with Prismatic Engine can be fully contained in `src/core/game.c`
@@ -2422,3 +2498,90 @@ See the sample script created in `src/core/dialogue/` and how dialogue is used i
 #### DialogueLineType Values
 - `DialogueLineType_String`: Represents a DialogueLine with a string value - Enum Value = 0
 - `DialogueLineType_Fn`: Represents a DialogueLine that should execute a function - Enum Value = 1
+
+
+### Camera System
+
+The engine provides an optional camera system for your game. The "camera" works by setting a draw offset on the screen based on the type of Camera you define, and the target of said camera.
+
+There are 4 types of Cameras available:
+
+- **Fixed Cam**: A fixed Camera has (x, y) coordinates that you specify when you initialize the Camera. The coordinates are not automatically updated via any internal Camera mechanism. The coordinates can be updated via the `cameraController->setPos()` or `cameraController->moveTo()` functions, if desired, and when updated the Camera will instantly change to the new coordinates. This type of Camera can be used to create a static camera, or a Camera that needs to "warp" to specific coordinates. 
+
+- **Lerp Cam**: A lerp Camera has (x, y) coordinates that you specify when you initialize the Camera. The coordinates are not automatically updated via any internal Camera mechanism. The coordinates can be updated via the `cameraController->moveTo()` function, and when updated the Camera will smoothly pan to the new coordinates using linear interpolation. Transition time is controlled via the time parameter passed into `newLerpCam`.
+
+- **Follow Cam**: A follow Camera sets its own (x, y) coordinates based on the position of any `PrismSprite*` that is passed into it during initialization. The Camera's position will continue to be updated on each pass through the update loop with the current position of the `PrismSprite` that it is following. The Camera will follow the `PrismSprite`'s position exactly and instantly, and will not trail behind.
+
+- **Follow Lerp Cam**: A follow-lerp Camera is a combination of a lerp Camera and a follow Camera. It sets its own (x, y) coordinates based on the position of any `PrismSprite*` that is passed into it during initialization. The Camera's position will continue to be updated on each pass through the update loop with the current position of the `PrismSprite` that it is following. The Camera will smoothly pan to the `PrismSprite`'s current location, meaning that it will lag behind the target. Transition time is controlled via the time parameter passed into `newFollowLerpCam`.
+
+#### Restricting Camera bounds
+
+All Camera types can be restricted using the `setMinBounds`, `setMaxBounds`, and `setRestricted` functions. The min/max bounds of a restricted Camera are set by the respective functions, and `cameraController->setRestricted( true )` enables restricted mode. 
+
+When a Camera is restricted it will move freely until it hits its minimum or maximum bounds, where it will then be fixed if it would exceed them.
+
+#### Dialogue & Cameras
+
+Dialogue boxes are rendered separately from Cameras by default. The Camera system provides a way to attach Dialogue boxes to a Camera, so they render at the same offset as the Camera.
+
+To do this, you would use `cameraController->pushDialogue()`, and pass in the Dialogue that you would like to attach to your Camera. Cameras are capable of handling multiple Dialogue boxes, but you will need to call `pushDialogue` for each Dialogue box that you want to attach to the Camera. 
+
+**Type Name**: `Camera`
+
+```C
+typedef struct Camera {
+
+    // The Camera Type - See CameraStyle in camera.h
+    CameraStyle _cameraType;
+
+    // The camera's target - Used by Follow Cams
+    PrismSprite* __target;
+
+    // The total dialogues currently added to the Camera
+    size_t __dialogueCount; 
+
+    // The Dialogue boxes contained by the Camera
+    Dialogue** dialogues;
+
+    // The camera x origin - Default: center of the screen
+    float __originX;
+
+    // The camera y origin - Default: center of the screen
+    float __originY;
+
+    // The camera's X position - Use setPos to set this value
+    float __x;
+
+    // The camera's Y position - Use setPos to set this value
+    float __y;
+
+    // The target X position - Used by Lerp Cams
+    float __targetX;
+
+    // The target Y position - Used by Lerp Cams
+    float __targetY;
+
+    // The lerp time for this Camera - Used by Lerp Cams
+    float __lerpTime;
+
+    // Used with restricted prop - The minimum X bounds
+    float __minX;
+
+    // Used with restricted prop - The maximum X bounds
+    float __maxX;
+
+    // Used with restricted prop - The minimum Y bounds
+    float __minY;
+
+    // Used with restricted prop - The maximum Y bounds
+    float __maxY;
+
+    // Is the camera movement restricted to min/max bounds? True/False
+    // 
+    // Default: False
+    bool __restricted;
+
+    // Will be true after the first update loop
+    bool __init;
+} Camera;
+```
