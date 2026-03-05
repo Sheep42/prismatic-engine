@@ -26,7 +26,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 
 # Game Name Customization
 set(PLAYDATE_GAME_NAME prismatic-game)
-set(PLAYDATE_GAME_DEVICE prismatic-game_DEVICE)
+set(PLAYDATE_GAME_DEVICE prismatic-game)
 set(PROJECT_DIR "~/Projects/Playdate/prismatic-game/")
 
 project(${PLAYDATE_GAME_NAME} C ASM)
@@ -44,6 +44,7 @@ set(SOURCE_FILES
     src/prismatic/transition/transition.c
     src/prismatic/tilemap/ldtk.c
     src/prismatic/dialogue/dialogue.c
+    src/prismatic/camera/camera.c
 )
 
 # Set header files
@@ -58,6 +59,7 @@ set(HEADER_FILES
     src/prismatic/transition/transition.h
     src/prismatic/tilemap/ldtk.h
     src/prismatic/dialogue/dialogue.h
+    src/prismatic/camera/camera.h
 )
 
 # Glob all files in core game dir

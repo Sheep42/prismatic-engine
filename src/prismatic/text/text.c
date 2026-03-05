@@ -25,7 +25,7 @@ static void stringConcat( string* target, string src ) {
 
 	size_t targetLen = strlen( *target );
 	size_t srcLen = strlen( src );
-	const string tmp = newString( target );
+	const string tmp = newString( *target );
 
 	*target = realloc( *target, targetLen + srcLen + 1 );
 	if( target == NULL ) {

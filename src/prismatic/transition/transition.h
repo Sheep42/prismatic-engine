@@ -114,7 +114,7 @@ typedef struct TransitionFn {
 	// you implement a custom transition update function
 	// 
 	// PrismTransition* transition
-	void ( *complete )( PrismTransition* );
+	void ( *complete )( PrismTransition*, float );
 } TransitionFn;
 
 extern const int PRISM_TRANSITION_MIN;

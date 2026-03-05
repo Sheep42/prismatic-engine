@@ -53,6 +53,11 @@
     #define DIALOGUE_INCLUDED
 #endif
 
+#ifndef CAMERA_INCLUDED
+	#include "camera/camera.h"
+	#define CAMERA_INCLUDED
+#endif
+
 #ifndef LOGGER_INCLUDED
 	#define LOGGER_INCLUDED
 	#include "logger/logger.h"
