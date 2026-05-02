@@ -184,6 +184,8 @@ static void setSpriteAnimation( PrismSprite* sp, PrismAnimation* animation ) {
 
 	sp->animation = animation;
 	animation->sprite = sp;
+	animation->timer = 0;
+	sprites->setImage( sp->sprite, animation->frames[animation->currentFrame], kBitmapUnflipped );
 
 }
 
